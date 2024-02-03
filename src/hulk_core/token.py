@@ -9,9 +9,11 @@ class String(Token):
     def __init__(self, row: int, col: int, value: str) -> None:
         super().__init__(row, col, value)
 
+
 class Char(Token):
     def __init__(self, row: int, col: int, value: str) -> None:
         super().__init__(row, col, value)
+
 
 class Int(Token):
     def __init__(self, row: int, col: int, value: int) -> None:

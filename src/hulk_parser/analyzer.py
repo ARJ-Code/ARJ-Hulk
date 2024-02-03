@@ -11,6 +11,7 @@ space_token = [' ', '\n']
 
 stop_char = [x[0] for x in special_token+space_token]
 
+
 class AnalyzerResult:
     def __init__(self, pos: int, row: int, col: int, token: Token | None = None, error: ParsingError | None = None) -> None:
         self.ok = error is None
@@ -74,10 +75,11 @@ class NumberAnalyzer(Analyzer):
 
         return AnalyzerResult(pos, row, col, token=Double(row, col, float(result)) if is_decimal else Int(row, col, int(result)))
 
+
 class ScapedCharAnalyzer(Analyzer):
     def can_analyze(self, string: str, pos: int) -> bool:
-        return string[pos]=='\\'
-    
+        return string[pos] == '\\'
+
     def run(self, string: str, pos: int, row: int, col: int) -> AnalyzerResult:
         if (pos == len(string)-1):
             return AnalyzerResult(pos, row, col, error=ParsingError('', row, col))
@@ -85,10 +87,10 @@ class ScapedCharAnalyzer(Analyzer):
         pos += 1
         col += 1
 
-        if(not string[pos] in scaped_char):
-            return AnalyzerResult(pos,row,col,error=ParsingError('',row,col))
-        
-        return AnalyzerResult(pos,row,col,token=Char(row,col,scaped_char[string[pos]]))
+        if (not string[pos] in scaped_char):
+            return AnalyzerResult(pos, row, col, error=ParsingError('', row, col))
+
+        return AnalyzerResult(pos, row, col, token=Char(row, col, scaped_char[string[pos]]))
 
 
 class StringAnalyzer(Analyzer):
@@ -96,7 +98,7 @@ class StringAnalyzer(Analyzer):
         return string[pos] == '\"'
 
     def run(self, string: str, pos: int, row: int, col: int) -> AnalyzerResult:
-        scaped_char_analyzer=ScapedCharAnalyzer()
+        scaped_char_analyzer = ScapedCharAnalyzer()
 
         if (string[pos] != '\"'):
             return AnalyzerResult(pos, row, col, error=ParsingError('', row, col))
@@ -107,11 +109,11 @@ class StringAnalyzer(Analyzer):
         result = ''
 
         while (string[pos] != '\"'):
-            if (scaped_char_analyzer.can_analyze(string,pos)):
-                r=scaped_char_analyzer.run(string,pos,row,col)
-                if(r.ok):
-                    result+=r.token.value
-                    pos,row,col=r.pos,r.row,r.col
+            if (scaped_char_analyzer.can_analyze(string, pos)):
+                r = scaped_char_analyzer.run(string, pos, row, col)
+                if (r.ok):
+                    result += r.token.value
+                    pos, row, col = r.pos, r.row, r.col
                 else:
                     return r.error
             else:
@@ -126,13 +128,14 @@ class StringAnalyzer(Analyzer):
         col += 1
 
         return AnalyzerResult(pos, row, col, token=String(row, col, result))
-    
+
+
 class CharAnalyzer(Analyzer):
     def can_analyze(self, string: str, pos: int) -> bool:
-        return string[pos]=='\''
-    
+        return string[pos] == '\''
+
     def run(self, string: str, pos: int, row: int, col: int) -> AnalyzerResult:
-        scaped_char_analyzer=ScapedCharAnalyzer()
+        scaped_char_analyzer = ScapedCharAnalyzer()
 
         if (string[pos] != '\''):
             return AnalyzerResult(pos, row, col, error=ParsingError('', row, col))
@@ -142,21 +145,19 @@ class CharAnalyzer(Analyzer):
 
         result = ''
 
-        if (scaped_char_analyzer.can_analyze(string,pos)):
-            r=scaped_char_analyzer.run(string,pos,row,col)
-            if(r.ok):
-                result+=r.token.value
+        if (scaped_char_analyzer.can_analyze(string, pos)):
+            r = scaped_char_analyzer.run(string, pos, row, col)
+            if (r.ok):
+                result += r.token.value
             else:
                 return r.error
         else:
             result += string[pos]
-           
 
-        if (len(string) == pos or string[pos]!='\''):
+        if (len(string) == pos or string[pos] != '\''):
             return AnalyzerResult(pos, row, col, error=ParsingError('', row, col))
 
         pos += 1
         col += 1
 
         return AnalyzerResult(pos, row, col, token=String(row, col, result))
-    
