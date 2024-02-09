@@ -1,13 +1,11 @@
-from hulk_lexer.analyzer import DigitAnalyzer, PatternAnalyzer, ManyAnalyzer, PatternAnalyzer, AlphaNumericAnalyzer, AndAnalyzer, OrAnalyzer, ConditionalAnalyzer, or_patterns
+from hulk_lexer.hulk_lexer import hulk_lexer, ignore_analyzer,string_analyzer
 
+l = hulk_lexer.run('a2222a2+2')
 
-print(or_patterns('e', 'e+').analyzers[0].match(0, 'e'))
-a = ManyAnalyzer(DigitAnalyzer())
-b = ConditionalAnalyzer(or_patterns('e', 'e+'), a)
-c = AndAnalyzer(a, b)
+# s=string_analyzer.run("\"\\n")
+# print()
+print([t.value for t in l.tokens])
 
-s = "233e+33"
-
-r = c.run(0, 0, 0, s)
-
-print(r.token)
+# q = ignore_analyzer.run(0, 0, 0, "//errr\n")
+# print(q.ok)
+# print(ignore_analyzer.match(0,"   /* errr */"))

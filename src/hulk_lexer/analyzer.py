@@ -22,7 +22,7 @@ class Analyzer(ABC):
         if self.match(index, text):
             return self._run(index, row, col, text)
 
-        return AnalyzerResult(index, row, col, None, ParsingError("Invalid character", row, col))
+        return AnalyzerResult(index, row, col, error=ParsingError("Invalid character", row, col))
 
     @abstractmethod
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
@@ -36,6 +36,22 @@ class Analyzer(ABC):
             else:
                 col += 1
         return AnalyzerResult(index+len(token), row, col, token)
+
+
+class AsciiCharAnalyzer(Analyzer):
+    def match(self, index: int, text: str) -> bool:
+        return text[index].isascii()
+
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+        return self._ok_run(index, row, col, text[index])
+
+
+class AlphaAnalyzer(Analyzer):
+    def match(self, index: int, text: str) -> bool:
+        return text[index].isalpha()
+
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+        return self._ok_run(index, row, col, text[index])
 
 
 class AlphaNumericAnalyzer(Analyzer):
@@ -111,7 +127,52 @@ class AndAnalyzer(Analyzer):
         return AnalyzerResult(index, row, col, token)
 
 
-class ConditionalAnalyzer:
+class Between(Analyzer):
+    def __init__(self, left_analyzer: Analyzer, body_analyzer: Analyzer, right_analyzer: Analyzer) -> None:
+        self.left_analyzer = left_analyzer
+        self.body_analyzer = body_analyzer
+        self.right_analyzer = right_analyzer
+
+    def match(self, index: int, text: str) -> bool:
+        return self.left_analyzer.match(index, text)
+
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+        token = ""
+        result = self.left_analyzer.run(index, row, col, text)
+        if result.ok:
+            token += result.token
+            index = result.index
+            row = result.row
+            col = result.col
+        else:
+            return result
+
+        while self.body_analyzer.match(index, text) and not self.right_analyzer.match(index, text):
+            result = self.body_analyzer.run(index, row, col, text)
+            if result.ok:
+                token += result.token
+                index = result.index
+                row = result.row
+                col = result.col
+            else:
+                return result
+
+            if index == len(text):
+                return AnalyzerResult(index, row, col, error=ParsingError('Invalid character', row, col))
+
+        result = self.right_analyzer.run(index, row, col, text)
+        if result.ok:
+            token += result.token
+            index = result.index
+            row = result.row
+            col = result.col
+        else:
+            return result
+
+        return AnalyzerResult(index, row, col, token)
+
+
+class ConditionalAnalyzer(Analyzer):
     def __init__(self, condition: Analyzer, body: Analyzer) -> None:
         self.condition = condition
         self.body = body
@@ -119,7 +180,7 @@ class ConditionalAnalyzer:
     def match(self, _: int, __: str) -> bool:
         return True
 
-    def run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         if self.condition.match(index, text):
             return AndAnalyzer(self.condition, self.body).run(index, row, col, text)
         return AnalyzerResult(index, row, col)
@@ -145,6 +206,21 @@ class ManyAnalyzer(Analyzer):
                 return result
 
         return AnalyzerResult(index, row, col, token)
+
+
+scaped_char = {'n': '\n', 't': '\t', 'r': '\r',
+               '\\': '\\', '\"': '\"', '\'': '\''}
+
+
+class ScapedCharAnalyzer(Analyzer):
+    def match(self, index: int, text: str) -> bool:
+        return text[index] == '\\'
+
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+        if index == len(text)-1 or not text[index+1] in scaped_char:
+            return AnalyzerResult(index+1, row, col+1, error=ParsingError("Invalid character", row, col+1))
+
+        return AnalyzerResult(index+2, row, col+2, scaped_char[text[index+1]])
 
 
 def or_patterns(*patterns: str) -> OrAnalyzer:
