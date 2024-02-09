@@ -1,13 +1,13 @@
-from hulk_parser.analyzer import NumberAnalyzer,StringAnalyzer,SpaceAnalyzer
-from hulk_parser.lexer import lexer
-a=StringAnalyzer()
+from hulk_lexer.analyzer import DigitAnalyzer, PatternAnalyzer, ManyAnalyzer, PatternAnalyzer, AlphaNumericAnalyzer, AndAnalyzer, OrAnalyzer, ConditionalAnalyzer, or_patterns
 
-s='\"1e2.\\nooo39\" 122    122'
 
-# print(a.analyze(s,0,0,0).ok)
+print(or_patterns('e', 'e+').analyzers[0].match(0, 'e'))
+a = ManyAnalyzer(DigitAnalyzer())
+b = ConditionalAnalyzer(or_patterns('e', 'e+'), a)
+c = AndAnalyzer(a, b)
 
-q=1e3
+s = "233e+33"
 
-print(lexer(s,[NumberAnalyzer(),StringAnalyzer(),SpaceAnalyzer()]))
+r = c.run(0, 0, 0, s)
 
-print(float('1e-1'))
+print(r.token)
