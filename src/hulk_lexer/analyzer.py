@@ -18,11 +18,14 @@ class Analyzer(ABC):
     def match(self, index: int, text: str) -> bool:
         pass
 
+    def msg_error(self):
+        return "Invalid character"
+
     def run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         if self.match(index, text):
             return self._run(index, row, col, text)
 
-        return AnalyzerResult(index, row, col, error=ParsingError("Invalid character", row, col))
+        return AnalyzerResult(index, row, col, error=ParsingError(self.msg_error(), row, col))
 
     @abstractmethod
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
@@ -50,6 +53,9 @@ class AlphaAnalyzer(Analyzer):
     def match(self, index: int, text: str) -> bool:
         return text[index].isalpha()
 
+    def msg_error(self):
+        return "Character is not alphabetical"
+
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         return self._ok_run(index, row, col, text[index])
 
@@ -58,6 +64,9 @@ class AlphaNumericAnalyzer(Analyzer):
     def match(self, index: int, text: str) -> bool:
         return text[index].isalnum()
 
+    def msg_error(self):
+        return "Character is not alphanumerical"
+
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         return self._ok_run(index, row, col, text[index])
 
@@ -65,6 +74,9 @@ class AlphaNumericAnalyzer(Analyzer):
 class DigitAnalyzer(Analyzer):
     def match(self, index: int, text: str) -> bool:
         return text[index].isdigit()
+
+    def msg_error(self):
+        return "Character is not a digit"
 
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         return self._ok_run(index, row, col, text[index])
@@ -76,6 +88,9 @@ class PatternAnalyzer(Analyzer):
 
     def match(self, index: int, text: str) -> bool:
         return text[index:].startswith(self.pattern)
+
+    def msg_error(self):
+        return f"Except {self.pattern}"
 
     def _run(self, index: int, row: int, col: int, _: str) -> AnalyzerResult:
         return self._ok_run(index, row, col, self.pattern)
@@ -96,7 +111,7 @@ class OrAnalyzer(Analyzer):
             if analyzer.match(index, text):
                 return analyzer.run(index, row, col, text)
 
-        return AnalyzerResult(index, row, col, None, ParsingError("Invalid character", row, col))
+        return AnalyzerResult(index, row, col, None, ParsingError(self.msg_error(), row, col))
 
 
 class AndAnalyzer(Analyzer):
@@ -122,7 +137,7 @@ class AndAnalyzer(Analyzer):
                 else:
                     return result
             else:
-                return AnalyzerResult(index, row, col, None, ParsingError("Invalid character", row, col))
+                return AnalyzerResult(index, row, col, None, ParsingError(analyzer.msg_error(), row, col))
 
         return AnalyzerResult(index, row, col, token)
 
@@ -158,7 +173,7 @@ class Between(Analyzer):
                 return result
 
             if index == len(text):
-                return AnalyzerResult(index, row, col, error=ParsingError('Invalid character', row, col))
+                return AnalyzerResult(index, row, col, error=ParsingError(self.right_analyzer.msg_error(), row, col))
 
         result = self.right_analyzer.run(index, row, col, text)
         if result.ok:
@@ -216,9 +231,12 @@ class ScapedCharAnalyzer(Analyzer):
     def match(self, index: int, text: str) -> bool:
         return text[index] == '\\'
 
+    def msg_error(self):
+        return "Character is not a scaped char"
+
     def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
         if index == len(text)-1 or not text[index+1] in scaped_char:
-            return AnalyzerResult(index+1, row, col+1, error=ParsingError("Invalid character", row, col+1))
+            return AnalyzerResult(index+1, row, col+1, error=ParsingError(self.msg_error(), row, col+1))
 
         return AnalyzerResult(index+2, row, col+2, scaped_char[text[index+1]])
 

@@ -25,7 +25,8 @@ identifier_analyzer = AndAnalyzer(
 special_token_analyzer = or_patterns(
     ";", ",", ".", ":", "(", ")", "[", "]", "{", "}",
     "<", ">", "=", "+", "-", "*", "/", "%", "|", "&",
-    "^", "@", ">=", "<=", "==", "||", "&&", "^^")
+    "^", "@", ">=", "<=", "==", "||", "&&", "^^", ":=",
+    "=>")
 
 hulk_lexer = Lexer((TokenType.IDENTIFIER, identifier_analyzer),
                    (TokenType.NUMBER, number_analyzer),

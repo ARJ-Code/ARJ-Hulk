@@ -1,11 +1,10 @@
-from hulk_lexer.hulk_lexer import hulk_lexer, ignore_analyzer,string_analyzer
+from hulk_lexer.hulk_lexer import hulk_lexer
 
-l = hulk_lexer.run('a2222a2+2')
+code = input()
 
-# s=string_analyzer.run("\"\\n")
-# print()
-print([t.value for t in l.tokens])
+r = hulk_lexer.run(code)
 
-# q = ignore_analyzer.run(0, 0, 0, "//errr\n")
-# print(q.ok)
-# print(ignore_analyzer.match(0,"   /* errr */"))
+if r.ok:
+    print([t.value for t in r.tokens])
+else:
+    print(f'Error: {r.error.msg}\nrow:{r.error.row+1} col:{r.error.col+1} ')
