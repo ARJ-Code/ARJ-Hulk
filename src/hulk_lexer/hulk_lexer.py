@@ -20,7 +20,7 @@ ignore_analyzer = ManyAnalyzer(OrAnalyzer(
     space_and_endline_analyzer, simple_comments_analyzer, complex_comments_analyzer))
 
 identifier_analyzer = AndAnalyzer(
-    AlphaAnalyzer(), ManyAnalyzer(AlphaNumericAnalyzer()))
+    AlphaAnalyzer(), ConditionalAnalyzer(AlphaNumericAnalyzer(), ManyAnalyzer(AlphaNumericAnalyzer())))
 
 special_token_analyzer = or_patterns(
     ";", ",", ".", ":", "(", ")", "[", "]", "{", "}",
