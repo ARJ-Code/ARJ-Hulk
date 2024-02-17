@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 from hulk_core.token import TokenType, Token
 from hulk_core.error import ParsingError
 from .analyzer import Analyzer
@@ -12,12 +12,12 @@ class LexerResult:
 
 
 class Lexer:
-    def __init__(self, *token_analyzers: Tuple[TokenType, Analyzer], ignore_analyzer: Analyzer) -> None:
+    def __init__(self, *token_analyzers: Tuple[TokenType | Callable[[str], str], Analyzer], ignore_analyzer: Analyzer) -> None:
         if len(token_analyzers) == 1 and isinstance(token_analyzers[0], list):
-            self.token_analyzers: List[Tuple[TokenType,
+            self.token_analyzers: List[Tuple[TokenType | Callable[[str], str],
                                              Analyzer]] = token_analyzers[0]
         else:
-            self.token_analyzers: List[Tuple[TokenType, Analyzer]] = list(
+            self.token_analyzers: List[Tuple[TokenType | Callable[[str], str], Analyzer]] = list(
                 token_analyzers)
 
         self.ignore_analyzer: Analyzer = ignore_analyzer
@@ -49,7 +49,8 @@ class Lexer:
 
                     if result.ok:
                         if not result.empty:
-                            tokens.append(Token(row, col, result.token, t))
+                            tokens.append(
+                                Token(row, col, result.token, t if isinstance(t, TokenType) else t(result.token)))
 
                         index = result.index
                         row = result.row
