@@ -86,6 +86,17 @@ class DigitAnalyzer(Analyzer):
         return self._ok_run(index, row, col, text[index])
 
 
+class DigitAnalyzerNotZero(Analyzer):
+    def match(self, index: int, text: str) -> bool:
+        return _valid_index(index, text) and text[index].isdigit() and text[index] != '0'
+
+    def msg_error(self):
+        return "Character is not a digit or is equal 0"
+
+    def _run(self, index: int, row: int, col: int, text: str) -> AnalyzerResult:
+        return self._ok_run(index, row, col, text[index])
+
+
 class PatternAnalyzer(Analyzer):
     def __init__(self, pattern: str) -> None:
         self.pattern = pattern

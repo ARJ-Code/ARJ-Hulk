@@ -1,7 +1,7 @@
 from typing import Tuple, List, Callable
 from hulk_core.token import TokenType, Token
 from hulk_core.error import ParsingError
-from .analyzer import Analyzer
+from .analyzer import Analyzer, AnalyzerResult
 
 
 class LexerResult:
@@ -12,12 +12,12 @@ class LexerResult:
 
 
 class Lexer:
-    def __init__(self, *token_analyzers: Tuple[TokenType | Callable[[str], str], Analyzer], ignore_analyzer: Analyzer) -> None:
+    def __init__(self, *token_analyzers: Tuple[TokenType], ignore_analyzer: Analyzer) -> None:
         if len(token_analyzers) == 1 and isinstance(token_analyzers[0], list):
-            self.token_analyzers: List[Tuple[TokenType | Callable[[str], str],
+            self.token_analyzers: List[Tuple[TokenType,
                                              Analyzer]] = token_analyzers[0]
         else:
-            self.token_analyzers: List[Tuple[TokenType | Callable[[str], str], Analyzer]] = list(
+            self.token_analyzers: List[Tuple[TokenType, Analyzer]] = list(
                 token_analyzers)
 
         self.ignore_analyzer: Analyzer = ignore_analyzer
@@ -30,37 +30,29 @@ class Lexer:
         col = 0
 
         while index != len(text):
-            match = False
+            result: AnalyzerResult | None = None
+            token_type: TokenType | None = None
 
-            if self.ignore_analyzer.match(index, text):
-                result = self.ignore_analyzer.run(index, row, col, text)
-
-                if result.ok:
-                    index = result.index
-                    row = result.row
-                    col = result.col
-                else:
-                    return LexerResult([], result.error)
-                continue
-
-            for t, a in self.token_analyzers:
+            for t, a in self.token_analyzers+[(None, self.ignore_analyzer)]:
                 if a.match(index, text):
-                    result = a.run(index, row, col, text)
+                    current_result = a.run(index, row, col, text)
 
-                    if result.ok:
-                        if not result.empty:
-                            tokens.append(
-                                Token(row, col, result.token, t if isinstance(t, TokenType) else t(result.token)))
-
-                        index = result.index
-                        row = result.row
-                        col = result.col
+                    if current_result.ok:
+                        if result is None or result.index < current_result.index:
+                            result = current_result
+                            token_type = t
                     else:
                         return LexerResult([], result.error)
 
-                    match = True
-                    break
-            if not match:
+            if result is None:
                 return LexerResult([], ParsingError('Invalid character', row, col))
+
+            row = result.row
+            col = result.col
+            index = result.index
+
+            if not result.empty and token_type is not None:
+                tokens.append(
+                    Token(result.row, result.col, result.token, token_type))
 
         return LexerResult(tokens)
