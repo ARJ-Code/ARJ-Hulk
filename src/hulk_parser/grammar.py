@@ -28,6 +28,20 @@ class GrammarProduction:
         self.body: List[GrammarToken] = body
         self.ind = ind
 
+    def __eq__(self, other) -> bool:
+        return str(self) == str(other)
+
+    def __str__(self) -> str:
+        value = str(self.head)+" -> "
+
+        for v in self.body:
+            value += str(v)+" "
+
+        return value
+
+    def __hash__(self) -> int:
+        return hash(str(self))
+
 
 class Grammar:
     def __init__(self) -> None:
@@ -127,6 +141,8 @@ class Grammar:
         return result
 
     def calculate_follow(self) -> List[GrammarToken]:
+        self.calculate_first()
+
         for non_terminal in self.non_terminals:
             self.follows[non_terminal] = set()
 

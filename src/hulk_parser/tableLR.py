@@ -11,17 +11,28 @@ class Action(Enum):
     ACCEPT = 2,
     ERROR = 3
 
+
 class NodeAction:
     def __init__(self, ind: int) -> None:
         self.ind = ind
         self.terminal_actions: Dict[GrammarToken, Tuple[Action, int]] = {}
         self.no_terminal_actions: Dict[GrammarToken, int] = {}
 
-    def add_terminal_action(self, token: GrammarToken, action: Action, ind: int):
+    def add_terminal_action(self, token: GrammarToken, action: Action, ind: int) -> bool:
+        if token in self.terminal_actions:
+            return False
+
         self.terminal_actions[token] = action, ind
 
-    def add_no_terminal_action(self, token: GrammarToken, ind: int):
+        return True
+
+    def add_no_terminal_action(self, token: GrammarToken, ind: int) -> bool:
+        if token in self.no_terminal_actions:
+            return False
+
         self.no_terminal_actions[token] = ind
+
+        return True
 
     def to_json(self):
         return {
@@ -43,21 +54,22 @@ class NodeAction:
 
         return node_action
 
+
 class TableLR:
     def __init__(self, grammar: Grammar) -> None:
         self.grammar: Grammar = grammar
         self.stack_states: List[int] = [0]
         self.node_actions: List[NodeAction] = []
 
-    def build(self, node_actions: List[NodeAction]):
+    def build(name:str,node_actions: List[NodeAction]):
         cache_json = json.dumps([node_action.to_json()
                                 for node_action in node_actions])
 
-        with open("cache.json", "w") as file:
+        with open(f"cache/{name}_parse.json", "w") as file:
             file.write(cache_json)
 
-    def load(self):
-        cache = json.load(open("cache.json"))
+    def load(self, name: str):
+        cache = json.load(open(f"cache/{name}_parse.json"))
         self.node_actions = [NodeAction.from_json(x) for x in cache]
 
     def action(self, token: GrammarToken) -> Tuple[Action, int]:
