@@ -11,26 +11,6 @@ class Action(Enum):
     ACCEPT = 2,
     ERROR = 3
 
-
-class ItemLR:
-    def __init__(self, production: GrammarProduction, index: int) -> None:
-        self.production: GrammarProduction = production
-        self.index: int = index
-
-
-class NodeLR:
-    def __init__(self, ind: int) -> None:
-        self.ind: int = ind
-        self.items: List[ItemLR] = []
-        self.transitions: Dict[GrammarToken, 'NodeLR'] = {}
-
-    def add_item(self, item: ItemLR) -> None:
-        self.items.append(item)
-
-    def add_transition(self, token: GrammarToken, node: 'NodeLR') -> None:
-        self.transitions[token] = node
-
-
 class NodeAction:
     def __init__(self, ind: int) -> None:
         self.ind = ind
@@ -63,16 +43,18 @@ class NodeAction:
 
         return node_action
 
-
-class AutomatonLR(ABC):
+class TableLR:
     def __init__(self, grammar: Grammar) -> None:
         self.grammar: Grammar = grammar
         self.stack_states: List[int] = [0]
         self.node_actions: List[NodeAction] = []
 
-    @abstractmethod
-    def build():
-        pass
+    def build(self, node_actions: List[NodeAction]):
+        cache_json = json.dumps([node_action.to_json()
+                                for node_action in node_actions])
+
+        with open("cache.json", "w") as file:
+            file.write(cache_json)
 
     def load(self):
         cache = json.load(open("cache.json"))

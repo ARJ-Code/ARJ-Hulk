@@ -1,16 +1,16 @@
 from .grammar import Grammar, GrammarToken, EOF
-from .automatonLR import AutomatonLR, Action
+from .tableLR import TableLR, Action
 from typing import List
 from .parse_out import ParseResult
 
 
 class Parser:
-    def __init__(self, grammar: Grammar, automatonLR: AutomatonLR) -> None:
+    def __init__(self, grammar: Grammar, tableLR: TableLR) -> None:
         self.grammar: Grammar = grammar
-        self.aut: AutomatonLR = automatonLR
+        self.table: TableLR = TableLR
 
     def parse(self, tokens: List[GrammarToken]) -> ParseResult:
-        self.aut.load()
+        self.table.load()
 
         tokens.append(EOF())
         productions_result: List[GrammarToken] = []
@@ -19,7 +19,7 @@ class Parser:
         stack_tokens: List[GrammarToken] = []
 
         while True:
-            action, ind = self.aut.action(tokens[index])
+            action, ind = self.table.action(tokens[index])
 
             if action == Action.SHIFT:
                 self.shift_action(stack_tokens, tokens[index])
