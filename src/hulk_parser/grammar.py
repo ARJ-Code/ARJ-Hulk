@@ -23,9 +23,10 @@ class EOF(GrammarToken):
 
 
 class GrammarProduction:
-    def __init__(self, head: GrammarToken, body: List[GrammarToken]) -> None:
+    def __init__(self, ind: int, head: GrammarToken, body: List[GrammarToken]) -> None:
         self.head: GrammarToken = head
         self.body: List[GrammarToken] = body
+        self.ind = ind
 
 
 class Grammar:
@@ -48,7 +49,8 @@ class Grammar:
             body = [EOF() if token == "" or token ==
                     "EOF" else self.add_terminal(token) for token in tokens]
 
-            self.productions.append(GrammarProduction(head, body))
+            self.productions.append(GrammarProduction(
+                len(self.productions), head, body))
 
     def add_non_terminal(self, value: str) -> GrammarToken:
         token = GrammarToken(value, False)
