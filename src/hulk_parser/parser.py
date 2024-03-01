@@ -17,8 +17,7 @@ class Parser:
         stack_tokens: List[GrammarToken] = []
 
         while True:
-            action, ind = self.aut.action(
-                stack_tokens, tokens[index])
+            action, ind = self.aut.action(tokens[index])
 
             if action == Action.SHIFT:
                 self.shift_action(stack_tokens, tokens[index])
@@ -34,14 +33,13 @@ class Parser:
                 productions_result.reverse()
                 return ParseResult(derivations=productions_result)
 
-    def shift_action(self, stack_tokens: List[GrammarToken], input: GrammarToken):
-        stack_tokens.append(input)
+    def shift_action(self, stack_tokens: List[GrammarToken], token: GrammarToken):
+        stack_tokens.append(token)
 
-    def reduce_action(self, stack_tokens: List[GrammarToken], ind: int, productions_result: List[GrammarToken]):
-        for production in self.grammar.productions:
-            if production.ind == ind:
-                productions_result.append(production)
+    def reduce_action(self, stack_tokens: List[GrammarToken], ind: int, productions_result: List[GrammarToken]) -> GrammarToken:
+        production = self.grammar.get_production(ind)
+        productions_result.append(production)
 
-                for _ in range(len(production.body)):
-                    stack_tokens.pop()
-                stack_tokens.append(production.head)
+        for _ in range(len(production.body)):
+            stack_tokens.pop()
+        stack_tokens.append(production.head)

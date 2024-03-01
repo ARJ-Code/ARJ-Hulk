@@ -37,6 +37,9 @@ class Grammar:
         self.firsts: Dict[GrammarToken, Set[GrammarToken]] = {}
         self.follows: Dict[GrammarToken, Set[GrammarToken]] = {}
 
+    def get_production(self, ind: int) -> GrammarProduction:
+        return self.productions[ind]
+
     def add_main(self, non_terminal: str) -> None:
         self.main = self.add_non_terminal(non_terminal)
         self.main.is_main = True
