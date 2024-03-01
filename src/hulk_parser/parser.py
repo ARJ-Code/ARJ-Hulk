@@ -10,6 +10,8 @@ class Parser:
         self.aut: AutomatonLR = automatonLR
 
     def parse(self, tokens: List[GrammarToken]) -> ParseResult:
+        self.aut.load()
+
         tokens.append(EOF())
         productions_result: List[GrammarToken] = []
 
