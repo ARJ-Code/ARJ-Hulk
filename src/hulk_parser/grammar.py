@@ -61,6 +61,15 @@ class Grammar:
         for t in self.terminals:
             yield t
 
+    def get_token(self, value: str) -> GrammarToken:
+        for t in self.non_terminals:
+            if t.value == value:
+                return t
+
+        for t in self.terminals:
+            if t.value == value:
+                return t
+
     def add_main(self, non_terminal: str) -> None:
         self.main = GrammarToken(non_terminal)
         self.main.is_main = True

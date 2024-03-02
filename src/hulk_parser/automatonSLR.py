@@ -2,6 +2,7 @@ from .grammar import GrammarProduction, GrammarToken, Grammar, EOF
 from typing import List, Dict, Set, Tuple
 from .tableLR import TableLR, NodeAction, Action
 from queue import Queue
+from .automaton import AutomatonNFA, AutomatonDFA
 
 
 class ItemLR:
@@ -59,8 +60,8 @@ class AutomatonSLR:
         self.nodes: List[NodeLR] = []
         # self.item_to_node: List[NodeLR | None] = []
 
-        self.build_items()
-        self.build_nodes()
+        nfa = self.build_items()
+        self.build_nodes(nfa)
 
         self.build_table(name)
 
@@ -76,10 +77,12 @@ class AutomatonSLR:
 
         return node
 
-    def build_items(self):
+    def build_items(self) -> AutomatonNFA:
         for production in self.grammar .productions:
             for i in range(len(production.body) + 1):
                 self.get_item(production, i)
+
+        nfa = AutomatonNFA(len(self.items))
 
         for x in self.items:
             for y in self.items:
@@ -87,79 +90,26 @@ class AutomatonSLR:
                     continue
 
                 if y.production.head == x.production.body[x.index] and y.index == 0:
-                    x.add_eof_transition(y)
+                    nfa.add_epsilon_transition(x.ind, y.ind)
 
                 if y.production == x.production and y.index == x.index + 1:
                     x.add_transition(x.production.body[x.index], y)
+                    nfa.add_transition(
+                        x.ind, y.ind, x.production.body[x.index].value)
 
-    def build_nodes(self):
-        main_item = [item for item in self.items if item.production.head ==
-                     self.grammar.main and item.index == 0][0]
+        return nfa
 
-        main_closure = set([main_item])
-        self.build_closure(main_closure)
+    def build_nodes(self, nfa: AutomatonNFA):
+        dfa = nfa.compute_dfa()
 
-        self.get_node(main_closure)
+        for l in dfa.sets:
+            items = [self.items[i] for i in l]
+            self.get_node(set(items))
 
-        change = True
-
-        while change:
-            change = False
-
-            for node in self.nodes:
-                for token in self.grammar.get_tokens():
-                    if token in node.transitions:
-                        continue
-
-                    goto_closure = self.build_goto(node.items, token)
-
-                    if len(goto_closure) == 0:
-                        continue
-
-                    node_goto = self.closure_to_node(goto_closure)
-
-                    node.add_transition(token, node_goto)
-                    change = True
-
-    def closure_to_node(self, closure: Set[ItemLR]):
-        for node in self.nodes:
-            if any([x for x in node.items if x in closure]):
-                return node
-
-        return self.get_node(closure)
-
-    def build_closure(self, closure: Set[ItemLR]):
-        change = True
-
-        while change:
-            aux = []
-
-            for item in closure:
-                for ind_c in item.get_eof_transitions():
-                    item_c = self.items[ind_c]
-
-                    if item_c in closure:
-                        continue
-
-                    aux.append(item_c)
-
-            for item in aux:
-                closure.add(item)
-
-            change = len(aux) != 0
-
-    def build_goto(self, closure: Set[ItemLR], token: GrammarToken) -> Set[NodeLR]:
-        goto_closure = set()
-
-        for item in closure:
-            for ind_g in item.get_transitions(token):
-                item_g = self.items[ind_g]
-
-                goto_closure.add(item_g)
-
-        self.build_closure(goto_closure)
-
-        return goto_closure
+        for i in range(len(self.nodes)):
+            for k, v in dfa.transitions[i].items():
+                self.nodes[i].add_transition(
+                    self.grammar.get_token(k), self.nodes[v])
 
     def build_table(self, name: str) -> bool:
         node_actions = []

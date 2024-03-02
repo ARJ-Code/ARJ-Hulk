@@ -33,10 +33,13 @@ table.load('test')
 
 p = Parser(g, table)
 
-q = p.parse([GrammarToken('n'), GrammarToken('+'),
-            GrammarToken('n'), GrammarToken('*'), GrammarToken('n')])
+w=[GrammarToken('n'), GrammarToken('+'),
+            GrammarToken('n'), GrammarToken('*'), GrammarToken('n')]
+w=[GrammarToken('n'), GrammarToken('+'),
+            GrammarToken('n')]
+q = p.parse(w)
 
-print(q.error)
+# print(q.error)
 
 # def dfs(t):
 #     print(t.token)
