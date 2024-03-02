@@ -1,0 +1,1 @@
+# define regular expression and lexer configuration
