@@ -7,6 +7,7 @@
 - $E$ expresión
 - $E_B$ expresión booleana
 - $E_A$ expresión aritmética
+- $E_S$ expresión string
 - $E_L$ expresión let
 - $E_C$ expresión call (llamar a una función)
 - $E_F$ expresión _for_
@@ -22,21 +23,27 @@
 - $B\rightarrow \{I_S\}$
 - $I_S\rightarrow II_S|I$
 - $I\rightarrow E;|E|F$
-- $E\rightarrow E_A|E_B$
+- $E\rightarrow E_A|E_B|E_S$
 
 ### Expresión booleana
 
-- $E_B\rightarrow E_B || T_B|T_B$
-- $T_B\rightarrow T_B \&\& F_B|F_B$
+- $E_B\rightarrow T_B || E_B|T_B$
+- $T_B\rightarrow F_B \&\& T_B|F_B$
 - $F_B\rightarrow !G_B|G_B$
-- $G_B\rightarrow id|\text{true}|\text{false}|(E_B)|E_L|E_F|E_W|E_{IF}|B|A$
+- $G_B\rightarrow id|\text{true}|\text{false}|(E_B)|E_C|E_L|E_F|E_W|E_{IF}|B|A$
 
 ### Expresión aritmética
 
-- $E_A\rightarrow E_A+T_A|E_A-T_A|-T_A|+T_A|T_A$
-- $T_A\rightarrow T_A\cdot F_A|T_A/F_A|F_A$
-- $F_A\rightarrow G_A \wedge F_A|G_A$
-- $G_A\rightarrow num|id|(E_A)|E_L|E_F|E_W|E_{IF}|B|A$
+- $E_A\rightarrow T_A+E_A|T_A-E_A|-T_A|+T_A|T_A$
+- $T_A\rightarrow F_A\cdot T_A|F_A/T_A|F_A$
+- $F_A\rightarrow F_A \wedge G_A|G_A$
+- $G_A\rightarrow num|id|(E_A)|E_C|E_L|E_F|E_W|E_{IF}|B|A$
+
+### Expresión string
+
+- $E_S\rightarrow T_S @ E_S$
+- $E_S\rightarrow T_S @@ E_S$
+- $T_S\rightarrow id|(E_S)|E_C|E_L|E_F|E_W|E_{IF}|B|A$
 
 ### Expresión let
 
@@ -62,14 +69,15 @@
 - $E_W\rightarrow \text{while } (E_B) E$
 - $E_F\rightarrow \text{for } id\text{ in range}(E,E,E) E$
 
+### Expresión call
+
+- $E_C\rightarrow id(D_1)$
+- $D_1\rightarrow \epsilon | D_2$
+- $D_2\rightarrow E,D_2|E$
+
 ### Funciones
 
 - $F\rightarrow \text{function } (C_1) C_2$
 - $C_2\rightarrow => E|B$
 - $C_1\rightarrow C_3|\epsilon$
 - $C_3\rightarrow id,C_3|id$
-
-
-
-
-
