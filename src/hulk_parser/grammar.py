@@ -94,7 +94,10 @@ class Grammar:
 
             return t
 
-        head = get(non_terminal.upper())
+        if non_terminal != non_terminal.upper():
+            raise ValueError("Non terminal must be in upper case")
+
+        head = get(non_terminal)
 
         for sentence in sentences:
             tokens = sentence.split(" ")

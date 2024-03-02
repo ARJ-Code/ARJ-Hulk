@@ -17,7 +17,7 @@ class ItemLR:
         return self.ind
 
     def __str__(self) -> str:
-        return str(self.production)+' '+str(self.index)
+        return f"{self.production} {self.index}"
 
     def add_transition(self, token: GrammarToken, item: 'ItemLR'):
         if token not in self.transitions:
@@ -64,10 +64,10 @@ class AutomatonSLR:
         self.items: List[ItemLR] = []
         self.nodes: List[NodeLR] = []
 
-        self.build_items()
-        self.build_nodes()
+        self.__build_items()
+        self.__build_nodes()
 
-        self.build_table(name)
+        self.ok = self.__build_table(name)
 
     def nodes_to_str(self):
         s = ''
@@ -77,22 +77,22 @@ class AutomatonSLR:
 
         return s
 
-    def get_item(self, production: GrammarProduction, index: int) -> ItemLR:
+    def __get_item(self, production: GrammarProduction, index: int) -> ItemLR:
         item = ItemLR(len(self.items), production, index)
         self.items.append(item)
 
         return item
 
-    def get_node(self, closure: Set[ItemLR]):
+    def __get_node(self, closure: Set[ItemLR]):
         node = NodeLR(len(self.nodes), closure)
         self.nodes.append(node)
 
         return node
 
-    def build_items(self):
+    def __build_items(self):
         for production in self.grammar .productions:
             for i in range(len(production.body) + 1):
-                self.get_item(production, i)
+                self.__get_item(production, i)
 
         for x in self.items:
             for y in self.items:
@@ -105,13 +105,13 @@ class AutomatonSLR:
                 if y.production == x.production and y.index == x.index + 1:
                     x.add_transition(x.production.body[x.index], y)
 
-    def build_nodes(self):
+    def __build_nodes(self):
         item_main = [
             item for item in self.items if item.production.head == self.grammar.main and item.index == 0]
 
         items_main = set(item_main)
-        self.build_closure(items_main)
-        node = self.get_node(items_main)
+        self.__build_closure(items_main)
+        node = self.__get_node(items_main)
 
         change = True
 
@@ -125,17 +125,17 @@ class AutomatonSLR:
                     if t in node.transitions:
                         continue
 
-                    goto = self.build_goto(node.items, t)
+                    goto = self.__build_goto(node.items, t)
 
                     if len(goto) == 0:
                         continue
 
-                    node_goto = self.get_goto_node(goto)
+                    node_goto = self.__get_goto_node(goto)
                     node.add_transition(t, node_goto)
 
                     change = True
 
-    def build_closure(self, items: Set[ItemLR]):
+    def __build_closure(self, items: Set[ItemLR]):
         change = True
 
         while change:
@@ -155,7 +155,7 @@ class AutomatonSLR:
 
             change = len(aux) != 0
 
-    def build_goto(self, items: Set[ItemLR], token: GrammarToken) -> Set[ItemLR]:
+    def __build_goto(self, items: Set[ItemLR], token: GrammarToken) -> Set[ItemLR]:
         goto = set()
 
         for item in items:
@@ -163,18 +163,18 @@ class AutomatonSLR:
                 item_g = self.items[item_g]
                 goto.add(item_g)
 
-        self.build_closure(goto)
+        self.__build_closure(goto)
 
         return goto
 
-    def get_goto_node(self, items: Set[ItemLR]) -> NodeLR:
+    def __get_goto_node(self, items: Set[ItemLR]) -> NodeLR:
         for node in self.nodes:
             if all(item in node.items for item in items):
                 return node
 
-        return self.get_node(items)
+        return self.__get_node(items)
 
-    def build_table(self, name: str) -> bool:
+    def __build_table(self, name: str) -> bool:
         node_actions = []
         result = True
 
