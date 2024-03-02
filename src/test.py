@@ -10,7 +10,8 @@ g.add_main("S")
 g.add_production("S", ["E"])
 g.add_production("E", ["T + E", "T"])
 g.add_production("T", ["F * T","F"])
-g.add_production("F",["n", "( E )"])
+g.add_production("F",["F ^ G","G"])
+g.add_production("G",["n", "( E )"])
 # g.add_production("F", ["( E )", "n"])
 # g.add_production("E",["A = A","i"])
 # g.add_production("A",["i + A","i"])
@@ -25,7 +26,7 @@ table.load('test')
 
 p = Parser(g, table)
 
-q = p.parse(p.str_to_tokens('n + n * n'))
+q = p.parse(p.str_to_tokens('n ^ n * ( n + n )'))
 
 print(q.error)
 
