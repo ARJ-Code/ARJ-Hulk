@@ -46,51 +46,53 @@ class GrammarProduction:
 class Grammar:
     def __init__(self) -> None:
         self.productions: List[GrammarProduction] = []
-        self.terminals: List[GrammarToken] = [EOF()]
-        self.non_terminals: List[GrammarToken] = []
+        self.terminals: Set[GrammarToken] = set([EOF()])
+        self.non_terminals: Set[GrammarToken] = set()
         self.firsts: Dict[GrammarToken, Set[GrammarToken]] = {}
         self.follows: Dict[GrammarToken, Set[GrammarToken]] = {}
 
     def get_production(self, ind: int) -> GrammarProduction:
         return self.productions[ind]
 
+    def get_tokens(self):
+        for t in self.non_terminals:
+            yield t
+
+        for t in self.terminals:
+            yield t
+
     def add_main(self, non_terminal: str) -> None:
-        self.main = self.add_non_terminal(non_terminal)
+        self.main = GrammarToken(non_terminal)
         self.main.is_main = True
 
+        self.non_terminals.add(self.main)
+
     def add_production(self, non_terminal: str, sentences: List[str]) -> None:
-        head = self.add_non_terminal(non_terminal)
+        def get(t: str):
+            if t == "" or t == "EOF":
+                return EOF()
+
+            t = GrammarToken(t, t[0].lower() == t[0])
+
+            if t.is_terminal:
+                self.terminals.add(t)
+            else:
+                self.non_terminals.add(t)
+
+            if t == self.main:
+
+                t = self.main
+
+            return t
+
+        head = get(non_terminal.upper())
 
         for sentence in sentences:
             tokens = sentence.split(" ")
-            body = [EOF() if token == "" or token ==
-                    "EOF" else self.add_terminal(token) for token in tokens]
+            body = [get(token) for token in tokens]
 
             self.productions.append(GrammarProduction(
                 len(self.productions), head, body))
-
-    def add_non_terminal(self, value: str) -> GrammarToken:
-        token = GrammarToken(value, False)
-
-        if token not in self.non_terminals:
-            self.non_terminals.append(token)
-
-        if token in self.terminals:
-            self.terminals.remove(token)
-
-        return token
-
-    def add_terminal(self, value: str) -> GrammarToken:
-        token = GrammarToken(value, True)
-
-        if token in self.non_terminals:
-            token.is_terminal = False
-            return token
-
-        if token not in self.terminals:
-            self.terminals.append(token)
-
-        return token
 
     def calculate_first(self) -> List[GrammarToken]:
         for terminal in self.terminals:
@@ -171,8 +173,8 @@ class Grammar:
                             self.follows[token].add(first)
                             changed = True
 
-                        if EOF() in firsts or i == len(body)-1:
-                            for follow in self.follows[head]:
-                                if follow not in self.follows[token]:
-                                    self.follows[token].add(follow)
-                                    changed = True
+                    if EOF() in firsts or i == len(body)-1:
+                        for follow in self.follows[head]:
+                            if follow not in self.follows[token]:
+                                self.follows[token].add(follow)
+                                changed = True

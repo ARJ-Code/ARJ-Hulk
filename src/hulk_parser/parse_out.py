@@ -3,7 +3,7 @@ from typing import List
 
 
 class DerivationTree:
-    def __init__(self, token: GrammarToken, father: 'DerivationTree' | None = None) -> None:
+    def __init__(self, token: GrammarToken, father: 'DerivationTree | None' = None) -> None:
         self.token: GrammarToken = token
         self.children: List[DerivationTree] = []
         self.father: DerivationTree | None = father
@@ -16,9 +16,11 @@ class DerivationTree:
 
 
 class ParseResult:
-    def __init__(self, derivations: List[GrammarProduction], error: int = -1) -> None:
-        self.ok: bool = error != -1
-        self.derivation_tree= ParseResult.__build_tree(derivations) if self.ok else None
+    def __init__(self, derivations: List[GrammarProduction] = [], error: int = -1) -> None:
+        self.ok: bool = error == -1
+        self.error = error
+        self.derivation_tree = ParseResult.__build_tree(
+            derivations) if self.ok else None
 
     def __build_tree(derivations: List[GrammarProduction]) -> DerivationTree:
         root = DerivationTree(derivations[0].head)

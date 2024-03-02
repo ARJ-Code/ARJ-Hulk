@@ -11,6 +11,16 @@ class Action(Enum):
     ACCEPT = 2,
     ERROR = 3
 
+    def str_to_action(value):
+        if value == "SHIFT":
+            return Action.SHIFT
+        elif value == "REDUCE":
+            return Action.REDUCE
+        elif value == "ACCEPT":
+            return Action.ACCEPT
+        else:
+            return Action.ERROR
+
 
 class NodeAction:
     def __init__(self, ind: int) -> None:
@@ -47,10 +57,10 @@ class NodeAction:
 
         for key, value in data["terminal_actions"].items():
             node_action.add_terminal_action(
-                GrammarToken(key), value[0], value[1])
+                GrammarToken(key), Action.str_to_action(value[0]), int(value[1]))
 
         for key, value in data["no_terminal_actions"].items():
-            node_action.add_no_terminal_action(GrammarToken(key), value)
+            node_action.add_no_terminal_action(GrammarToken(key), int(value))
 
         return node_action
 
@@ -61,7 +71,7 @@ class TableLR:
         self.stack_states: List[int] = [0]
         self.node_actions: List[NodeAction] = []
 
-    def build(name:str,node_actions: List[NodeAction]):
+    def build(name: str, node_actions: List[NodeAction]):
         cache_json = json.dumps([node_action.to_json()
                                 for node_action in node_actions])
 

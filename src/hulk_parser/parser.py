@@ -7,11 +7,9 @@ from .parse_out import ParseResult
 class Parser:
     def __init__(self, grammar: Grammar, tableLR: TableLR) -> None:
         self.grammar: Grammar = grammar
-        self.table: TableLR = TableLR
+        self.table: TableLR = tableLR
 
     def parse(self, tokens: List[GrammarToken]) -> ParseResult:
-        self.table.load()
-
         tokens.append(EOF())
         productions_result: List[GrammarToken] = []
 
@@ -40,6 +38,7 @@ class Parser:
 
     def reduce_action(self, stack_tokens: List[GrammarToken], ind: int, productions_result: List[GrammarToken]) -> GrammarToken:
         production = self.grammar.get_production(ind)
+        print(production)
         productions_result.append(production)
 
         for _ in range(len(production.body)):
