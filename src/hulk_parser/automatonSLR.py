@@ -1,8 +1,7 @@
 from .grammar import GrammarProduction, GrammarToken, Grammar, EOF
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Set
 from .tableLR import TableLR, NodeAction, Action
-from queue import Queue
-from .automaton import AutomatonNFA, AutomatonDFA
+from .automaton import AutomatonNFA
 
 
 class ItemLR:
@@ -10,7 +9,6 @@ class ItemLR:
         self.production: GrammarProduction = production
         self.index: int = index
         self.ind = ind
-        self.transitions: Dict[GrammarToken, Set[int]] = {}
 
     def __eq__(self, other) -> bool:
         self.ind == other.ind
@@ -18,52 +16,45 @@ class ItemLR:
     def __hash__(self) -> int:
         return self.ind
 
-    def add_transition(self, token: GrammarToken, item: 'ItemLR'):
-        if token not in self.transitions:
-            self.transitions[token] = set()
-
-        self.transitions[token].add(item.ind)
-
-    def add_eof_transition(self, item: 'ItemLR'):
-        self.add_transition(EOF(), item)
-
-    def get_transitions(self, token: GrammarToken) -> Set[int]:
-        if token not in self.transitions:
-            return set([])
-
-        return self.transitions[token]
-
-    def get_eof_transitions(self):
-        return self.get_transitions(EOF())
+    def __str__(self) -> str:
+        return str(self.production)+' '+str(self.index)
 
 
 class NodeLR:
-    def __init__(self, ind: int, items: Set[ItemLR]) -> None:
+    def __init__(self, ind: int, items: List[ItemLR]) -> None:
         self.ind: int = ind
-        self.items: Set[ItemLR] = items
+        self.items: List[ItemLR] = items
         self.transitions: Dict[GrammarToken, int] = {}
-
-    def contains(self, item: ItemLR) -> bool:
-        return item in self.items
-
-    # def add_item(self, item: ItemLR) -> None:
-    #     self.items.add(item)
 
     def add_transition(self, token: GrammarToken, node: 'NodeLR') -> None:
         self.transitions[token] = node.ind
 
+    def __str__(self) -> str:
+        s=''
+
+        for i in self.items:
+            s+=f'{str(i)}\n'
+
+        return s
 
 class AutomatonSLR:
     def __init__(self, name: str, grammar: Grammar):
         self.grammar: Grammar = grammar
         self.items: List[ItemLR] = []
         self.nodes: List[NodeLR] = []
-        # self.item_to_node: List[NodeLR | None] = []
 
         nfa = self.build_items()
         self.build_nodes(nfa)
 
         self.build_table(name)
+
+    def nodes_to_str(self):
+        s = ''
+
+        for n in self.nodes:
+            s+=f'{str(n)}\n'
+
+        return s
 
     def get_item(self, production: GrammarProduction, index: int) -> ItemLR:
         item = ItemLR(len(self.items), production, index)
@@ -93,9 +84,8 @@ class AutomatonSLR:
                     nfa.add_epsilon_transition(x.ind, y.ind)
 
                 if y.production == x.production and y.index == x.index + 1:
-                    x.add_transition(x.production.body[x.index], y)
                     nfa.add_transition(
-                        x.ind, y.ind, x.production.body[x.index].value)
+                        x.ind, y.ind, x.production.body[x.index])
 
         return nfa
 
@@ -109,7 +99,7 @@ class AutomatonSLR:
         for i in range(len(self.nodes)):
             for k, v in dfa.transitions[i].items():
                 self.nodes[i].add_transition(
-                    self.grammar.get_token(k), self.nodes[v])
+                    k, self.nodes[v])
 
     def build_table(self, name: str) -> bool:
         node_actions = []

@@ -1,4 +1,5 @@
 from typing import List, Dict, Set, Tuple
+from .grammar import GrammarToken, EOF
 
 
 class DisjointSet:
@@ -38,21 +39,21 @@ class DisjointSet:
 class AutomatonDFA:
     def __init__(self, sets: List[List[int]]) -> None:
         self.sets: List[List[int]] = sets
-        self.transitions: List[Dict[str, int]] = [{} for _ in range(len(sets))]
+        self.transitions: List[Dict[GrammarToken, int]] = [{} for _ in range(len(sets))]
 
-    def add_transition(self, src: int, dest: int, token: str) -> None:
+    def add_transition(self, src: int, dest: int, token: GrammarToken) -> None:
         self.transitions[src][token] = dest
 
 
 class AutomatonNFA:
     def __init__(self, n: int) -> None:
         self.n = n
-        self.transitions: List[Dict[str, List[int]]] = [{} for _ in range(n)]
+        self.transitions: List[Dict[GrammarToken, List[int]]] = [{} for _ in range(n)]
         self.dsu = DisjointSet(n)
-        self.tokens: Set[str] = set()
+        self.tokens: Set[GrammarToken] = set()
 
-    def add_transition(self, src: int, dest: int, token: str) -> None:
-        if token != "EOF":
+    def add_transition(self, src: int, dest: int, token: GrammarToken) -> None:
+        if token != EOF():
             self.tokens.add(token)
 
         if token not in self.transitions[src]:
@@ -60,15 +61,15 @@ class AutomatonNFA:
         self.transitions[src][token].append(dest)
 
     def add_epsilon_transition(self, src: int, dest: int) -> None:
-        self.add_transition(src, dest, 'EOF')
+        self.add_transition(src, dest, EOF())
 
-    def get_transitions(self, src, token: str) -> List[int]:
+    def get_transitions(self, src, token: GrammarToken) -> List[int]:
         if token in self.transitions[src]:
             return self.transitions[src][token]
         return []
 
     def get_epsilon_transitions(self, src: int) -> List[int]:
-        return self.get_transitions(src, 'EOF')
+        return self.get_transitions(src, EOF())
 
     def compute_dfa(self) -> AutomatonDFA:
         self.to_closure()
@@ -151,7 +152,7 @@ class AutomatonNFA:
 
         return change
 
-    def goto(self, state: int, token: str) -> bool:
+    def goto(self, state: int, token: GrammarToken) -> bool:
         l = self.dsu.get_set(state)
         new_l = []
         change = False

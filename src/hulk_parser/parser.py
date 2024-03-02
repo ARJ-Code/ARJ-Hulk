@@ -9,6 +9,14 @@ class Parser:
         self.grammar: Grammar = grammar
         self.table: TableLR = tableLR
 
+    def str_to_tokens(self, string: str) -> List[GrammarToken]:
+        tokens: List[GrammarToken] = []
+
+        for s in string.split(' '):
+            tokens.append(self.grammar.get_token(s))
+
+        return tokens
+
     def parse(self, tokens: List[GrammarToken]) -> ParseResult:
         tokens.append(EOF())
         productions_result: List[GrammarToken] = []
@@ -38,7 +46,6 @@ class Parser:
 
     def reduce_action(self, stack_tokens: List[GrammarToken], ind: int, productions_result: List[GrammarToken]) -> GrammarToken:
         production = self.grammar.get_production(ind)
-        print(production)
         productions_result.append(production)
 
         for _ in range(len(production.body)):
