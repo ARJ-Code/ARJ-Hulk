@@ -71,6 +71,9 @@ class TableLR:
         self.stack_states: List[int] = [0]
         self.node_actions: List[NodeAction] = []
 
+    def reset(self):
+        self.stack_states = [0]
+
     def build(name: str, node_actions: List[NodeAction]):
         cache_json = json.dumps([node_action.to_json()
                                 for node_action in node_actions])
@@ -106,7 +109,6 @@ class TableLR:
 
     def action_reduce(self, action: Action, ind: int) -> Tuple[Action, int]:
         production = self.grammar.get_production(ind)
-        print(production)
 
         for _ in range(len(production.body)):
             self.stack_states.pop()

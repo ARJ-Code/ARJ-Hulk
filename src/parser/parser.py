@@ -18,6 +18,7 @@ class Parser:
         return tokens
 
     def parse(self, tokens: List[GrammarToken]) -> ParseResult:
+        self.table.reset()
         tokens.append(EOF())
         productions_result: List[GrammarToken] = []
 
