@@ -16,13 +16,10 @@ class RegexGrammar():
 
         g.add_production('S', ['E'])
         g.add_production('E', ['A | E', 'A'])
-        g.add_production('A', ['B C D'])
-        g.add_production('B', ['^', ''])
-        g.add_production('D', ['$', ''])
-        g.add_production('C', ['F C', 'F'])
-        g.add_production('F', ['[ G ]', 'H I'])
+        g.add_production('C', ['F A', 'F'])
+        g.add_production('F', ['[ G ] I', 'H I'])
         g.add_production(
-            'I', ['?', '+', '*', '{ ch }', '{ ch , ch }', '{ , ch }', '{ ch , }'])
+            'I', ['?', '+', '*', '{ ch }', '{ ch , ch }', '{ , ch }', '{ ch , }', ''])
         g.add_production('H', ['ch', '( E )', '.'])
         g.add_production('G', ['^ J', 'J'])
         g.add_production('J', ['K J', 'K'])
