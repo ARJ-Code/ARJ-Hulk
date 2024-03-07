@@ -7,6 +7,7 @@ class DerivationTree:
         self.token: GrammarToken = token
         self.children: List[DerivationTree] = []
         self.father: DerivationTree | None = father
+        self.production_ind: int = -1
 
     def add_child(self, child: 'DerivationTree'):
         self.children.append(child)
@@ -29,6 +30,8 @@ class ParseResult:
         return root
 
     def __build_tree_node(node: DerivationTree, derivations: List[GrammarProduction], index: int) -> int:
+        node.production_ind = derivations[index].ind
+
         tokens = derivations[index].body.copy()
         tokens.reverse()
 

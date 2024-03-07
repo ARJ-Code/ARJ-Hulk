@@ -1,7 +1,8 @@
 from parser.grammar import Grammar, GrammarToken
 from parser.parser import Parser
-from parser.parse_out import ParseResult
+from parser.parser_out import ParseResult
 from parser.automatonSLR1 import AutomatonSLR1
+from parser.tableLR import TableLR
 from typing import List
 
 
@@ -13,5 +14,7 @@ class RegexParser():
         a = AutomatonSLR1('regex', self.grammar)
         return a.ok
 
-    def parse(l: List[GrammarToken]) -> ParseResult:
-        return Parser('regex').parse(l)
+    def parse(self, l: List[GrammarToken]) -> ParseResult:
+        t = TableLR(self.grammar)
+        t.load('regex')
+        return Parser(self.grammar, t).parse(l)

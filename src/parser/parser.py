@@ -1,7 +1,7 @@
 from .grammar import Grammar, GrammarToken, EOF
 from .tableLR import TableLR, Action
 from typing import List
-from .parse_out import ParseResult
+from .parser_out import ParseResult
 
 
 class Parser:
