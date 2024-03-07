@@ -1,6 +1,5 @@
-from .grammar import Grammar, GrammarToken, GrammarProduction
+from .grammar import Grammar, GrammarToken, EOF
 from typing import List, Tuple, Dict
-from abc import ABC, abstractmethod
 from enum import Enum
 import json
 
@@ -110,7 +109,10 @@ class TableLR:
     def action_reduce(self, action: Action, ind: int) -> Tuple[Action, int]:
         production = self.grammar.get_production(ind)
 
-        for _ in range(len(production.body)):
+        for t in production.body:
+            if t == EOF():
+                continue
+
             self.stack_states.pop()
 
         self.stack_states.append(

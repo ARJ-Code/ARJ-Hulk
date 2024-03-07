@@ -49,6 +49,10 @@ class Parser:
         production = self.grammar.get_production(ind)
         productions_result.append(production)
 
-        for _ in range(len(production.body)):
+        for t in production.body:
+            if t == EOF():
+                continue
+
             stack_tokens.pop()
+            
         stack_tokens.append(production.head)

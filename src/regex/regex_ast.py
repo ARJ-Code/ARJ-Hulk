@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class MatchResult():
-    def __init__(self, value: str | None = None) -> None:
+    def __init__(self, value: str | None = None, error: str = '') -> None:
         self.value: str | None = value
         self.ok = value is not None
+        self.error: str = error
 
 
 class RegexAst(ABC):

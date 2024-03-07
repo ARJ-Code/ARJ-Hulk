@@ -44,5 +44,7 @@ class ParseResult:
 
                 index = ParseResult.__build_tree_node(
                     child, derivations, index + 1)
+        
+        node.children.reverse()
 
         return index
