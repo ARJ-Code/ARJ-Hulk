@@ -1,3 +1,8 @@
-from regex.regex_parser import build
+from regex.regex_lexer import lexer
 
-build()
+l = lexer('$\$e[34]\$').value
+
+for i in l:
+    print(i)
+
+print(l[1].is_special)
