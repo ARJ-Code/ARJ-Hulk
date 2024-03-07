@@ -19,7 +19,7 @@ class RegexGrammar():
         g.add_production('A', ['F A', 'F'])
         g.add_production('F', ['[ G ] I', 'H I'])
         g.add_production(
-            'I', ['?', '+', '*', '{ ch }', '{ ch , ch }', '{ , ch }', '{ ch , }', ''])
+            'I', ['?', '+', '*',  ''])
         g.add_production('H', ['ch', '( E )', '.'])
         g.add_production('G', ['^ J', 'J'])
         g.add_production('J', ['K J', 'K'])

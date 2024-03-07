@@ -15,7 +15,7 @@ class RegexAttributedGrammar():
         # g.add_production('A', ['F A', 'F'])
         # g.add_production('F', ['[ G ] I', 'H I'])
         # g.add_production(
-        #     'I', ['?', '+', '*', '{ ch }', '{ ch , ch }', '{ , ch }', '{ ch , }', ''])
+        #     'I', ['?', '+', '*', ''])
         # g.add_production('H', ['ch', '( E )', '.'])
         # g.add_production('G', ['^ J', 'J'])
         # g.add_production('J', ['K J', 'K'])
@@ -49,8 +49,8 @@ class RegexAttributedGrammar():
 
     def __inherited_attribute(self, node: DerivationTree) -> RegexResult[RegexAst]:
         production_ind = node.production_ind
-   
-        if production_ind == 0 or production_ind == 2 or production_ind == 4 or production_ind == 19 or production_ind == 21:
+    
+        if production_ind == 0 or production_ind == 2 or production_ind == 4 or production_ind == 15 or production_ind == 17:
             return self.__inherited_attribute(node.children[0])
 
         if production_ind == 1:
@@ -77,22 +77,22 @@ class RegexAttributedGrammar():
 
             return self.__synthesized_attribute(node.children[1], [param.value])
 
-        if production_ind == 15 or production_ind == 22:
+        if production_ind == 11 or production_ind == 18:
             return RegexResult[RegexAst](RegexChar(self.__terminal()))
 
-        if production_ind == 16:
+        if production_ind == 12:
             self.__terminal()
             result = self.__inherited_attribute(node.children[1])
             self.__terminal()
 
             return result
 
-        if production_ind == 17:
+        if production_ind == 13:
             self.__terminal()
 
             return RegexResult[RegexAst](RegexAnyChar())
 
-        if production_ind == 18:
+        if production_ind == 14:
             self.__terminal()
 
             result = self.__inherited_attribute(node.children[1])
@@ -101,10 +101,10 @@ class RegexAttributedGrammar():
 
             return RegexResult[RegexAst](RegexNot(result.value))
 
-        if production_ind == 20:
+        if production_ind == 16:
             return self.__binary(node, lambda x, y: RegexOr(x, y))
 
-        if production_ind == 23:
+        if production_ind == 19:
             x = self.__terminal()
             self.__terminal()
             y = self.__terminal()
@@ -123,7 +123,5 @@ class RegexAttributedGrammar():
         if production_ind == 9:
             self.__terminal()
             return RegexResult[RegexAst](RegexMany(param[0]))
-
-        # TODO:
-        if production_ind == 14:
+        if production_ind == 10:
             return RegexResult[RegexAst](param[0])
