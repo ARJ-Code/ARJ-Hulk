@@ -1,15 +1,6 @@
-from regex.regex import Regex, RegexBuilder
-from regex.regex_grammar import RegexGrammar
+from hulk_lexer.hulk_lexer import hulk_lexer
 
-b = RegexBuilder()
-# b.build()
+a = hulk_lexer.run('/***/')
 
-r = b.parse('"(\\\\[\\\\trn"]|[^"])*"')
-
-m=r.value.match('"ass\\\"s"')
-
-print(m.value)
-
-# a=[1,23,2]
-# a.reverse()
-# print(a)
+for i in a.tokens:
+    print(i.value)

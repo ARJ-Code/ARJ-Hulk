@@ -23,7 +23,7 @@ class RegexGrammar():
         g.add_production('H', ['ch', '( E )', '.'])
         g.add_production('G', ['^ J', 'J'])
         g.add_production('J', ['K J', 'K'])
-        g.add_production('K', ['ch', 'ch - ch'])
+        g.add_production('K', ['ch', 'ch - ch','( E )'])
 
         return g
 

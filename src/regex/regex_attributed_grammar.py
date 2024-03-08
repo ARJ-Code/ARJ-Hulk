@@ -49,7 +49,7 @@ class RegexAttributedGrammar():
 
     def __inherited_attribute(self, node: DerivationTree) -> RegexResult[RegexAst]:
         production_ind = node.production_ind
-    
+
         if production_ind == 0 or production_ind == 2 or production_ind == 4 or production_ind == 15 or production_ind == 17:
             return self.__inherited_attribute(node.children[0])
 
@@ -110,6 +110,13 @@ class RegexAttributedGrammar():
             y = self.__terminal()
 
             return RegexResult[RegexAst](RegexRank(x, y))
+
+        if production_ind == 20:
+            self.__terminal()
+            result = self.__inherited_attribute(node.children[1])
+            self.__terminal()
+
+            return result
 
     def __synthesized_attribute(self, node: DerivationTree, param: List[RegexAst]) -> RegexResult[RegexAst]:
         production_ind = node.production_ind
