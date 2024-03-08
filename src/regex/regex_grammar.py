@@ -1,4 +1,4 @@
-from parser.grammar import Grammar, GrammarToken
+from compiler_tools.grammar import Grammar, GrammarToken
 from .regex_core import RegexToken
 
 regex_special_tokens = ['?', '+', '*', '^',

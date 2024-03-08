@@ -1,8 +1,8 @@
-from parser.grammar import Grammar, GrammarToken
-from parser.parser import Parser
-from parser.parser_out import ParseResult
-from parser.automatonSLR1 import AutomatonSLR1
-from parser.tableLR import TableLR
+from compiler_tools.grammar import Grammar, GrammarToken
+from compiler_tools.parser import Parser
+from compiler_tools.parser_out import ParseResult
+from compiler_tools.automatonSLR1 import AutomatonSLR1
+from compiler_tools.tableLR import TableLR
 from typing import List
 
 

@@ -1,4 +1,4 @@
-from parser.parser_out import DerivationTree
+from compiler_tools.parser_out import DerivationTree
 from typing import List, Callable
 from .regex_ast import *
 from .regex_core import RegexToken, RegexResult

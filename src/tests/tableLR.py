@@ -1,6 +1,6 @@
-from parser.parser import Parser
-from parser.tableLR import TableLR
-from parser.grammar import Grammar
+from compiler_tools.parser import Parser
+from compiler_tools.tableLR import TableLR
+from compiler_tools.grammar import Grammar
 
 
 def test():
