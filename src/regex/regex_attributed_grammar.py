@@ -1,4 +1,5 @@
 from compiler_tools.parser_out import DerivationTree
+from compiler_tools.attributed_grammar import AttributedGrammar, AttributedRule
 from typing import List, Callable
 from .regex_ast import *
 from .regex_core import RegexToken, RegexResult
@@ -6,129 +7,44 @@ from .regex_core import RegexToken, RegexResult
 
 class RegexAttributedGrammar():
     def __init__(self) -> None:
-        self.non_terminals: List[RegexToken] = []
+        self.attributed_grammar: AttributedGrammar = AttributedGrammar(
+            self.__get_rules())
 
-        # g.add_main('S')
+    def __get_rules(self) -> List[AttributedRule]:
+        r0 = AttributedRule[RegexAst](lambda _, s: s[1])
 
-        # g.add_production('S', ['E'])
-        # g.add_production('E', ['A | E', 'A'])
-        # g.add_production('A', ['F A', 'F'])
-        # g.add_production('F', ['[ G ] I', 'H I'])
-        # g.add_production(
-        #     'I', ['?', '+', '*', ''])
-        # g.add_production('H', ['ch', '( E )', '.'])
-        # g.add_production('G', ['^ J', 'J'])
-        # g.add_production('J', ['K J', 'K'])
-        # g.add_production('K', ['ch', 'ch - ch'])
+        r1 = AttributedRule[RegexAst](lambda _, s: RegexOr(s[1], s[3]))
+        r2 = AttributedRule[RegexAst](lambda _, s: s[1])
 
-    def to_ast(self, derivation_tree: DerivationTree, non_terminals: List[RegexToken]) -> RegexResult[RegexAst]:
-        self.non_terminals = non_terminals
-        self.non_terminals.reverse()
+        r3 = AttributedRule[RegexAst](lambda _, s: RegexConcat(s[1], s[2]))
+        r4 = AttributedRule[RegexAst](lambda _, s: s[1])
 
-        return self.__inherited_attribute(derivation_tree)
+        r5 = AttributedRule[RegexAst](
+            lambda _, s: s[4], [(3, lambda _, s: s[2])])
+        r6 = AttributedRule[RegexAst](
+            lambda _, s: s[2], [(1, lambda _, s: s[1])])
 
-    def __terminal(self) -> str:
-        t = self.non_terminals[-1].value
-        self.non_terminals.pop()
+        r7 = AttributedRule[RegexAst](lambda h, _: RegexQuestion(h[0]))
+        r8 = AttributedRule[RegexAst](lambda h, _: RegexOneAndMany(h[0]))
+        r9 = AttributedRule[RegexAst](lambda h, _: RegexMany(h[0]))
+        r10 = AttributedRule[RegexAst](lambda h, _: h[0])
 
-        return t
+        r11 = AttributedRule[RegexAst](lambda _, s: RegexChar(s[1].value))
+        r12 = AttributedRule[RegexAst](lambda _, s: s[2])
+        r13 = AttributedRule[RegexAst](lambda _, s: RegexAnyChar())
 
-    def __binary(self, node: DerivationTree, binary_function: Callable[[RegexAst, RegexAst], RegexAst], op: bool = False) -> RegexResult[RegexAst]:
+        r14 = AttributedRule[RegexAst](lambda _, s: RegexNot(s[2]))
+        r15 = AttributedRule[RegexAst](lambda _, s: s[1])
 
-        left = self.__inherited_attribute(node.children[0])
-        if op:
-            self.__terminal()
-        right = self.__inherited_attribute(node.children[2 if op else 1])
+        r16 = AttributedRule[RegexAst](lambda _, s: RegexOr(s[1], s[2]))
+        r17 = AttributedRule[RegexAst](lambda _, s: s[1])
 
-        if not left.ok:
-            return left
-        if not right.ok:
-            return right
+        r18 = AttributedRule[RegexAst](lambda _, s: RegexChar(s[1].value))
+        r19 = AttributedRule[RegexAst](
+            lambda _, s: RegexRank(s[1].value, s[3].value))
+        r20 = AttributedRule[RegexAst](lambda _, s: s[2])
 
-        return RegexResult[RegexAst](binary_function(left.value, right.value))
+        return [r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20]
 
-    def __inherited_attribute(self, node: DerivationTree) -> RegexResult[RegexAst]:
-        production_ind = node.production_ind
-
-        if production_ind == 0 or production_ind == 2 or production_ind == 4 or production_ind == 15 or production_ind == 17:
-            return self.__inherited_attribute(node.children[0])
-
-        if production_ind == 1:
-            return self.__binary(node, lambda x, y: RegexOr(x, y), True)
-
-        if production_ind == 3:
-            return self.__binary(node, lambda x, y: RegexConcat(x, y))
-
-        if production_ind == 5:
-            self.__terminal()
-            param = self.__inherited_attribute(node.children[1])
-            self.__terminal()
-
-            if not param.ok:
-                return param
-
-            return self.__synthesized_attribute(node.children[3], [param.value])
-
-        if production_ind == 6:
-            param = self.__inherited_attribute(node.children[0])
-
-            if not param.ok:
-                return param
-
-            return self.__synthesized_attribute(node.children[1], [param.value])
-
-        if production_ind == 11 or production_ind == 18:
-            return RegexResult[RegexAst](RegexChar(self.__terminal()))
-
-        if production_ind == 12:
-            self.__terminal()
-            result = self.__inherited_attribute(node.children[1])
-            self.__terminal()
-
-            return result
-
-        if production_ind == 13:
-            self.__terminal()
-
-            return RegexResult[RegexAst](RegexAnyChar())
-
-        if production_ind == 14:
-            self.__terminal()
-
-            result = self.__inherited_attribute(node.children[1])
-            if not result.ok:
-                return result
-
-            return RegexResult[RegexAst](RegexNot(result.value))
-
-        if production_ind == 16:
-            return self.__binary(node, lambda x, y: RegexOr(x, y))
-
-        if production_ind == 19:
-            x = self.__terminal()
-            self.__terminal()
-            y = self.__terminal()
-
-            return RegexResult[RegexAst](RegexRank(x, y))
-
-        if production_ind == 20:
-            self.__terminal()
-            result = self.__inherited_attribute(node.children[1])
-            self.__terminal()
-
-            return result
-
-    def __synthesized_attribute(self, node: DerivationTree, param: List[RegexAst]) -> RegexResult[RegexAst]:
-        production_ind = node.production_ind
-
-        if production_ind == 7:
-            self.__terminal()
-            return RegexResult[RegexAst](RegexQuestion(param[0]))
-        if production_ind == 8:
-            self.__terminal()
-            return RegexResult[RegexAst](RegexOneAndMany(param[0]))
-        if production_ind == 9:
-            self.__terminal()
-            return RegexResult[RegexAst](RegexMany(param[0]))
-        if production_ind == 10:
-            return RegexResult[RegexAst](param[0])
+    def to_ast(self, derivation_tree: DerivationTree, tokens: List[RegexToken]) -> RegexAst:
+        return self.attributed_grammar.evaluate(derivation_tree, tokens)

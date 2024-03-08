@@ -1,8 +1,6 @@
-from regex.regex import RegexBuilder, Regex
+from regex.regex import builder, Regex
 from hulk_lexer.lexer import Lexer
 from hulk_core.hulk_constants import SPECIAL_TOKENS, RESERVED_WORDS
-
-builder = RegexBuilder()
 
 
 def get_special_token_pattern(token: str) -> str:

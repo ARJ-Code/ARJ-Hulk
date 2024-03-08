@@ -27,10 +27,8 @@ class RegexBuilder():
             return RegexResult[Regex](error=result.error)
 
         result = self.__parser(result.value)
-        if not result.ok:
-            return RegexResult[Regex](error=result.error)
 
-        return RegexResult[Regex](Regex(result.value))
+        return RegexResult[Regex](Regex(result))
 
     def build(self) -> bool:
         return self.parser.build()
@@ -46,3 +44,5 @@ class RegexBuilder():
             return RegexResult[RegexAst](error=result.error)
 
         return RegexAttributedGrammar().to_ast(result.derivation_tree, tokens)
+
+builder = RegexBuilder()
