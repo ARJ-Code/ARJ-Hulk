@@ -40,7 +40,7 @@ class GrammarProduction:
         return value
 
     def __hash__(self) -> int:
-        return hash(str(self))
+        return hash(str(self.ind))
 
 
 class Grammar:
