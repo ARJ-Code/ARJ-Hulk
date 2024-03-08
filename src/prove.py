@@ -4,7 +4,7 @@ from regex.regex_grammar import RegexGrammar
 b = RegexBuilder()
 # b.build()
 
-r = b.parse('"(\\\\[\\\\tr\\\\"]|[^"])*"')
+r = b.parse('"(\\\\[\\\\trn"]|[^"])*"')
 
 m=r.value.match('"ass\\\"s"')
 

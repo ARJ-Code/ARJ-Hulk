@@ -1,58 +1,58 @@
 from typing import Tuple, List, Callable
-from hulk_core.token import TokenType, Token
+from hulk_core.token import HulkToken
 from hulk_core.error import ParsingError
-from .analyzer import Analyzer, AnalyzerResult
+from regex.regex import Regex, RegexResult
 
 
 class LexerResult:
-    def __init__(self, tokens: List[Token], error: ParsingError | None = None) -> None:
-        self.ok = error is None
-        self.tokens = tokens
-        self.error = error
+    def __init__(self, tokens: List[HulkToken] = [], error: ParsingError | None = None) -> None:
+        self.ok: bool = error is None
+        self.tokens: List[HulkToken] = tokens
+        self.error: ParsingError | None = error
 
 
 class Lexer:
-    def __init__(self, *token_analyzers: Tuple[TokenType], ignore_analyzer: Analyzer) -> None:
-        if len(token_analyzers) == 1 and isinstance(token_analyzers[0], list):
-            self.token_analyzers: List[Tuple[TokenType,
-                                             Analyzer]] = token_analyzers[0]
+    def __init__(self, *tokens_regex: Tuple[str, Regex], ignore_regex: Regex) -> None:
+        if len(tokens_regex) == 1 and isinstance(tokens_regex[0], list):
+            self.tokens_regex: List[Tuple[str, Regex]] = tokens_regex[0]
         else:
-            self.token_analyzers: List[Tuple[TokenType, Analyzer]] = list(
-                token_analyzers)
+            self.tokens_regex: List[Tuple[str, Regex]] = list(
+                tokens_regex)
 
-        self.ignore_analyzer: Analyzer = ignore_analyzer
+        self.ignore_regex: Regex = ignore_regex
 
     def run(self, text: str) -> LexerResult:
-        tokens: List[Token] = []
+        tokens: List[HulkToken] = []
+        ignore: str = 'IGNORE'
 
         index = 0
         row = 0
         col = 0
 
         while index != len(text):
-            result: AnalyzerResult | None = None
-            token_type: TokenType | None = None
+            result: RegexResult | None = None
+            token_type: str | None = None
 
-            for t, a in self.token_analyzers+[(None, self.ignore_analyzer)]:
-                if a.match(index, text):
-                    current_result = a.run(index, row, col, text)
-
-                    if current_result.ok:
-                        if result is None or result.index < current_result.index:
-                            result = current_result
-                            token_type = t
-                    else:
-                        return LexerResult([], result.error)
+            for t, r in self.tokens_regex+[(ignore, self.ignore_regex)]:
+                current_result = r.match(text, index)
+                if current_result.ok and len(current_result.value) != 0:
+                    if result is None or len(current_result.value) > len(result.value):
+                        result = current_result
+                        token_type = t
 
             if result is None:
-                return LexerResult([], ParsingError('Invalid character', row, col))
+                return LexerResult(error=ParsingError('Invalid character', row, col))
 
-            row = result.row
-            col = result.col
-            index = result.index
+            for c in result.value:
+                if c == '\n':
+                    row += 1
+                    col = 0
+                else:
+                    col += 1
+            index += len(result.value)
 
-            if not result.empty and token_type is not None:
+            if token_type != ignore:
                 tokens.append(
-                    Token(result.row, result.col, result.token, token_type))
+                    HulkToken(row, col, result.value, token_type))
 
         return LexerResult(tokens)
