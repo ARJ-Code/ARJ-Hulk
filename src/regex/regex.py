@@ -1,48 +1,40 @@
-from .regex_grammar import RegexGrammar
-from .regex_parser import RegexParser
 from .regex_core import RegexResult, RegexToken
 from .regex_lexer import lexer
 from typing import List
 from .regex_ast import RegexAst, MatchResult
-from .regex_attributed_grammar import RegexAttributedGrammar
+from .regex_attributed_grammar import regex_attributed_grammar
+from .regex_grammar import regex_to_grammar
+from .regex_parser import regex_parser
 
 
 class Regex():
-    def __init__(self, ast: RegexAst) -> None:
-        self.ast: RegexAst = ast
+    def __init__(self, text: str) -> None:
+        result = self.__build(text)
+
+        self.error: str = result.error
+        self.ok: bool = result.ok
+        self.__ast: RegexAst | None = result.value
 
     def match(self, text: str, index: int = 0) -> MatchResult:
-        return self.ast.match(text, index)
+        if self.__ast is None:
+            return MatchResult(error=f"Invalid parse: {self.error}")
 
+        return self.__ast.match(text, index)
 
-class RegexBuilder():
-    def __init__(self) -> None:
-        self.grammar: RegexGrammar = RegexGrammar()
-        self.parser: RegexParser = RegexParser(self.grammar.grammar)
-        self.error: str = ''
-
-    def parse(self, text: str) -> RegexResult[Regex]:
+    def __build(self, text: str) -> RegexResult[RegexAst]:
         result = self.__lexer(text)
         if not result.ok:
-            return RegexResult[Regex](error=result.error)
+            return RegexResult[RegexResult](error=result.error)
 
-        result = self.__parser(result.value)
-
-        return RegexResult[Regex](Regex(result))
-
-    def build(self) -> bool:
-        return self.parser.build()
+        return self.__parser(result.value)
 
     def __lexer(self, text) -> RegexResult[List[RegexToken]]:
         return lexer(text)
 
     def __parser(self, tokens: List[RegexToken]) -> RegexResult[RegexAst]:
-        result = self.parser.parse(
-            [self.grammar.regex_to_grammar(t) for t in tokens])
+        result = regex_parser([regex_to_grammar(t) for t in tokens])
 
         if not result.ok:
             return RegexResult[RegexAst](error=result.error)
 
-        return RegexAttributedGrammar().to_ast(result.derivation_tree, tokens)
-
-builder = RegexBuilder()
+        return RegexResult[RegexAst](regex_attributed_grammar.evaluate(result.derivation_tree, tokens))

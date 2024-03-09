@@ -9,7 +9,6 @@ class RegexResult(Generic[T]):
         self.ok: bool = value is not None
         self.error: str = error
 
-
 class RegexToken():
     def __init__(self, value: str, pos: int, is_special: bool = False) -> None:
         self.value: str = value
