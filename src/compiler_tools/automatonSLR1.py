@@ -1,4 +1,4 @@
-from parser.automatonLR import Node
+from compiler_tools.automatonLR import Node
 from .grammar import GrammarProduction,  Grammar, EOF
 from .tableLR import NodeAction, Action
 from .automatonLR import AutomatonLR

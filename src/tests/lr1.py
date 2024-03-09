@@ -1,5 +1,5 @@
-from parser.automatonLR1 import AutomatonLR1
-from parser.grammar import Grammar
+from compiler_tools.automatonLR1 import AutomatonLR1
+from compiler_tools.grammar import Grammar
 
 
 def test():
