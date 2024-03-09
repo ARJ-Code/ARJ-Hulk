@@ -3,7 +3,8 @@ import importlib
 test_modules = {
     'slr1': 'test',
     'lr1': 'test',
-    'tableLR': 'test'
+    'tableLR': 'test',
+    'regex': 'test'
 }
 
 for module_name, method_name in test_modules.items():

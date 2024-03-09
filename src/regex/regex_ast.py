@@ -68,7 +68,7 @@ class RegexMany(RegexAst):
 
     def match(self, text: str, index: int = 0) -> MatchResult:
         q = ''
-      
+
         while index != len(text):
             result = self.body.match(text, index)
             if not result.ok:
@@ -76,7 +76,7 @@ class RegexMany(RegexAst):
 
             q += result.value
             index += len(result.value)
-       
+
         return MatchResult(q)
 
 
