@@ -5,7 +5,8 @@ test_modules = [
     'lr1',
     'tableLR',
     'regex',
-    'lexer'
+    'lexer',
+    'automaton',
 ]
 
 for module_name in test_modules:

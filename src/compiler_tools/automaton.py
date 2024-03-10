@@ -7,7 +7,7 @@ class State:
         self.ind = ind
         self.is_final: bool = is_final
         self.transitions: Dict[str, 'State'] = {}
-        self.eof_transitions: Set['State'] = {}
+        self.eof_transitions: Set['State'] = set()
 
     def add_transition(self, symbol: str, state: 'State') -> None:
         self.transitions[symbol] = state
@@ -15,7 +15,7 @@ class State:
     def add_eof_transition(self, state: 'State') -> None:
         self.eof_transitions.add(state)
 
-    def goto(self, symbol: str) -> 'State' | None:
+    def goto(self, symbol: str) -> 'State | None':
         if symbol in self.transitions:
             return self.transitions[symbol]
 
@@ -100,8 +100,9 @@ class Automaton:
         new_automaton = Automaton()
         new_nodes: List[Tuple[State, Set[State]]] = []
 
-        new_nodes.append((new_automaton.initial_state,
-                         self.__goto_eof({self.initial_state})))
+        initial = set([self.initial_state])
+        self.__goto_eof(initial)
+        new_nodes.append((new_automaton.initial_state, initial))
 
         q = Queue()
         q.put(new_nodes[0])

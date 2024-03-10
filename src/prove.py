@@ -1,10 +1,6 @@
-# from hulk_lexer.hulk_lexer import hulk_lexer
+from compiler_tools.automaton import Automaton,pattern_to_automaton
 
-# a = hulk_lexer.run('a')
+a=pattern_to_automaton('a')
+b=pattern_to_automaton('b')
 
-# for i in a.tokens:
-#     print(i.value)
-
-from regex.regex import RegexBuilder
-
-a=RegexBuilder().parse('a')
+a.to_dfa()
