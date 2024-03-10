@@ -79,12 +79,14 @@ class Automaton:
         return False
 
     def join(self, automaton: 'Automaton'):
+        automaton = automaton.copy()
         self.add_eof_transition(self.initial_state, automaton.initial_state)
 
         for state in automaton.states:
             self.get_new_state(state)
 
     def concat(self, automaton: 'Automaton'):
+        automaton = automaton.copy()
         for state in self.final_states:
             self.add_eof_transition(state, automaton.initial_state)
             state.is_final = False
@@ -95,6 +97,25 @@ class Automaton:
     def complement(self):
         for state in self.states:
             state.is_final = not state.is_final
+
+    def copy(self) -> 'Automaton':
+        new_automaton = Automaton()
+
+        for _ in range(len(self.states)-1):
+            new_automaton.get_new_state()
+
+        for state in self.states:
+            for eof_state in state.eof_transitions:
+                new_automaton.add_eof_transition(
+                    new_automaton.states[state.ind], new_automaton.states[eof_state.ind])
+
+            for symbol, symbol_state in state.transitions.items():
+                new_automaton.add_transition(
+                    new_automaton.states[state.ind], symbol, new_automaton.states[symbol_state.ind])
+
+            new_automaton.states[state.ind].is_final = state.is_final
+
+        return new_automaton
 
     def to_dfa(self) -> 'Automaton':
         new_automaton = Automaton()
