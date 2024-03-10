@@ -1,4 +1,5 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractproperty
+from compiler_tools.automaton import Automaton, pattern_to_automaton
 
 
 class MatchResult():
@@ -9,8 +10,8 @@ class MatchResult():
 
 
 class RegexAst(ABC):
-    @abstractmethod
-    def match(self, text: str, index: int = 0) -> MatchResult:
+    @abstractproperty
+    def automaton(self) -> Automaton:
         pass
 
 
@@ -20,12 +21,9 @@ class RegexOr(RegexAst):
         self.left: RegexAst = left
         self.right: RegexAst = right
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        result = self.left.match(text, index)
-        if result.ok:
-            return result
-
-        return self.right.match(text, index)
+    @property
+    def automaton(self) -> Automaton:
+        return self.left.automaton.join(self.right.automaton)
 
 
 class RegexConcat(RegexAst):
@@ -34,16 +32,9 @@ class RegexConcat(RegexAst):
         self.left: RegexAst = left
         self.right: RegexAst = right
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        left = self.left.match(text, index)
-        if not left.ok:
-            return left
-
-        right = self.right.match(text, index+len(left.value))
-        if not right.ok:
-            return right
-
-        return MatchResult(left.value+right.value)
+    @property
+    def automaton(self) -> Automaton:
+        return self.left.automaton.concat(self.right.automaton)
 
 
 class RegexQuestion(RegexAst):
@@ -52,12 +43,9 @@ class RegexQuestion(RegexAst):
 
         self.body: RegexAst = body
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        result = self.body.match(text, index)
-        if result.ok:
-            return result
-
-        return MatchResult('')
+    @property
+    def automaton(self) -> Automaton:
+        return pattern_to_automaton('').join(self.body.automaton)
 
 
 class RegexMany(RegexAst):
@@ -66,18 +54,9 @@ class RegexMany(RegexAst):
 
         self.body: RegexAst = body
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        q = ''
-
-        while index != len(text):
-            result = self.body.match(text, index)
-            if not result.ok:
-                break
-
-            q += result.value
-            index += len(result.value)
-
-        return MatchResult(q)
+    @property
+    def automaton(self) -> Automaton:
+        return self.body.automaton.many()
 
 
 class RegexOneAndMany(RegexAst):
@@ -86,8 +65,9 @@ class RegexOneAndMany(RegexAst):
 
         self.body: RegexAst = body
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        return RegexConcat(self.body, RegexMany(self.body)).match(text, index)
+    @property
+    def automaton(self) -> Automaton:
+        return self.body.automaton.concat(self.body.automaton.many())
 
 
 class RegexChar(RegexAst):
@@ -96,19 +76,20 @@ class RegexChar(RegexAst):
 
         self.char: str = char
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        if index < len(text) and text[index] == self.char:
-            return MatchResult(self.char)
-
-        return MatchResult(error='Invalid character')
+    @property
+    def automaton(self) -> Automaton:
+        return pattern_to_automaton(self.char)
 
 
 class RegexAnyChar(RegexAst):
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        if index < len(text) and text[index] == self.char:
-            return MatchResult(text[index])
+    @property
+    def automaton(self):
+        a = Automaton()
+        new_state = a.get_new_state()
+        a.add_complement(a.initial_state, new_state)
+        a.add_final_state(new_state)
 
-        return MatchResult(error='Invalid character')
+        return a
 
 
 class RegexRank(RegexAst):
@@ -118,11 +99,23 @@ class RegexRank(RegexAst):
         self.left: str = left
         self.right: str = right
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        if index < len(text) and ord(self.left) <= ord(text[index]) and ord(text[index]) <= ord(self.right):
-            return MatchResult(text[index])
+    @property
+    def automaton(self):
+        ind = ord(self.left)
 
-        return MatchResult(error='Invalid character')
+        r = Automaton()
+
+        while ind <= ord(self.right):
+            r.join(pattern_to_automaton(chr(ind)))
+            ind += 1
+
+        return r
+
+    # def match(self, text: str, index: int = 0) -> MatchResult:
+    #     if index < len(text) and ord(self.left) <= ord(text[index]) and ord(text[index]) <= ord(self.right):
+    #         return MatchResult(text[index])
+
+    #     return MatchResult(error='Invalid character')
 
 
 class RegexNot(RegexAst):
@@ -131,8 +124,18 @@ class RegexNot(RegexAst):
 
         self.body: RegexAst = body
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        if index < len(text) and not self.body.match(text, index).ok:
-            return MatchResult(text[index])
+    @property
+    def automaton(self):
+        dfa = self.body.automaton.to_dfa()
+        new_state = dfa.get_new_state()
+        dfa.add_final_state(new_state)
+        dfa.add_complement(dfa.initial_state, new_state)
 
-        return MatchResult(error='Invalid character')
+        for s in dfa.states:
+            if s == new_state:
+                continue
+
+            if s.is_final:
+                s.is_final = False
+
+        return dfa

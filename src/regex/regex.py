@@ -1,10 +1,11 @@
 from .regex_core import RegexResult, RegexToken
 from .regex_lexer import lexer
 from typing import List
-from .regex_ast import RegexAst, MatchResult
+from .regex_ast import RegexAst
 from .regex_attributed_grammar import regex_attributed_grammar
 from .regex_grammar import regex_to_grammar
 from .regex_parser import regex_parser
+from compiler_tools.automaton import Automaton
 
 
 class Regex():
@@ -13,13 +14,13 @@ class Regex():
 
         self.error: str = result.error
         self.ok: bool = result.ok
-        self.__ast: RegexAst | None = result.value
+        self.automaton: Automaton | None = None if not result.ok else result.value.automaton
 
-    def match(self, text: str, index: int = 0) -> MatchResult:
-        if self.__ast is None:
-            return MatchResult(error=f"Invalid parse: {self.error}")
+    def match(self, text: str) -> bool:
+        if self.automaton is None:
+            return False
 
-        return self.__ast.match(text, index)
+        return self.automaton.match(text)
 
     def __build(self, text: str) -> RegexResult[RegexAst]:
         result = self.__lexer(text)

@@ -1,8 +1,5 @@
-from compiler_tools.automaton import Automaton,pattern_to_automaton
+import re
 
-a=pattern_to_automaton('a')
-b=pattern_to_automaton('b')
+a=re.compile('/\/\*[\s\S]*?\*\//')
 
-a.to_dfa()
-
-a.concat(b)
+print(a.match('/*aaa*/'))
