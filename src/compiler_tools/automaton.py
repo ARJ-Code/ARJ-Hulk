@@ -3,7 +3,8 @@ from queue import Queue
 
 
 class State:
-    def __init__(self, is_final=False) -> None:
+    def __init__(self, ind: int, is_final=False) -> None:
+        self.ind = ind
         self.is_final: bool = is_final
         self.transitions: Dict[str, 'State'] = {}
         self.eof_transitions: Set['State'] = {}
@@ -20,11 +21,23 @@ class State:
 
         return None
 
+    def __str__(self) -> str:
+        return f'q{self.ind}'
+
+    def __hash__(self) -> int:
+        return self.ind
+
+    def __eq__(self, o: object) -> bool:
+        return self.ind == o.ind
+
 
 class Automaton:
-    def __init__(self) -> None:
-        self.initial_state: State = State()
-        self.final_states: Set[State] = set()
+    def __init__(self, initial_state=None) -> None:
+        self.initial_state: State = initial_state if initial_state is not None else State(
+            0)
+        self.initial_state.ind = 0
+
+        self.states: List[State] = [self.initial_state]
         self.symbols: Set[str] = set()
 
     def add_transition(self, from_state: State, symbol: str, to_state: State) -> None:
@@ -36,7 +49,17 @@ class Automaton:
 
     def add_final_state(self, state: State) -> None:
         state.is_final = True
-        self.final_states.add(state)
+
+    def get_new_state(self, state=None) -> State:
+        new_state = state if state is not None else State(len(self.states))
+        new_state.ind = len(self.states)
+
+        self.states.append(new_state)
+        return new_state
+
+    @property
+    def final_states(self) -> List[State]:
+        return [state for state in self.states if state.is_final]
 
     def match(self, string: str) -> bool:
         return self.__match(self.initial_state, string, 0)
@@ -54,6 +77,24 @@ class Automaton:
                 return True
 
         return False
+
+    def join(self, automaton: 'Automaton'):
+        self.add_eof_transition(self.initial_state, automaton.initial_state)
+
+        for state in automaton.states:
+            self.get_new_state(state)
+
+    def concat(self, automaton: 'Automaton'):
+        for state in self.final_states:
+            self.add_eof_transition(state, automaton.initial_state)
+            state.is_final = False
+
+        for state in automaton.states:
+            self.get_new_state(state)
+
+    def complement(self):
+        for state in self.states:
+            state.is_final = not state.is_final
 
     def to_dfa(self) -> 'Automaton':
         new_automaton = Automaton()
@@ -77,7 +118,7 @@ class Automaton:
                 new_node = self.__get_node(new_nodes, goto)
 
                 if new_node is None:
-                    new_node = (State(), goto)
+                    new_node = (new_automaton.get_new_state(), goto)
 
                     if any(state.is_final for state in goto):
                         new_automaton.add_final_state(new_node[0])
@@ -124,25 +165,16 @@ class Automaton:
         return goto
 
 
-# def pattern_to_automaton(pattern: str) -> Automaton:
-#     automaton = Automaton()
+def pattern_to_automaton(pattern: str) -> Automaton:
+    automaton = Automaton()
 
-#     state = automaton.initial_state
+    state = automaton.initial_state
 
-#     for symbol in pattern:
-#         new_state = State()
-#         automaton.add_transition(state, symbol, new_state)
-#         state = new_state
+    for symbol in pattern:
+        new_state = automaton.get_new_state()
+        automaton.add_transition(state, symbol, new_state)
+        state = new_state
 
-#     automaton.add_final_state(state)
+    automaton.add_final_state(state)
 
-#     return automaton
-
-
-# def join_automatons(automatons: List[Automaton]) -> Automaton:
-#     new_automaton = Automaton()
-
-#     for automaton in automatons:
-#         new_automaton.add_final_state(automaton.initial_state)
-
-#     return new_automaton
+    return automaton
