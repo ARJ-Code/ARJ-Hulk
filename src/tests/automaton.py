@@ -28,18 +28,18 @@ def test():
     a.many()
     a = a.to_dfa()
 
+    a.build('test_a')
+
     assert a.match('acacbc')
     assert a.match('')
 
-    w=pattern_to_automaton('w')
-    q=pattern_to_automaton('q')
+    w = pattern_to_automaton('w')
+    q = pattern_to_automaton('q')
 
     w.join(q)
 
     w.many()
 
-    w=w.to_dfa()
+    w = w.to_dfa()
 
     assert w.match('wqww')
-
-    

@@ -1,8 +1,5 @@
-from compiler_tools.parser_out import DerivationTree
 from compiler_tools.attributed_grammar import AttributedGrammar, AttributedRule
-from typing import List
 from .regex_ast import *
-from .regex_core import RegexToken
 
 
 r0 = AttributedRule[RegexAst](lambda _, s: s[1])
@@ -36,7 +33,6 @@ r17 = AttributedRule[RegexAst](lambda _, s: s[1])
 r18 = AttributedRule[RegexAst](lambda _, s: RegexChar(s[1].value))
 r19 = AttributedRule[RegexAst](
     lambda _, s: RegexRank(s[1].value, s[3].value))
-r20 = AttributedRule[RegexAst](lambda _, s: s[2])
 
 regex_attributed_grammar = AttributedGrammar(
-    [r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20])
+    [r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19])

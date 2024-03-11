@@ -1,4 +1,6 @@
-from hulk_lexer.hulk_lexer import hulk_lexer
+from hulk_lexer.hulk_lexer import load
+
+hulk_lexer = load()
 
 code = input()
 r = hulk_lexer.run(code)

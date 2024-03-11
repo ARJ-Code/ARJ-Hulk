@@ -1,24 +1,13 @@
-from regex.regex import Regex
+from hulk_lexer.hulk_lexer import *
+from compiler_tools.automaton import Automaton, pattern_to_automaton
 
-r9 = Regex('function')
+build()
 
+# a = pattern_to_automaton('asd')
 
-def match(text: str, index: int, r: Regex):
-        current_state = r.automaton.initial_state
-        result = ''
+# print(a.match('asd'))
+# a.build('q')
+# b=Automaton()
+# b.load('q')
 
-        while index != len(text):
-            current_state = current_state.goto(text[index])
-
-            result += text[index]
-            index += 1
-
-            if current_state is None:
-                return result, False
-            if current_state.is_final:
-                return result, len(result) != 0
-
-        return result, False
-
-print(match('foreach',0,r9))
-  
+# print(a.match('asd'))

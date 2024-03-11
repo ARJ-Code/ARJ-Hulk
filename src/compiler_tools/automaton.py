@@ -1,5 +1,6 @@
 from typing import Dict, Set, List, Tuple
 from queue import Queue
+import json
 
 
 class State:
@@ -33,6 +34,26 @@ class State:
 
     def __eq__(self, o: object) -> bool:
         return self.ind == o.ind
+
+    def to_json(self):
+        result = {}
+
+        for k, v in self.transitions.items():
+            if not k in result:
+                result[k] = []
+            result[k].append(v.ind)
+
+        result["eof"] = []
+
+        for v in self.eof_transitions:
+            result['eof'].append(v.ind)
+
+        if self.complement_state is not None:
+            result["default"] = self.complement_state.ind
+
+        result["is_final"] = self.is_final
+
+        return result
 
 
 class Automaton:
@@ -241,6 +262,48 @@ class Automaton:
         self.__goto_eof(goto)
 
         return goto
+
+    def load(self, name: str):
+        cache = json.load(open(f"cache/{name}_automaton.json"))
+        self.from_json(cache)
+
+    def build(self, name: str):
+        cache = self.to_json()
+        json.dump(cache, open(f"cache/{name}_automaton.json", 'w'))
+
+    def to_json(self):
+        result = []
+
+        for v in self.states:
+            result.append(v.to_json())
+
+        return result
+
+    def from_json(self, json_dict):
+        self.states.clear()
+
+        for _ in range(len(json_dict)):
+            self.get_new_state()
+
+        for i, s in enumerate(json_dict):
+            for k, v in s.items():
+                if k == "eok":
+                    for n in v:
+                        self.states[i].add_eof_transition(self.states[n])
+                    continue
+
+                if k == "default":
+                    self.states[i].complement_state = self.states[v]
+                    continue
+
+                if k == 'is_final':
+                    self.states[i].is_final = v
+                    continue
+
+                for n in v:
+                    self.states[i].add_transition(k, self.states[n])
+
+        self.initial_state = self.states[0]
 
 
 def pattern_to_automaton(pattern: str) -> Automaton:

@@ -1,8 +1,9 @@
-from hulk_lexer.hulk_lexer import hulk_lexer
+from hulk_lexer.hulk_lexer import load
 from hulk_core.hulk_constants import *
 
 
 def test():
+    hulk_lexer = load()
     l1 = hulk_lexer.run('a+we+_we')
     assert l1.ok
     assert l1.tokens[0].value == 'a'

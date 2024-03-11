@@ -15,7 +15,8 @@ regex_grammar.add_production('I', ['?', '+', '*',  ''])
 regex_grammar.add_production('H', ['ch', '( E )', '.'])
 regex_grammar.add_production('G', ['^ J', 'J'])
 regex_grammar.add_production('J', ['K J', 'K'])
-regex_grammar.add_production('K', ['ch', 'ch - ch', '( E )'])
+regex_grammar.add_production('K', ['ch', 'ch - ch'])
+
 
 def regex_to_grammar(token: RegexToken) -> GrammarToken:
     if token.is_special:

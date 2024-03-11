@@ -1,7 +1,11 @@
-from typing import Tuple, List, Callable
+from typing import Tuple, List
 from hulk_core.token import HulkToken
 from hulk_core.error import ParsingError
-from regex.regex import Regex, RegexResult
+from regex.regex import Regex
+from compiler_tools.automaton import Automaton
+import json
+
+IGNORE: str = 'IGNORE'
 
 
 class LexerResult:
@@ -12,14 +16,30 @@ class LexerResult:
 
 
 class Lexer:
-    def __init__(self, *tokens_regex: Tuple[str, Regex], ignore_regex: Regex) -> None:
-        if len(tokens_regex) == 1 and isinstance(tokens_regex[0], list):
-            self.tokens_regex: List[Tuple[str, Regex]] = tokens_regex[0]
-        else:
-            self.tokens_regex: List[Tuple[str, Regex]] = list(
-                tokens_regex)
+    def __init__(self, tokens_regex: List[List[Tuple[str, Regex]]] = [], ignore_regex: Regex = None) -> None:
+        self.ignore_regex: Regex | None = ignore_regex
+        self.tokens_regex: List[List[Tuple[str, Regex]]] = tokens_regex
 
-        self.ignore_regex: Regex = ignore_regex
+    @staticmethod
+    def build(name: str, token_regex: List[Tuple[str, Regex]], ignore_regex=Regex):
+        result = [(IGNORE, ignore_regex.automaton.to_json())]
+
+        for t, r in token_regex:
+            result.append((t, r.automaton.to_json()))
+
+        json.dump(result, open(f'cache/{name}_lexer.json', 'w'))
+
+    def load(self, name: str):
+        cache = json.load(open(f'cache/{name}_lexer.json'))
+        for t, v in cache:
+            a = Automaton()
+            a.from_json(v)
+
+            if t == IGNORE:
+                self.ignore_regex = Regex(automaton=a)
+                continue
+
+            self.tokens_regex.append((t, Regex(automaton=a)))
 
     def match(self, text: str, index: int, r: Regex) -> Tuple[str, bool]:
         current_state = r.automaton.initial_state
@@ -44,7 +64,6 @@ class Lexer:
 
     def run(self, text: str) -> LexerResult:
         tokens: List[HulkToken] = []
-        ignore: str = 'IGNORE'
 
         index = 0
         row = 0
@@ -54,7 +73,10 @@ class Lexer:
             result: str = ''
             token_type: str | None = None
 
-            for t, r in self.tokens_regex+[(ignore, self.ignore_regex)]:
+            ignore = [] if self.ignore_regex is None else [(
+                IGNORE, self.ignore_regex)]
+
+            for t, r in (self.tokens_regex+ignore):
                 current_result, ok = self.match(text, index, r)
 
                 if ok and len(current_result) > len(result):
@@ -72,7 +94,7 @@ class Lexer:
                     col += 1
             index += len(result)
 
-            if token_type != ignore:
+            if token_type != IGNORE:
                 tokens.append(
                     HulkToken(row, col, result, token_type))
 
