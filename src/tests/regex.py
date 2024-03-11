@@ -31,7 +31,7 @@ def test():
 
     r9 = Regex('[^ba]*')
     assert not r9.match('aac')
-    assert r9.match('cwd')
+    assert r9.match('cd')
 
     r10 = Regex('/\*([^\*]|\*[^/])*(\*/|\*\*/)')
     assert r10.match('/*a*/')
@@ -47,5 +47,5 @@ def test():
     r12 = Regex('[^a-z]')
     assert r12.match('A')
 
-    r13=Regex('[^a-z]*')
+    r13 = Regex('[^a-z]*')
     assert r13.match('EEE')

@@ -128,7 +128,7 @@ class AutomatonLR(ABC, Generic[T]):
 
     def _get_goto_node(self, items: Set[T]) -> Tuple[Node, bool]:
         for node in self.nodes:
-            if all(item in node.items for item in items):
+            if all(item in node.items for item in items) and len(node.items) == len(items):
                 return node, False
 
         return self._get_node(items), True

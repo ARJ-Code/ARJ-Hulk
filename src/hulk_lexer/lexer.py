@@ -21,6 +21,27 @@ class Lexer:
 
         self.ignore_regex: Regex = ignore_regex
 
+    def match(self, text: str, index: int, r: Regex) -> Tuple[str, bool]:
+        current_state = r.automaton.initial_state
+        result = ''
+        is_final = False
+
+        while True:
+            is_final = current_state.is_final
+
+            if index == len(text):
+                break
+
+            current_state = current_state.goto(text[index])
+
+            if current_state is None:
+                break
+
+            result += text[index]
+            index += 1
+
+        return result, len(result) != 0 and is_final
+
     def run(self, text: str) -> LexerResult:
         tokens: List[HulkToken] = []
         ignore: str = 'IGNORE'
@@ -30,29 +51,29 @@ class Lexer:
         col = 0
 
         while index != len(text):
-            result: RegexResult | None = None
+            result: str = ''
             token_type: str | None = None
 
             for t, r in self.tokens_regex+[(ignore, self.ignore_regex)]:
-                current_result = r.match(text, index)
-                if current_result.ok and len(current_result.value) != 0:
-                    if result is None or len(current_result.value) > len(result.value):
-                        result = current_result
-                        token_type = t
+                current_result, ok = self.match(text, index, r)
 
-            if result is None:
+                if ok and len(current_result) > len(result):
+                    result = current_result
+                    token_type = t
+
+            if len(result) == 0:
                 return LexerResult(error=ParsingError('Invalid character', row, col))
 
-            for c in result.value:
+            for c in result:
                 if c == '\n':
                     row += 1
                     col = 0
                 else:
                     col += 1
-            index += len(result.value)
+            index += len(result)
 
             if token_type != ignore:
                 tokens.append(
-                    HulkToken(row, col, result.value, token_type))
+                    HulkToken(row, col, result, token_type))
 
         return LexerResult(tokens)

@@ -14,7 +14,7 @@ class Regex():
 
         self.error: str = result.error
         self.ok: bool = result.ok
-        self.automaton: Automaton | None = None if not result.ok else result.value.automaton
+        self.automaton: Automaton | None = None if not result.ok else result.value.automaton.to_dfa()
 
     def match(self, text: str) -> bool:
         if self.automaton is None:

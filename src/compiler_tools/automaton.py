@@ -118,7 +118,7 @@ class Automaton:
         return self
 
     def copy(self) -> 'Automaton':
-        new_automaton = Automaton()
+        new_automaton = Automaton(True)
 
         for _ in range(len(self.states)):
             new_automaton.get_new_state()
@@ -151,9 +151,6 @@ class Automaton:
         new_automaton.initial_state.is_final = any(
             state for state in initial if state.is_final)
 
-        # new_automaton.complement_state.is_final = any(
-        #     state for state in self.states if state.complement_state is not None and state.complement_state.is_final)
-
         q: Queue[Tuple[Automaton, Set[State]]] = Queue()
         q.put(new_nodes[0])
 
@@ -168,30 +165,53 @@ class Automaton:
             for symbol in symbols:
                 goto = self.__goto_symbol(states, symbol)
 
-                if len(goto) == 0:
-                    continue
+                self.__next_goto(goto, new_automaton, node,
+                                 new_nodes, q, symbol)
 
-                new_node = self.__get_node(new_nodes, goto)
-
-                if new_node is None:
-                    new_node = new_automaton.get_new_state()
-
-                    if any(state.is_final for state in goto):
-                        new_automaton.add_final_state(new_node)
-
-                    new_nodes.append((new_node, goto))
-                    q.put((new_node, goto))
-
-                self.add_transition(node, symbol, new_node)
+            goto = self.__goto_complement(states)
+            self.__next_goto(goto, new_automaton, node, new_nodes, q)
 
         return new_automaton
 
+    def __next_goto(self, goto: Set[State], new_automaton: 'Automaton', node: State, new_nodes: List[Tuple[State, Set[State]]], q: Queue, symbol: str | None = None):
+        if len(goto) == 0:
+            return
+
+        new_node = self.__get_node(new_nodes, goto)
+
+        if new_node is None:
+            new_node = new_automaton.get_new_state()
+
+            if any(state.is_final for state in goto):
+                new_automaton.add_final_state(new_node)
+
+            new_nodes.append((new_node, goto))
+            q.put((new_node, goto))
+
+        if symbol is not None:
+            new_automaton.add_transition(node, symbol, new_node)
+        else:
+            new_automaton.add_complement(node, new_node)
+
     def __get_node(self, nodes: List[Tuple[State, Set[State]]], states: Set[State]) -> State | None:
         for node, node_states in nodes:
-            if all(state in node_states for state in states):
+            if all(state in node_states for state in states) and len(node_states) == len(states):
                 return node
 
         return None
+
+    def __goto_complement(self, states: Set[State]) -> Set[State]:
+        goto = set([])
+
+        for state in states:
+            if state.complement_state is None:
+                continue
+
+            goto.add(state.complement_state)
+
+        self.__goto_eof(goto)
+
+        return goto
 
     def __goto_eof(self, states: Set[State]):
         change = True
