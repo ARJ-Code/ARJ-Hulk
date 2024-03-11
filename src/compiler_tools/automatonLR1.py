@@ -9,6 +9,9 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
     def __init__(self, name: str, grammar: Grammar):
         super().__init__(name, grammar)
 
+    def _build_grammar(self):
+        self.grammar.calculate_first()
+
     def _get_item(self, production: GrammarProduction, index: int, teal: GrammarToken) -> ItemLR1:
         item = ItemLR1(len(self.items), production, index, teal)
         self.items.append(item)

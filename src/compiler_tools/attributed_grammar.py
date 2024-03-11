@@ -2,26 +2,24 @@ from typing import Generic, TypeVar, Dict, Callable, List, Tuple
 from .grammar import GrammarToken, EOF
 from .parser_out import DerivationTree
 
-T = TypeVar('T')
+T1 = TypeVar('T1')
+T2 = TypeVar('T2')
 
 
-class AttributedRule(Generic[T]):
-    def __init__(self, header_action: Callable[[List[T], List[T | GrammarToken]], T], actions: List[Tuple[int, Callable[[List[T], List[T | GrammarToken]], T]]] = []) -> None:
-        self.actions: Dict[int, Callable[[List[T | GrammarToken], List[T | GrammarToken]], T]] = {
+class AttributedRule(Generic[T1, T2]):
+    def __init__(self, header_action: Callable[[List[T1], List[T1 | T2]], T1], actions: List[Tuple[int, Callable[[List[T1], List[T1 | GrammarToken]], T1]]] = []) -> None:
+        self.actions: Dict[int, Callable[[List[T1 | T2], List[T1 | T2]], T1]] = {
             i: action for i, action in actions}
         self.header_action: Callable[[
-            List[T], List[T | GrammarToken]], T] = header_action
-
-    def __call__(self, stack: List[T], symbols: List[T]) -> T:
-        return self.action(stack, symbols)
+            List[T1], List[T1 | T2]], T1] = header_action
 
 
-class AttributedGrammar(Generic[T]):
+class AttributedGrammar(Generic[T1, T2]):
     def __init__(self, rules: List[AttributedRule]) -> None:
         self.rules: List[AttributedRule] = rules
         self.terminals: List[GrammarToken] = []
 
-    def evaluate(self, derivation_tree: DerivationTree, tokens: List[GrammarToken]) -> T:
+    def evaluate(self, derivation_tree: DerivationTree, tokens: List[T2]) -> T1:
         self.terminals = tokens.copy()
         self.terminals.reverse()
 
@@ -33,10 +31,10 @@ class AttributedGrammar(Generic[T]):
 
         return t
 
-    def __evaluate(self, node: DerivationTree, inherit: T | None = None) -> T:
-        h: List[None | T] = [inherit] + \
+    def __evaluate(self, node: DerivationTree, inherit: T1 | None = None) -> T1:
+        h: List[None | T1] = [inherit] + \
             [None for _ in range(len(node.children))]
-        s: List[None | T | GrammarToken] = [None] + \
+        s: List[None | T1 | T2] = [None] + \
             [None for _ in range(len(node.children))]
 
         rule = self.rules[node.production_ind]
