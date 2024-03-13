@@ -35,7 +35,7 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
 
                 if y.production.head == x.production.body[x.index] and y.index == 0:
                     w = self.grammar.calculate_sentence_first(
-                        x.production.body[x.index+2:]+[x.teal])
+                        x.production.body[x.index+1:]+[x.teal])
                     if y.teal in w:
                         x.add_eof_transition(y)
 
@@ -43,7 +43,7 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
                     x.add_transition(
                         x.production.body[x.index], y)
 
-    def _build_reduce(self, node: Node, node_action: NodeAction, result: bool) -> bool:
+    def _build_reduce(self, node: Node, node_action: NodeAction, result: bool) -> bool:     
         for item in node.items:
             if item.index == len(item.production.body):
                 if item.production.head == self.grammar.main:
