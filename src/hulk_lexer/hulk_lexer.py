@@ -30,8 +30,7 @@ def build():
 
     boolean_regex = Regex('true|false')
 
-    ignore_regex = Regex('( |\n|\t)+|//[^\n]*\n|/\*[^(\*/)]*\*/')
-    print(ignore_regex)
+    ignore_regex = Regex('( |\n|\t)+|//[^\n]*\n|/\*([^\*]|\*[^/])*(\*/|\*\*/)')
 
     Lexer().build('hulk',
                   reserved_words_regex +
@@ -41,7 +40,7 @@ def build():
                   [(BOOLEAN, boolean_regex),
                    (NUMBER, num_regex),
                    (STRING, string_regex),
-                   (IDENTIFIER, identifier_regex)], ignore_regex=ignore_regex)
+                   (IDENTIFIER, identifier_regex)], ignore_regex)
 
 
 def load() -> Lexer:

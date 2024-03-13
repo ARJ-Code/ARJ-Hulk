@@ -21,7 +21,7 @@ class Lexer:
         self.tokens_regex: List[List[Tuple[str, Regex]]] = tokens_regex
 
     @staticmethod
-    def build(name: str, token_regex: List[Tuple[str, Regex]], ignore_regex=Regex):
+    def build(name: str, token_regex: List[Tuple[str, Regex]], ignore_regex: Regex):
         result = [(IGNORE, ignore_regex.automaton.to_json())]
 
         for t, r in token_regex:

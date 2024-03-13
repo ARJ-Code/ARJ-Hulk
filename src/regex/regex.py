@@ -9,6 +9,10 @@ from compiler_tools.automaton import Automaton
 
 class Regex():
     def __init__(self, text: str | None = None, automaton: Automaton | None = None) -> None:
+        self.error: str = ''
+        self.ok: bool = True
+        self.automaton: Automaton | None = None
+
         if text is not None:
             result = self.__build(text)
 
