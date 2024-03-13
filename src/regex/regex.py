@@ -2,8 +2,7 @@ from .regex_core import RegexResult, RegexToken
 from .regex_lexer import lexer
 from typing import List
 from .regex_ast import RegexAst
-from .regex_attributed_grammar import regex_attributed_grammar
-from .regex_grammar import regex_to_grammar
+from .regex_grammar import regex_grammar,  regex_to_grammar
 from .regex_parser import regex_parser
 from compiler_tools.automaton import Automaton
 
@@ -44,4 +43,4 @@ class Regex():
         if not result.ok:
             return RegexResult[RegexAst](error=result.error)
 
-        return RegexResult[RegexAst](regex_attributed_grammar.evaluate(result.derivation_tree, tokens))
+        return RegexResult[RegexAst](regex_grammar.evaluate(result.derivation_tree, tokens))

@@ -31,6 +31,7 @@ def build():
     boolean_regex = Regex('true|false')
 
     ignore_regex = Regex('( |\n|\t)+|//[^\n]*\n|/\*[^(\*/)]*\*/')
+    print(ignore_regex)
 
     Lexer().build('hulk',
                   reserved_words_regex +
