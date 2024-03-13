@@ -35,7 +35,7 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
 
                 if y.production.head == x.production.body[x.index] and y.index == 0:
                     w = self.grammar.calculate_sentence_first(
-                        x.production.body[x.index+1:]+[x.teal])
+                        x.production.body[x.index+2:]+[x.teal])
                     if y.teal in w:
                         x.add_eof_transition(y)
 
