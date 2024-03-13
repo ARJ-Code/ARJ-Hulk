@@ -1,4 +1,6 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set,Generic, TypeVar
+
+T=TypeVar('T')
 
 
 class GrammarToken:
@@ -190,3 +192,7 @@ class Grammar:
                             if follow not in self.follows[token]:
                                 self.follows[token].add(follow)
                                 changed = True
+
+class AttributedGrammar(Grammar,Generic[T]):
+    def __init__(self) -> None:
+        super().__init__()

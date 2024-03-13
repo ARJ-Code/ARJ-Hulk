@@ -1,4 +1,4 @@
-from .grammar import GrammarToken, Grammar, GrammarProduction
+from .grammar import GrammarToken, GrammarProduction
 from typing import List
 
 

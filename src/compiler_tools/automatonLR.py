@@ -30,11 +30,11 @@ class Node(Generic[T]):
 class AutomatonLR(ABC, Generic[T]):
     def __init__(self, name: str, grammar: Grammar):
         self.grammar: Grammar = grammar
-        self.grammar.calculate_follow()
 
         self.items: List[T] = []
         self.nodes: List[Node] = []
 
+        self._build_grammar()
         self._build_items()
         self._build_nodes()
 
@@ -47,6 +47,10 @@ class AutomatonLR(ABC, Generic[T]):
             s += f'{str(n)}\n'
 
         return s
+
+    @abstractmethod
+    def _build_grammar(self):
+        pass
 
     @abstractmethod
     def _get_item(self, production: GrammarProduction, index: int) -> T:

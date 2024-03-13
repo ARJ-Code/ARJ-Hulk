@@ -9,6 +9,9 @@ class AutomatonSLR1(AutomatonLR[ItemLR]):
     def __init__(self, name: str, grammar: Grammar):
         super().__init__(name, grammar)
 
+    def _build_grammar(self):
+        self.grammar.calculate_follow()
+
     def _get_item(self, production: GrammarProduction, index: int) -> ItemLR:
         item = ItemLR(len(self.items), production, index)
         self.items.append(item)
