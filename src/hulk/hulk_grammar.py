@@ -86,7 +86,7 @@ hulk_grammar.add_attributed_production('D1', ['', 'D2'], [])
 hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [])
 hulk_grammar.add_attributed_production('D3', ['id T'], [])
 
-hulk_grammar.add_attributed_production('F', ['function Fh FB'], [])
+hulk_grammar.add_attributed_production('F', ['function Fh T FB'], [])
 hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [])
 
 hulk_grammar.add_attributed_production('Hc', ['type Fh', 'type id'], [])

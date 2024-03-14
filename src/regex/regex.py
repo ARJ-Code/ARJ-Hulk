@@ -2,28 +2,18 @@ from .regex_core import RegexResult, RegexToken
 from .regex_lexer import lexer
 from typing import List
 from .regex_ast import RegexAst
-from .regex_grammar import regex_grammar,  regex_to_grammar
-from .regex_parser import regex_parser
+from .regex_grammar import regex_grammar
+from .regex_parser import regex_parser, regex_to_grammar
 from compiler_tools.automaton import Automaton
 
 
 class Regex():
-    def __init__(self, text: str | None = None, automaton: Automaton | None = None) -> None:
-        self.error: str = ''
-        self.ok: bool = True
-        self.automaton: Automaton | None = None
+    def __init__(self, text: str) -> None:
+        result = self.__build(text)
 
-        if text is not None:
-            result = self.__build(text)
-
-            self.error: str = result.error
-            self.ok: bool = result.ok
-            self.automaton: Automaton | None = None if not result.ok else result.value.automaton.to_dfa()
-
-        if automaton is not None:
-            self.ok = True
-            self.error: str = ''
-            self.automaton: Automaton | None = automaton
+        self.error: str = result.error
+        self.ok: bool = result.ok
+        self.automaton: Automaton | None = None if not result.ok else result.value.automaton
 
     def match(self, text: str) -> bool:
         if self.automaton is None:

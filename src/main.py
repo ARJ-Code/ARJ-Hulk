@@ -1,4 +1,4 @@
-from hulk_lexer.hulk_lexer import load
+from hulk.hulk_lexer import load
 
 hulk_lexer = load()
 

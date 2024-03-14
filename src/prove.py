@@ -1,4 +1,4 @@
-from hulk_parser.hulk_parser import hulk_build
+from hulk.hulk import hulk_build
 import time
 
 start_time = time.time()

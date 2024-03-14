@@ -5,7 +5,7 @@ from compiler_tools.parser import Parser
 from compiler_tools.tableLR import TableLR
 
 
-def hulk_build():
+def hulk_parser_build() -> bool:
     a = AutomatonLR1('hulk', hulk_grammar)
     return a.ok
 
@@ -19,3 +19,4 @@ def hulk_parse():
     r = p.parse([GrammarToken('num', True), GrammarToken('*', True), GrammarToken('num', True),
                 GrammarToken('+', True), GrammarToken('num', True), GrammarToken('*', True), GrammarToken('num', True), GrammarToken(';', True)])
     print(r.ok)
+

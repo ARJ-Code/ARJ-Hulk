@@ -54,10 +54,3 @@ regex_grammar.add_attributed_production(
 regex_grammar.add_attributed_production('G', ['^ J', 'J'], [r14, r15])
 regex_grammar.add_attributed_production('J', ['K J', 'K'], [r16, r17])
 regex_grammar.add_attributed_production('K', ['ch', 'ch - ch'], [r18, r19])
-
-
-def regex_to_grammar(token: RegexToken) -> GrammarToken:
-    if token.is_special:
-        return [t for t in regex_grammar.terminals if t.value == token.value][0]
-
-    return [t for t in regex_grammar.terminals if t.value == 'ch'][0]
