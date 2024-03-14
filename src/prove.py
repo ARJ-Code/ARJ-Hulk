@@ -1,6 +1,8 @@
-from regex.regex_parser import regex_build
-from regex.regex import Regex
-from hulk_lexer.hulk_lexer import build
+from hulk_parser.hulk_parser import hulk_build,hulk_parse
+
+
+print( hulk_parse())
+# print(hulk_build())
 
 # a = Regex('( |\n|\t)+|//[^\n]*\n|/\*([^\*]|\*[^/])*(\*/|\*\*/)')
                                  
