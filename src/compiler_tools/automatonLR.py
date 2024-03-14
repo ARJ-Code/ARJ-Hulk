@@ -147,6 +147,9 @@ class AutomatonLR(ABC, Generic[T]):
             result = self._build_shift(node, node_action, result)
             result = self._build_reduce(node, node_action, result)
 
+            if not result:
+                break
+
             node_actions.append(node_action)
 
         if result:
@@ -162,6 +165,9 @@ class AutomatonLR(ABC, Generic[T]):
             else:
                 result = result and node_action.add_no_terminal_action(
                     t, i)
+                
+            if not result:
+                break
 
         return result
 

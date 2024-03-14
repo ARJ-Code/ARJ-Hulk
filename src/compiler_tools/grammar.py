@@ -1,6 +1,6 @@
-from typing import List, Dict, Set,Generic, TypeVar
+from typing import List, Dict, Set, Generic, TypeVar
 
-T=TypeVar('T')
+T = TypeVar('T')
 
 
 class GrammarToken:
@@ -80,9 +80,6 @@ class Grammar:
 
     def add_production(self, non_terminal: str, sentences: List[str]) -> None:
         def get(t: str):
-            if t == "" or t == "EOF":
-                raise ValueError("aaaa")
-
             t = GrammarToken(t, t[0].lower() == t[0])
 
             if t.is_terminal:
@@ -103,7 +100,8 @@ class Grammar:
 
         for sentence in sentences:
             tokens = sentence.split(" ")
-            body = [get(token) for token in tokens if token!="" and token!="EOF"]
+            body = [get(token)
+                    for token in tokens if token != "" and token != "EOF"]
 
             self.productions.append(GrammarProduction(
                 len(self.productions), head, body))
@@ -193,6 +191,7 @@ class Grammar:
                                 self.follows[token].add(follow)
                                 changed = True
 
-class AttributedGrammar(Grammar,Generic[T]):
+
+class AttributedGrammar(Grammar, Generic[T]):
     def __init__(self) -> None:
         super().__init__()
