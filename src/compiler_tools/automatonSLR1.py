@@ -49,4 +49,7 @@ class AutomatonSLR1(AutomatonLR[ItemLR]):
                         result = result and node_action.add_terminal_action(
                             t, Action.REDUCE, item.production.ind)
 
+            if not result:
+                break
+
         return result

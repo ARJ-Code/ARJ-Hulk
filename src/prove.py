@@ -1,9 +1,11 @@
-from hulk.hulk import hulk_build
+from hulk.hulk import hulk_build, hulk_compile
 import time
 
-start_time = time.time()
-print(hulk_build())
-end_time = time.time()
+# start_time = time.time()
+# print(hulk_build())
+# end_time = time.time()
 
-execution_time = end_time - start_time
-print(f"Tiempo de ejecución: {execution_time} segundos")
+# execution_time = end_time - start_time
+# print(f"Tiempo de ejecución: {execution_time} segundos")
+
+hulk_compile()
