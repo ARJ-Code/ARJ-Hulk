@@ -1,6 +1,6 @@
-from typing import List, Dict, Set,Generic, TypeVar
+from typing import List, Dict, Set, Generic, TypeVar
 
-T=TypeVar('T')
+T = TypeVar('T')
 
 
 class GrammarToken:
@@ -96,14 +96,15 @@ class Grammar:
 
             return t
 
-        if non_terminal != non_terminal.upper():
+        if non_terminal[0] != non_terminal[0].upper():
             raise ValueError("Non terminal must be in upper case")
 
         head = get(non_terminal)
 
         for sentence in sentences:
             tokens = sentence.split(" ")
-            body = [get(token) for token in tokens]
+            body = [get(token)
+                    for token in tokens if token != 'EOF' and token != '']
 
             self.productions.append(GrammarProduction(
                 len(self.productions), head, body))
@@ -193,6 +194,7 @@ class Grammar:
                                 self.follows[token].add(follow)
                                 changed = True
 
-class AttributedGrammar(Grammar,Generic[T]):
+
+class AttributedGrammar(Grammar, Generic[T]):
     def __init__(self) -> None:
         super().__init__()

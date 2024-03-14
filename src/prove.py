@@ -1,9 +1,9 @@
-from regex.regex_parser import regex_build
-from regex.regex import Regex
-from hulk_lexer.hulk_lexer import build
+from hulk_parser.hulk_parser import hulk_build
+import time
 
-# a = Regex('( |\n|\t)+|//[^\n]*\n|/\*([^\*]|\*[^/])*(\*/|\*\*/)')
-                                 
-# print(a.ok)
-# # Regex('aaaa')
-build()
+start_time = time.time()
+print(hulk_build())
+end_time = time.time()
+
+execution_time = end_time - start_time
+print(f"Tiempo de ejecución: {execution_time} segundos")
