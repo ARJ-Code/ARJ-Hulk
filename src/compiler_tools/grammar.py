@@ -81,7 +81,7 @@ class Grammar:
     def add_production(self, non_terminal: str, sentences: List[str]) -> None:
         def get(t: str):
             if t == "" or t == "EOF":
-                return EOF()
+                raise ValueError("aaaa")
 
             t = GrammarToken(t, t[0].lower() == t[0])
 
@@ -103,8 +103,7 @@ class Grammar:
 
         for sentence in sentences:
             tokens = sentence.split(" ")
-            body = [get(token)
-                    for token in tokens if token != 'EOF' and token != '']
+            body = [get(token) for token in tokens if token!="" and token!="EOF"]
 
             self.productions.append(GrammarProduction(
                 len(self.productions), head, body))
