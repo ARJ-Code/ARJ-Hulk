@@ -1,12 +1,12 @@
 SPECIAL_TOKENS = [";", ",", ".", ":", "(", ")", "[", "]", "{", "}",
                   "<", ">", "=", "+", "-", "*", "/", "^", "**" "@",
-                  "@@", ">=", "<=", "==", "|", "&", ":=", "=>"]
+                  "@@", ">=", "<=", "==", "|", "&", ":=", "=>", "||"]
 
 RESERVED_WORDS = ["let", "for", "while",
-                  "if", "elif", "else", "function", "in", "is", "as", "new", "type", "range"]
+                  "if", "elif", "else", "function", "in", "is", "as", "new", "type", "protocol", "extends"]
 
 DEFINED_FUNCTIONS = ["sqrt", "sin", "cos",
-                     "tan", "cot", "print", "exp", "log", "rand"]
+                     "tan", "cot", "print", "exp", "log", "rand", "range"]
 
 NUMERIC_CONSTANTS = ["PI", "E"]
 

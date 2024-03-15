@@ -109,12 +109,7 @@ class TableLR:
     def action_reduce(self, action: Action, ind: int) -> Tuple[Action, int]:
         production = self.grammar.get_production(ind)
 
-        print(production)
-
         for t in production.body:
-            if t == EOF():
-                continue
-
             self.stack_states.pop()
 
         self.stack_states.append(
