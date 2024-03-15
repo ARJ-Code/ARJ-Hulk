@@ -24,5 +24,5 @@ def test():
     assert l5.error.col == 0
     assert l5.error.row == 1
 
-    l6 = hulk_lexer.run('@@+/||')
+    l6 = hulk_lexer.run('@@+/|')
     assert len(l6.tokens) == 4

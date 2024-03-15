@@ -50,9 +50,6 @@ class Parser:
         productions_result.append(production)
 
         for t in production.body:
-            if t == EOF():
-                continue
-
             stack_tokens.pop()
             
         stack_tokens.append(production.head)

@@ -26,7 +26,7 @@ class AttributedGrammar(Generic[T1, T2], Grammar):
     def evaluate(self, derivation_tree: DerivationTree, tokens: List[T2]) -> T1:
         tokens = tokens.copy()
         tokens.reverse()
-       
+
         return self.__evaluate(derivation_tree, tokens)
 
     def __evaluate(self, node: DerivationTree, tokens: List[T2], inherit: T1 | None = None) -> T1:
@@ -44,8 +44,6 @@ class AttributedGrammar(Generic[T1, T2], Grammar):
         rule = self.rules[node.production_ind]
 
         for i, n in enumerate(node.children):
-            if n.token == EOF():
-                continue
             if n.token.is_terminal:
                 s[i+1] = get_terminal()
             else:

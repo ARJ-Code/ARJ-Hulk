@@ -4,7 +4,7 @@ from compiler_tools.lexer import Lexer
 
 
 def hulk_build() -> bool:
-    # hulk_lexer_build()
+    hulk_lexer_build()
     return hulk_parser_build()
 
 
@@ -18,13 +18,6 @@ def hulk_compile():
     hulk_lexer.load('hulk')
 
     result = hulk_lexer.run(p)
-
-    if not result.ok:
-        print(result.error)
-        return
-
-    for w in [hulk_to_grammar(t) for t in result.tokens]:
-        print(w)
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
     print(result.ok)

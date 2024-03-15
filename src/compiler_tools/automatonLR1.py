@@ -54,8 +54,6 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
                     result = result and node_action.add_terminal_action(
                         item.teal, Action.REDUCE, item.production.ind)
             if not result:
-                print(item)
-                print(node)
                 break
 
         return result

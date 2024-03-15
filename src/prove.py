@@ -9,3 +9,6 @@ import time
 # print(f"Tiempo de ejecución: {execution_time} segundos")
 
 hulk_compile()
+# from regex.regex_parser import regex_build
+
+# print(regex_build())
