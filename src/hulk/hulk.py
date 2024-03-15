@@ -8,16 +8,21 @@ def hulk_build() -> bool:
     return hulk_parser_build()
 
 
+def hulk_compile_str(program: str) -> bool:
+    hulk_lexer = Lexer()
+    hulk_lexer.load('hulk')
+
+    result = hulk_lexer.run(program)
+
+    result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
+
+    return result.ok
+
+
 def hulk_compile():
 
     f = open('cache/main.hulk')
     p = f.read()
     f.close()
 
-    hulk_lexer = Lexer()
-    hulk_lexer.load('hulk')
-
-    result = hulk_lexer.run(p)
-
-    result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
-    print(result.ok)
+    print(hulk_compile_str(p))

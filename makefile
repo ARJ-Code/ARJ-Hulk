@@ -1,11 +1,15 @@
 .PHONY: dev
 dev:
-	python src/main.py
+	python3 src/main.py
 
 .PHONY: prove
 prove:
-	python src/prove.py
+	python3 src/prove.py
 
 .PHONY: test
 test:
-	python src/test.py
+	python3 src/test.py
+
+.PHONY: build
+build:
+	python3 src/build.py
