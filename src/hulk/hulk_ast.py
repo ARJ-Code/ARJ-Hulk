@@ -9,7 +9,6 @@ class ASTNode (ABC):
 class InstructionNode (ASTNode):
     pass
 
-
 class ExpressionNode (ASTNode):
     pass
 
@@ -88,15 +87,19 @@ class StringExpressionNode (BinaryNode):
         super().__init__(left, right)
         self.operator: StringOperator = operator
 
+class AssignmentExpressionNode (BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
 
-class AssignmentNode (ASTNode):
-    def __init__(self, name, value):
+class AssignmentInstructionNode (InstructionNode):
+    def __init__(self, name, type, value):
         self.name: str = name
+        self.type: TypeNode = type
         self.value: ExpressionNode = value
 
 class IfNode (ASTNode):
     def __init__(self, condition, then_body, else_body):
-        self.condition: BooleanExpressionNode = condition
+        self.condition: BooleanBinaryNode | BooleanUnaryNode = condition
         self.then_body: ASTNode = then_body
 
 class WhileNode (ASTNode):
