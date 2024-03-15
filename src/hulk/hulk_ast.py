@@ -12,6 +12,19 @@ class InstructionNode (ASTNode):
 class ExpressionNode (ASTNode):
     pass
 
+
+
+
+
+class ListNode(ASTNode):
+    def __init__(self, left, right):
+        self.left: ListNode = left
+        self.right: ASTNode = right
+
+class TypeNode (ASTNode):
+    def __init__(self, name):
+        self.name: str = name     
+
 class BinaryNode (ExpressionNode):
     def __init__(self, left, right):
         self.left: ASTNode = left
@@ -25,10 +38,13 @@ class AtomicNode(ExpressionNode):
     def __init__(self, name):
         self.name: str = name
 
-class ListNode(ASTNode):
-    def __init__(self, left, right):
-        self.left: ListNode = left
-        self.right: ASTNode = right
+
+
+
+class FunctionCallNode (AtomicNode):
+    def __init__(self, name, parameters):
+        super().__init__(name, AtomicTypes.CALL)
+        self.parameters: List[ExpressionNode] = parameters
 
 class ConstantNode (AtomicNode):
     def __init__(self, value, type):
@@ -36,18 +52,16 @@ class ConstantNode (AtomicNode):
         self.value = value
         self.type: ConstantTypes = type        
 
-class TypeNode (ASTNode):
-    def __init__(self, name):
-        self.name: str = name     
+
 
 class LetExpressionNode (BinaryNode):
     def __init__(self, assignments, body):
         super().__init__(assignments, body)    
 
-class LetInstructionNode (InstructionNode):
-    def __init__(self, assignments):
-        self.assignments: List[AssignmentNode] = assignments            
-
+class StringExpressionNode (BinaryNode):
+    def __init__(self, left, right, operator):
+        super().__init__(left, right)
+        self.operator: StringOperator = operator       
 
 class AritmeticBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
@@ -69,6 +83,15 @@ class BooleanUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
+
+
+
+
+
+class LetInstructionNode (InstructionNode):
+    def __init__(self, assignments):
+        self.assignments: List[AssignmentNode] = assignments         
+
 class FunctionDeclarationNode (InstructionNode):
     def __init__(self, name, parameters, body, return_type):
         self.name: str = name
@@ -76,16 +99,14 @@ class FunctionDeclarationNode (InstructionNode):
         self.body: ASTNode = body
         self.return_type: str = return_type                
 
-class FunctionCallNode (AtomicNode):
-    def __init__(self, name, parameters):
-        super().__init__(name, AtomicTypes.CALL)
-        self.parameters: List[ExpressionNode] = parameters
 
 
-class StringExpressionNode (BinaryNode):
-    def __init__(self, left, right, operator):
-        super().__init__(left, right)
-        self.operator: StringOperator = operator
+
+
+
+
+
+
 
 class AssignmentExpressionNode (BinaryNode):
     def __init__(self, left, right):
