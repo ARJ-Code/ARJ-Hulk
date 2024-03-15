@@ -1,47 +1,48 @@
 from compiler_tools.attributed_grammar import AttributedGrammar, AttributedRule
 from hulk.hulk_ast import *
+from hulk.hulk_atributed_rules import *
 
 hulk_grammar = AttributedGrammar()
 
 hulk_grammar.add_main('P')
 
-hulk_grammar.add_attributed_production('P', ['Is'], [], [lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Is', ['Is I', 'I'], [], [lambda h,s: ListNode(s[1],s[2]), lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('I', ['I1', 'I2'], [], [lambda h,s: s[1], lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('P', ['Is'], [r0])
+hulk_grammar.add_attributed_production('Is', ['Is I', 'I'], [r1,r2])
+hulk_grammar.add_attributed_production('I', ['I1', 'I2'], [r3,r4])
 
-hulk_grammar.add_attributed_production('I1', ['E ;', 'IB', ';', 'Il'], [], [lambda h,s: s[1], lambda h,s: s[1], lambda h,s: None, lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('I1s', ['I1s I1', 'I1'], [], [lambda h,s: ListNode(s[1],s[2]), lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('I1', ['E ;', 'IB', ';', 'Il'], [r5,r6,r7,r8])
+hulk_grammar.add_attributed_production('I1s', ['I1s I1', 'I1'], [r9,r10])
 hulk_grammar.add_attributed_production(
-    'IB', ['B', 'Bl', 'Bw', 'Bf', 'Bif'], [], [lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],])
+    'IB', ['B', 'Bl', 'Bw', 'Bf', 'Bif'], [r11,r12,r13,r14,r15])
 hulk_grammar.add_attributed_production(
-    'IBif', ['B', 'E ;'], [], [lambda h,s: s[1],lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('B', ['{ I1s }'], [], [lambda h,s: s[2]])
+    'IBif', ['B', 'E ;'], [r16, r17])
+hulk_grammar.add_attributed_production('B', ['{ I1s }'], [r18])
 
-hulk_grammar.add_attributed_production('I2', ['C', 'F', 'Pr'], [], [lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('I2', ['C', 'F', 'Pr'], [r19,r20,r21])
 
 hulk_grammar.add_attributed_production(
-    'E', ['Es', 'El', 'Eif', 'Ew', 'Ef', 'Eas', 'Ear'], [], [lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],lambda h,s: s[1],])
+    'E', ['Es', 'El', 'Eif', 'Ew', 'Ef', 'Eas', 'Ear'], [r22,r23,r24,r25,r26,r27,r28])
 
-hulk_grammar.add_attributed_production('Es', ['Es @ Ts', 'Es @@ Ts', 'Ts'], [], [lambda h,s: StringExpressionNode(s[1],s[3], StringOperator.CONCAT),lambda h,s: StringExpressionNode(s[1],s[3], StringOperator.SPACED_CONCAT),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Ts', ['Eb'], [], [lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('Es', ['Es @ Ts', 'Es @@ Ts', 'Ts'], [r29,r30,r31])
+hulk_grammar.add_attributed_production('Ts', ['Eb'], [r32])
 
-hulk_grammar.add_attributed_production('Eb', ['Eb | Fb', 'Tb'], [], [lambda h,s: BooleanBinaryNode(s[1],s[3], BooleanOperator.OR),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Tb', ['Tb & Fb', 'Fb'], [], [lambda h,s: BooleanBinaryNode(s[1],s[3], BooleanOperator.AND),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Fb', ['! Cb', 'Cb'], [], [lambda h,s: BooleanUnaryNode(s[2], BooleanOperator.NOT),lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('Eb', ['Eb | Fb', 'Tb'], [r33,r34])
+hulk_grammar.add_attributed_production('Tb', ['Tb & Fb', 'Fb'], [r35,r36])
+hulk_grammar.add_attributed_production('Fb', ['! Cb', 'Cb'], [r37,r38])
 hulk_grammar.add_attributed_production(
-    'Cb', ['Gb == Gb', 'Gb < Gb', 'Gb > Gb', 'Gb >= Gb', 'Gb <= Gb', 'Gb'], [], [lambda h,s: BooleanBinaryNode(s[1],s[3],BooleanOperator.EQ), lambda h,s: BooleanBinaryNode(s[1],s[3],BooleanOperator.LT), lambda h,s: BooleanBinaryNode(s[1],s[3],BooleanOperator.GT), lambda h,s: BooleanBinaryNode(s[1],s[3],BooleanOperator.GTE), lambda h,s: BooleanBinaryNode(s[1],s[3],BooleanOperator.LTE), lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Gb', ['Ea'], [], [lambda h,s: s[1]])
+    'Cb', ['Gb == Gb', 'Gb < Gb', 'Gb > Gb', 'Gb >= Gb', 'Gb <= Gb', 'Gb'], [r39,r40,r41,r42,r43,r44])
+hulk_grammar.add_attributed_production('Gb', ['Ea'], [r45])
 
-hulk_grammar.add_attributed_production('Ea', ['Ea + Ta', 'Ea - Ta', 'Ta'], [], [lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.ADD),lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.SUB),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Ta', ['Ta * Fa', 'Ta / Fa', 'Fa'], [], [lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.MUL),lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.DIV),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Fa', ['Ga ^ Fa', 'Ga'], [], [lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.POW),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Ga', ['+ Oa', '- Oa', 'Oa'], [], [lambda h,s: AritmeticUnaryNode(s[2], AritmeticOperator.ADD),lambda h,s: AritmeticUnaryNode(s[2], AritmeticOperator.SUB),lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('Oa', ['W'], [], [lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('Ea', ['Ea + Ta', 'Ea - Ta', 'Ta'], [r46,r47,r48])
+hulk_grammar.add_attributed_production('Ta', ['Ta * Fa', 'Ta / Fa', 'Fa'], [r49,r50,r51])
+hulk_grammar.add_attributed_production('Fa', ['Ga ^ Fa', 'Ga'], [r52,r53])
+hulk_grammar.add_attributed_production('Ga', ['+ Oa', '- Oa', 'Oa'], [r54,r55,r56])
+hulk_grammar.add_attributed_production('Oa', ['W'], [r57])
 hulk_grammar.add_attributed_production(
-    'W', ['Ids', 'num', 'bool', 'str', '( E )', 'Et'], [], [lambda h,s : s[1], lambda h,s: ConstantNode(s[1], ConstantTypes.NUMBER), lambda h,s: ConstantNode(s[1], ConstantTypes.BOOLEAN), lambda h,s: ConstantNode(s[1], ConstantTypes.STRING), lambda h,s: s[2], lambda h,s: s[1]])
-hulk_grammar.add_attributed_production('T', [': id', ''], [], [lambda h,s: TypeNode(s[2]), lambda h,s: None])
+    'W', ['Ids', 'num', 'bool', 'str', '( E )', 'Et'], [r58,r59,r60,r61,r62,r63])
+hulk_grammar.add_attributed_production('T', [': id', ''], [r64,r65])
 
-hulk_grammar.add_attributed_production('El', ['let As in E'], [], [lambda h,s: LetExpressionNode(s[2],s[4])])
+hulk_grammar.add_attributed_production('El', ['let As in E'], [r66])
 # cambiar letnode
 hulk_grammar.add_attributed_production('As', ['As , Sl', 'Sl'], [])
 hulk_grammar.add_attributed_production('Sl', ['id T = E'], [])
