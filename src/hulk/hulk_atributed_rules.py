@@ -4,6 +4,7 @@ from compiler_tools.lexer import LexerToken
 from hulk.hulk_ast import *
 
 # generic rules
+rs0 = AttributedGrammar[ASTNode, LexerToken](lambda h,s: EOFNode())
 rs1 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[1])
 rs2 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[2])
 
@@ -19,7 +20,7 @@ r4 = rs1
 #instructions1 rules
 r5 = rs1
 r6 = rs1
-r7 = None
+r7 = rs0
 r8 = rs1
 r9 = AttributedRule[ASTNode, LexerToken](lambda h,s: ListNode(s[1],s[2]))
 r10 = rs1
@@ -69,17 +70,17 @@ r43 = AttributedRule[ASTNode, LexerToken](lambda h,s: BooleanBinaryNode(s[1],s[3
 r44 = rs1
 r45 = rs1
 
-# aritmetic expression rules
-r46 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.ADD))
-r47 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.SUB))
+# aritmethic expression rules
+r46 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicBinaryNode(s[1],s[3],AritmethicOperator.ADD))
+r47 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicBinaryNode(s[1],s[3],AritmethicOperator.SUB))
 r48 = rs1
-r49 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.MUL))
-r50 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.DIV))
+r49 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicBinaryNode(s[1],s[3],AritmethicOperator.MUL))
+r50 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicBinaryNode(s[1],s[3],AritmethicOperator.DIV))
 r51 = rs1
-r52 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticBinaryNode(s[1],s[3],AritmeticOperator.POW))
+r52 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicBinaryNode(s[1],s[3],AritmethicOperator.POW))
 r53 = rs1
-r54 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticUnaryNode(s[2], AritmeticOperator.ADD))
-r55 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmeticUnaryNode(s[2], AritmeticOperator.SUB))
+r54 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicUnaryNode(s[2], AritmethicOperator.ADD))
+r55 = AttributedRule[ASTNode, LexerToken](lambda h,s: AritmethicUnaryNode(s[2], AritmethicOperator.SUB))
 r56 = rs1
 r57 = rs1
 
@@ -93,10 +94,7 @@ r63 = rs1
 
 # type rules
 r64 = AttributedRule[ASTNode, LexerToken](lambda h,s: TypeNode(s[2]))
-r65 = None
-
-# let expression rules
-r66 = AttributedRule[ASTNode, LexerToken](lambda h,s: LetExpressionNode(s[2],s[4]))
+r65 = rs0
 
 
 
