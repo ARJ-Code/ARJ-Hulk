@@ -7,6 +7,7 @@ test_modules = [
     'regex',
     'lexer',
     'automaton',
+    'hulk_grammar'
 ]
 
 for module_name in test_modules:
