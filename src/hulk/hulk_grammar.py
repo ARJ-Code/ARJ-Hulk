@@ -52,67 +52,75 @@ hulk_grammar.add_attributed_production(
 hulk_grammar.add_attributed_production('T', [': id', ''], [r64,r65])
 
 # let productions
-hulk_grammar.add_attributed_production('El', ['let As in E'], [lambda h,s: LetBodyNode(s[2],s[4])])
+hulk_grammar.add_attributed_production('El', ['let As in E'], [r66])
 
-hulk_grammar.add_attributed_production('Bl', ['let As in IB'], [lambda h,s: LetBodyNode(s[2],s[4])])
+hulk_grammar.add_attributed_production('Bl', ['let As in IB'], [r67])
 
-hulk_grammar.add_attributed_production('Il', ['let As ;'], [lambda h,s: LetNode(s[2])])
+hulk_grammar.add_attributed_production('Il', ['let As ;'], [r68])
 
-hulk_grammar.add_attributed_production('Eas', ['Ids := E'], [lambda h,s: AssignmentNode(s[1], s[3])])
+hulk_grammar.add_attributed_production('Eas', ['Ids := E'], [r69])
 
 # declarations productions
-hulk_grammar.add_attributed_production('As', ['As , Sl', 'Sl'], [lambda h, s: ListNode(s[1], s[3])])
-hulk_grammar.add_attributed_production('Sl', ['id T = E'], [lambda h, s: DeclarationNode(s[1], s[2], s[4])])
+hulk_grammar.add_attributed_production('As', ['As , Sl', 'Sl'], [r70,rs1])
+hulk_grammar.add_attributed_production('Sl', ['id T = E'], [r71])
 
 # if productions
-hulk_grammar.add_attributed_production('Hif', ['if ( Eb )'], [lambda h,s: s[3]])
-hulk_grammar.add_attributed_production('Helif', ['elif ( Eb )'], [lambda h,s: s[3]])
+hulk_grammar.add_attributed_production('Hif', ['if ( Eb )'], [r72])
+hulk_grammar.add_attributed_production('Helif', ['elif ( Eb )'], [r73])
 
 hulk_grammar.add_attributed_production(
-    'Eif', ['Hif E Eelifs else E'], [lambda h,s: IfNode(s[1], s[2], s[3], s[5])])
-hulk_grammar.add_attributed_production('Eelifs', ['Eelifs Eelif', ''], [lambda h,s: ListNode(s[1], s[2]), rs0])
-hulk_grammar.add_attributed_production('Eelif', ['Helif E'], [lambda h,s: s[2]])
+    'Eif', ['Hif E Eelifs else E'], [r74])
+hulk_grammar.add_attributed_production('Eelifs', ['Eelifs Eelif', ''], [r75,r76])
+hulk_grammar.add_attributed_production('Eelif', ['Helif E'], [r77])
 
 hulk_grammar.add_attributed_production(
-    'Bif', ['Hif IBif Belifs Belse'], [lambda h,s: IfNode(s[1], s[2], s[3], s[5])])
-hulk_grammar.add_attributed_production('Belifs', ['Belifs Belif', ''], [lambda h,s: ListNode(s[1], s[2]), rs0])
-hulk_grammar.add_attributed_production('Belif', ['Helif IBif'], [lambda h,s: s[2]])
-hulk_grammar.add_attributed_production('Belse', ['else IBif', ''], [lambda h,s: s[2], rs0])
+    'Bif', ['Hif IBif Belifs Belse'], [r78])
+hulk_grammar.add_attributed_production('Belifs', ['Belifs Belif', ''], [r79,r80])
+hulk_grammar.add_attributed_production('Belif', ['Helif IBif'], [r81])
+hulk_grammar.add_attributed_production('Belse', ['else IBif', ''], [r82,r83])
 
 # while productions
-hulk_grammar.add_attributed_production('Hw', ['while ( Eb )'], [lambda h,s: s[3]])
+hulk_grammar.add_attributed_production('Hw', ['while ( Eb )'], [r84])
 
-hulk_grammar.add_attributed_production('Ew', ['Hw E'], [lambda h,s: WhileNode(s[1], s[2])])
+hulk_grammar.add_attributed_production('Ew', ['Hw E'], [r85])
 
-hulk_grammar.add_attributed_production('Bw', ['Hw IB'], [lambda h,s: WhileNode(s[1], s[2])])
+hulk_grammar.add_attributed_production('Bw', ['Hw IB'], [r85])
 
 # # for productions
 # hulk_grammar.add_attributed_production(
 #     'Hf', ['for ( id in E )'], [])
 
 # hulk_grammar.add_attributed_production('Ef', ['Hf E'], [])
-hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) E'], [lambda h,s: ForNode(s[3], s[5], s[7])])
+hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) E'], [r86])
 
 # hulk_grammar.add_attributed_production('Bf', ['Hf IB'], [])
-hulk_grammar.add_attributed_production('Bf', ['for ( id in E ) IB'], [lambda h,s: ForNode(s[3], s[5], s[7])])
+hulk_grammar.add_attributed_production('Bf', ['for ( id in E ) IB'], [r86])
 
 # function call productions
-hulk_grammar.add_attributed_production('Ec', ['id ( C1 )'], [lambda h,s: FunctionCallNode(s[1], s[3])])
-hulk_grammar.add_attributed_production('C1', ['C2', ''], [lambda h,s: s[1], rs0])
-hulk_grammar.add_attributed_production('C2', ['E , C2', 'E'], [lambda h,s: [s[1]] + s[3], lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('Ec', ['id ( C1 )'], [r87])
+hulk_grammar.add_attributed_production('C1', ['C2', ''], [r88, r89])
+hulk_grammar.add_attributed_production('C2', ['E , C2', 'E'], [r90, r91])
 
 # variable productions
-hulk_grammar.add_attributed_production('Ids', ['Ids . Q', 'Q'], [lambda h,s: AttributedNode(s[1], s[3]), lambda h,s: s[1]])
+hulk_grammar.add_attributed_production('Ids', ['Ids . Q', 'Q'], [])
 hulk_grammar.add_attributed_production('Q', ['id', 'Ec', 'Ac'], [lambda h,s: s[1], lambda h,s: s[1], lambda h,s: s[1]])
 
 # function productions
-hulk_grammar.add_attributed_production('Fh', ['( D1 )'], [lambda h,s: s[2]])
+# hulk_grammar.add_attributed_production('Fh', ['( D1 )'], [lambda h,s: s[2]])
+# hulk_grammar.add_attributed_production('D1', ['', 'D2'], [rs0, r1])
+# hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [])
+# hulk_grammar.add_attributed_production('D3', ['id T'], [])
+
+# hulk_grammar.add_attributed_production('F', ['function id Fh T FB'], [lambda h,s: FunctionDeclarationNode(s[2], s[3], s[5], s[4])])
+# hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [lambda h,s: s[1], lambda h,s: s[2]])
+
+hulk_grammar.add_attributed_production('Fh', ['( D1 )'], [])
 hulk_grammar.add_attributed_production('D1', ['', 'D2'], [rs0, r1])
 hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [])
 hulk_grammar.add_attributed_production('D3', ['id T'], [])
 
-hulk_grammar.add_attributed_production('F', ['function id Fh T FB'], [lambda h,s: FunctionDeclarationNode(s[2], s[3], s[5], s[4])])
-hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [lambda h,s: s[1], lambda h,s: s[2]])
+hulk_grammar.add_attributed_production('F', ['function id Fh T FB'], [])
+hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [])
 
 hulk_grammar.add_attributed_production('Hc', ['type Fh', 'type id'], [])
 hulk_grammar.add_attributed_production(

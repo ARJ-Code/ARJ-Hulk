@@ -1,10 +1,9 @@
-from compiler_tools.grammar import GrammarToken
-from compiler_tools.attributed_grammar import AttributedGrammar, AttributedRule
+from compiler_tools.attributed_grammar import AttributedRule
 from compiler_tools.lexer import LexerToken
 from hulk.hulk_ast import *
 
 # generic rules
-rs0 = AttributedGrammar[ASTNode, LexerToken](lambda h,s: EOFNode())
+rs0 = AttributedRule[ASTNode, LexerToken](lambda h,s: EOFNode())
 rs1 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[1])
 rs2 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[2])
 
@@ -50,8 +49,8 @@ r27 = rs1
 r28 = rs1
 
 # string expression rules
-r29 = AttributedRule[ASTNode, LexerToken](lambda h,s: StringExpressionNode(s[1],s[3], StringOperator.CONCAT))
-r30 = AttributedRule[ASTNode, LexerToken](lambda h,s: StringExpressionNode(s[1],s[3], StringOperator.SPACED_CONCAT))
+r29 = AttributedRule[ASTNode, LexerToken](lambda h,s: StringBinaryNode(s[1],s[3], StringOperator.CONCAT))
+r30 = AttributedRule[ASTNode, LexerToken](lambda h,s: StringBinaryNode(s[1],s[3], StringOperator.SPACED_CONCAT))
 r31 = rs1
 r32 = rs1
 
@@ -95,6 +94,51 @@ r63 = rs1
 # type rules
 r64 = AttributedRule[ASTNode, LexerToken](lambda h,s: TypeNode(s[2]))
 r65 = rs0
+
+# let rules
+r66 = AttributedRule[ASTNode, LexerToken](lambda h,s: LetBodyNode(s[2],s[4]))
+r67 = AttributedRule[ASTNode, LexerToken](lambda h,s: LetBodyNode(s[2],s[4]))
+r68 = AttributedRule[ASTNode, LexerToken](lambda h,s: LetNode(s[2]))
+r69 = AttributedRule[ASTNode, LexerToken](lambda h,s: AssignmentNode(s[1],s[3]))
+
+# declarations rules
+r70 = AttributedRule[ASTNode, LexerToken](lambda h, s: ListNode(s[1], s[3]))
+r71 = AttributedRule[ASTNode, LexerToken](lambda h, s: DeclarationNode(s[1], s[2], s[4]))
+
+# if rules
+r72 = AttributedRule[ASTNode, LexerToken](lambda h,s: s[3])
+r73 = AttributedRule[ASTNode, LexerToken](lambda h,s: s[3])
+r74 = AttributedRule[ASTNode, LexerToken](lambda h,s: IfNode(s[1], s[2], s[3], s[5]))
+r75 = AttributedRule[ASTNode, LexerToken](lambda h,s: ListNode(s[1], s[2]))
+r76 = rs0
+r77 = rs2
+r78 = AttributedRule[ASTNode, LexerToken](lambda h,s: IfNode(s[1], s[2], s[3], s[5]))
+r79 = AttributedRule[ASTNode, LexerToken](lambda h,s: ListNode(s[1], s[2]))
+r80 = rs0
+r81 = rs2
+r82 = rs2
+r83 = rs0
+
+# while rules
+r84 = AttributedRule[ASTNode, LexerToken](lambda h,s: s[3])
+r85 = AttributedRule[ASTNode, LexerToken](lambda h,s: WhileNode(s[1], s[2]))
+
+# for rules
+r86 = AttributedRule[ASTNode, LexerToken](lambda h,s: ForNode(s[3], s[5], s[7]))
+
+# function call rules
+r87 = AttributedRule[ASTNode, LexerToken](lambda h,s: FunctionCallNode(s[1], s[3]))
+r88 = rs1
+r89 = rs0
+r90 = AttributedRule[ASTNode, LexerToken](lambda h,s: [s[1]] + s[3])
+r91 = rs1
+
+# variable rules
+r92 = AttributedRule[ASTNode, LexerToken](lambda h,s: AttributedNode(s[1], s[3]))
+r93 = rs1
+r94 = rs1
+r95 = rs1
+r96 = rs1
 
 
 
