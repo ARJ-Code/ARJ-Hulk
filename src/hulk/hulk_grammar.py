@@ -9,7 +9,8 @@ hulk_grammar.add_attributed_production(
     'P1', ['I2s EB ; I2s', 'I2s EB I2s'], [])
 hulk_grammar.add_attributed_production('I1s', ['I1s E ;', 'E ;'], [])
 hulk_grammar.add_attributed_production(
-    'I2s', ['I2s C', 'I2s F', 'I2s Pr', ''], [])
+    'I2s', ['I2s I', ''], [])
+hulk_grammar.add_attributed_production('I', ['C', 'F', 'Pr'], [])
 
 hulk_grammar.add_attributed_production('B', ['{ I1s }'], [])
 
