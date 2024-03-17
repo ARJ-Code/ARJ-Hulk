@@ -6,6 +6,17 @@ hulk_grammar = AttributedGrammar()
 
 hulk_grammar.add_main('P')
 
+# fix here
+hulk_grammar.add_attributed_production('P', ['P1'], [r0])
+hulk_grammar.add_attributed_production(
+    'P1', ['I2s EB ; I2s', 'I2s EB I2s'], [])
+hulk_grammar.add_attributed_production('I1s', ['I1s E ;', 'E ;'], [])
+hulk_grammar.add_attributed_production(
+    'I2s', ['I2s I', ''], [])
+hulk_grammar.add_attributed_production('I', ['C', 'F', 'Pr'], [])
+
+hulk_grammar.add_attributed_production('B', ['{ I1s }'], [])
+# from
 # program productions
 hulk_grammar.add_attributed_production('P', ['Is'], [r0])
 
@@ -23,6 +34,7 @@ hulk_grammar.add_attributed_production(
 hulk_grammar.add_attributed_production('B', ['{ I1s }'], [r18])
 
 hulk_grammar.add_attributed_production('I2', ['C', 'F', 'Pr'], [r19,r20,r21])
+# until
 
 hulk_grammar.add_attributed_production(
     'E', ['Es', 'El', 'Eif', 'Ew', 'Ef', 'Eas', 'Ear'], [r22,r23,r24,r25,r26,r27,r28])
@@ -54,6 +66,24 @@ hulk_grammar.add_attributed_production('T', [': id', ''], [r64,r65])
 # let productions
 hulk_grammar.add_attributed_production('El', ['let As in E'], [r66])
 
+# fix here
+hulk_grammar.add_attributed_production('EB', ['E', 'B'], [])
+
+hulk_grammar.add_attributed_production('El', ['let As in EB'], [])
+hulk_grammar.add_attributed_production('As', ['As , Sl', 'Sl'], [])
+hulk_grammar.add_attributed_production('Sl', ['id T = E'], [])
+
+hulk_grammar.add_attributed_production('Eas', ['Ids := E'], [])
+
+hulk_grammar.add_attributed_production(
+    'Eif', ['if ( Eb ) EB Eelifs else EB'], [])
+hulk_grammar.add_attributed_production('Eelifs', ['Eelif Eelifs', ''], [])
+hulk_grammar.add_attributed_production('Eelif', ['elif ( Eb ) EB'], [])
+
+hulk_grammar.add_attributed_production('Ew', ['while ( Eb ) EB'], [])
+
+hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) EB'], [])
+# from
 hulk_grammar.add_attributed_production('Bl', ['let As in IB'], [r67])
 
 hulk_grammar.add_attributed_production('Il', ['let As ;'], [r68])
@@ -95,6 +125,7 @@ hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) E'], [r86])
 
 # hulk_grammar.add_attributed_production('Bf', ['Hf IB'], [])
 hulk_grammar.add_attributed_production('Bf', ['for ( id in E ) IB'], [r86])
+# until
 
 # function call productions
 hulk_grammar.add_attributed_production('Ec', ['id ( C1 )'], [r87])
@@ -114,6 +145,14 @@ hulk_grammar.add_attributed_production('Q', ['id', 'Ec', 'Ac'], [lambda h,s: s[1
 # hulk_grammar.add_attributed_production('F', ['function id Fh T FB'], [lambda h,s: FunctionDeclarationNode(s[2], s[3], s[5], s[4])])
 # hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [lambda h,s: s[1], lambda h,s: s[2]])
 
+# fix here
+hulk_grammar.add_attributed_production('D1', ['', 'D2'], [])
+hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [])
+hulk_grammar.add_attributed_production('D3', ['id T'], [])
+
+hulk_grammar.add_attributed_production('F', ['function id ( D1 ) T FB'], [])
+hulk_grammar.add_attributed_production('FB', ['B', '=> E ;'], [])
+# from
 hulk_grammar.add_attributed_production('Fh', ['( D1 )'], [])
 hulk_grammar.add_attributed_production('D1', ['', 'D2'], [rs0, r1])
 hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [])
@@ -121,14 +160,15 @@ hulk_grammar.add_attributed_production('D3', ['id T'], [])
 
 hulk_grammar.add_attributed_production('F', ['function id Fh T FB'], [])
 hulk_grammar.add_attributed_production('FB', ['IB', '=> E ;'], [])
+# until
 
-hulk_grammar.add_attributed_production('Hc', ['type Fh', 'type id'], [])
+hulk_grammar.add_attributed_production('Hc', ['type id ( D2 )', 'type id'], [])
 hulk_grammar.add_attributed_production(
-    'Hih', ['inherits Ec', 'inherits id', ''], [])
+    'Hih', ['inherits id ( C2 )', 'inherits id', ''], [])
 
 hulk_grammar.add_attributed_production('C', ['Hc Hih { CB }'], [])
 hulk_grammar.add_attributed_production('CB', ['CB IC', ''], [])
-hulk_grammar.add_attributed_production('IC', ['id T = E ;', 'Fh T FB'], [])
+hulk_grammar.add_attributed_production('IC', ['id T = E ;', 'id ( D1 ) T FB'], [])
 
 hulk_grammar.add_attributed_production(
     'Et', ['Ids is id', 'Ids as id', 'new Ec'], [])
@@ -140,6 +180,6 @@ hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [])
 hulk_grammar.add_attributed_production('Ac', ['id Y1'], [])
 hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [])
 
-hulk_grammar.add_attributed_production('Pr', ['protocol id Pe { PB }'], [])
-hulk_grammar.add_attributed_production('Pe', ['extends id', ''], [])
-hulk_grammar.add_attributed_production('PB', ['PB Fh T ;', 'Fh T ;'], [])
+hulk_grammar.add_attributed_production(
+    'Pr', ['protocol id { PB }', 'protocol id extends id { PB }'], [])
+hulk_grammar.add_attributed_production('PB', ['PB id ( D1 ) T ;', 'id ( D1 ) T ;'], [])
