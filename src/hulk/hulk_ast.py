@@ -3,53 +3,61 @@ from enum import Enum
 from typing import List
 
 # level 0
+
+
 class ASTNode (ABC):
     pass
 
 # level 1
+
+
 class ProgramNode(ASTNode):
     def __init__(self, first_is, expression, second_is):
         self.first_is = first_is
         self.expression = expression
         self.second_is = second_is
 
+
 class InstructionNode (ASTNode):
     pass
+
 
 class ExpressionNode (ASTNode):
     pass
 
-# class ListNode(ASTNode):
-#     def __init__(self, left, right):
-#         self.left: ListNode = left
-#         self.right: ASTNode = right
 
 class TypeNode (ASTNode):
     def __init__(self, name):
-        self.name: str = name   
+        self.name: str = name
+
 
 class TypedParameterNode(ASTNode):
     def __init__(self, name, type):
         self.name: str = name
         self.type: TypeNode = type
 
+
 class EOFNode (ASTNode):
-    pass 
+    pass
+
 
 class ClassTypeNode(ASTNode):
     def __init__(self, name):
         self.name = name
 
-class ClassTypeParametedNode(ClassTypeNode):
+
+class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters = parameters
+
 
 class InheritanceNode(ASTNode):
     def __init__(self, name):
         self.name = name
 
-class InheritanceParametedNode(InheritanceNode):
+
+class InheritanceParameterNode(InheritanceNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters = parameters
@@ -61,9 +69,11 @@ class BinaryNode (ExpressionNode):
         self.left: ASTNode = left
         self.right: ASTNode = right
 
+
 class UnaryNode (ExpressionNode):
     def __init__(self, child):
-        self.child: ASTNode = child        
+        self.child: ASTNode = child
+
 
 class AtomicNode(ExpressionNode):
     def __init__(self, name):
@@ -75,37 +85,42 @@ class InstancePropertyNode(AtomicNode):
         super().__init__(name)
         self.property = property
 
+
 class FunctionCallNode (AtomicNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters = parameters
 
+
 class AttributedNode(AtomicNode):
     def __init__(self, base_instance, property_access):
-        self.base_instance = base_instance  
-        self.property_access = property_access 
+        self.base_instance = base_instance
+        self.property_access = property_access
+
 
 class ConstantNode (AtomicNode):
     def __init__(self, value, type):
         super().__init__(value)
         self.value = value
-        self.type: ConstantTypes = type     
+        self.type: ConstantTypes = type
 
 
 class StringBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
         super().__init__(left, right)
-        self.operator: StringOperator = operator       
+        self.operator: StringOperator = operator
 
-class AritmethicBinaryNode (BinaryNode):
+
+class ArithmeticBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
         super().__init__(left, right)
-        self.operator: AritmethicOperator = operator    
+        self.operator: ArithmeticOperator = operator
 
-class AritmethicUnaryNode (UnaryNode):
+
+class ArithmeticUnaryNode (UnaryNode):
     def __init__(self, child, operator):
         super().__init__(child)
-        self.operator: AritmethicOperator = operator
+        self.operator: ArithmeticOperator = operator
 
 
 class BooleanBinaryNode (BinaryNode):
@@ -113,17 +128,20 @@ class BooleanBinaryNode (BinaryNode):
         super().__init__(left, right)
         self.operator: BooleanOperator = operator
 
+
 class BooleanUnaryNode (UnaryNode):
     def __init__(self, child, operator):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
+
 class FunctionDeclarationNode (InstructionNode):
     def __init__(self, name, parameters, return_type, body):
         self.name: str = name
         self.parameters = parameters
-        self.return_type: str = return_type                
+        self.return_type: str = return_type
         self.body: ExpressionNode = body
+
 
 class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
@@ -131,39 +149,41 @@ class ClassDeclarationNode(InstructionNode):
         self.inheritance: InheritanceNode = inheritance
         self.body: ExpressionNode = body
 
-class ClassInstrcuctionNode(InstructionNode):
+
+class ClassInstructionNode(InstructionNode):
     pass
 
-class ClassFunctionNode(ClassInstrcuctionNode):
+
+class ClassFunctionNode(ClassInstructionNode):
     def __init__(self, name, parameters, type, body):
         self.name: str = name
         self.parameters = parameters
         self.type: TypeNode = type
         self.body: ExpressionNode = body
 
-class ClassPropertyNode(ClassInstrcuctionNode):
+
+class ClassPropertyNode(ClassInstructionNode):
     def __init__(self, name, type, expression):
         self.name: str = name
         self.type: TypeNode = type
         self.expression: ExpressionNode = expression
+
 
 class IsNode(ExpressionNode):
     def __init__(self, name, type_name):
         self.name = name
         self.type_name = type_name
 
+
 class AsNode(ExpressionNode):
     def __init__(self, name, type_name):
         self.name = name
         self.type_name = type_name
 
+
 class NewNode(ExpressionNode):
     def __init__(self, name):
         self.name = name
-
-
-
-
 
 
 class DeclarationNode (ExpressionNode):
@@ -172,14 +192,16 @@ class DeclarationNode (ExpressionNode):
         self.type: TypeNode = type
         self.value: ExpressionNode = value
 
+
 class AssignmentNode (ExpressionNode):
     def __init__(self, name, value):
         self.name: str = name
         self.value: ExpressionNode = value
 
+
 class LetNode (ExpressionNode):
-    def __init__(self, assignments, body):
-        super().__init__(assignments)    
+    def __init__(self, assignments: List[AssignmentNode], body):
+        self.assignments: List[AssignmentNode] = assignments
         self.body: ExpressionNode = body
 
 
@@ -190,22 +212,24 @@ class IfNode (ExpressionNode):
         self.elif_clauses: ExpressionNode | EOFNode = elif_clauses
         self.else_body: ExpressionNode | EOFNode = else_body
 
+
 class ElifNode(ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
 
+
 class WhileNode (ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition
-        self.body: ExpressionNode = body        
+        self.body: ExpressionNode = body
+
 
 class ForNode (ExpressionNode):
     def __init__(self, variable, iterable, body):
         self.variable: str = variable
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
-
 
 
 class BooleanOperator(Enum):
@@ -219,16 +243,19 @@ class BooleanOperator(Enum):
     LTE = 7
     GTE = 8
 
-class AritmethicOperator(Enum):
+
+class ArithmeticOperator(Enum):
     ADD = 0
     SUB = 1
     MUL = 2
     DIV = 3
-    POW = 4    
+    POW = 4
+
 
 class StringOperator(Enum):
     CONCAT = 0
-    SPACED_CONCAT = 1    
+    SPACED_CONCAT = 1
+
 
 class ConstantTypes(Enum):
     STRING = 0
