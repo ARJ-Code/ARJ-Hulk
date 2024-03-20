@@ -144,7 +144,7 @@ class BooleanUnaryNode (UnaryNode):
         self.operator: BooleanOperator = operator
 
 class ImplicitArrayDeclarationNode (ExpressionNode):
-    def __init__(self, expression, variable, iterable, ):
+    def __init__(self, expression, variable, iterable):
         self.expression: ExpressionNode = expression
         self.variable: str = variable
         self.iterable: ExpressionNode = iterable
