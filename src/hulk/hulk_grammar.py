@@ -238,18 +238,37 @@ hulk_grammar.add_attributed_production(
 
 
 # array productions
-hulk_grammar.add_attributed_production('Ear', ['[ X1 ]'], [])
-hulk_grammar.add_attributed_production('X1', ['E || id in E', 'X2', ''], [])
-hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [])
+hulk_grammar.add_attributed_production('Ear', ['[ X1 ]'], [r5])
+
+r50 = AttributedRule[ASTNode, LexerToken](lambda h, s: s[1] + [s[3]])
+hulk_grammar.add_attributed_production('X1', ['E || id in E', 'X2', ''], [r50 , r0 , r4])
+
+r51 = AttributedRule[ASTNode, LexerToken](lambda h, s: s[1] + [s[3]])
+hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [r51, r0])
 
 
 # array indexation productions
-hulk_grammar.add_attributed_production('Ac', ['id Y1'], [])
-hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [])
+r52 = AttributedRule[ASTNode, LexerToken](lambda h, s: ArrayCallNode(s[1], s[2]))
+hulk_grammar.add_attributed_production('Ac', ['id Y1'], [r52])
+
+hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [r50, r5])
 
 
 # protocol productions
+r53 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolTypeNode(s[2]))
+hulk_grammar.add_attributed_production('PT', 'protocol id', [r53])
+
+r54 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[3]))
+hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r54, r4])
+
+r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolDeclarationNode(s[2], s[3], s[5]))
 hulk_grammar.add_attributed_production(
-    'Pr', ['protocol id { PB }', 'protocol id extends id { PB }'], [])
+    'Pr', ['PT Prex { PB }'], [r55])
+
 hulk_grammar.add_attributed_production(
-    'PB', ['PB id ( D1 ) T ;', 'id ( D1 ) T ;'], [])
+    'PB', ['PB PF', 'PF'], [r3, r0])
+
+r56 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolFunctionNode(s[1], s[3], s[5]))
+hulk_grammar.add_attributed_production(
+    'PF', ['id ( D1 ) T ;', [r56]]
+)
