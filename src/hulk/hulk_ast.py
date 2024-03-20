@@ -143,7 +143,15 @@ class BooleanUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
-# class ArrayDeclarationNode(InstructionNode):
+class ImplicitArrayDeclarationNode (ExpressionNode):
+    def __init__(self, expression, variable, iterable, ):
+        self.expression: ExpressionNode = expression
+        self.variable: str = variable
+        self.iterable: ExpressionNode = iterable
+
+class ExplicitArrayDeclarationNode(ExpressionNode):
+    def __init__(self, values):
+        self.values: ExpressionNode = values
 
 
 class FunctionDeclarationNode (InstructionNode):
