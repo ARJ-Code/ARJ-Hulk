@@ -258,9 +258,9 @@ hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [r52, r5])
 
 # protocol productions
 r54 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolTypeNode(s[2]))
-hulk_grammar.add_attributed_production('PT', 'protocol id', [r54])
+hulk_grammar.add_attributed_production('PT', ['protocol id'], [r54])
 
-r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[3]))
+r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[2]))
 hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r55, r4])
 
 r56 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolDeclarationNode(s[1], s[2], s[4]))
