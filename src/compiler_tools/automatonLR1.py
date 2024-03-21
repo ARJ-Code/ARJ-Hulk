@@ -43,7 +43,7 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
                     x.add_transition(
                         x.production.body[x.index], y)
 
-    def _build_reduce(self, node: Node, node_action: NodeAction, result: bool) -> bool:
+    def _build_reduce(self, node: Node[ItemLR1], node_action: NodeAction, result: bool) -> bool:
         for item in node.items:
             if item.index == len(item.production.body):
                 if item.production.head == self.grammar.main:
@@ -54,6 +54,8 @@ class AutomatonLR1(AutomatonLR[ItemLR1]):
                     result = result and node_action.add_terminal_action(
                         item.teal, Action.REDUCE, item.production.ind)
             if not result:
+                print(item.production)
+                print(node)
                 break
 
         return result

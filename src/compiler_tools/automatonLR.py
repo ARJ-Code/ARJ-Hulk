@@ -12,7 +12,7 @@ T = TypeVar('T', bound='ItemLR')
 class Node(Generic[T]):
     def __init__(self, ind: int, items: Set[T]) -> None:
         self.ind: int = ind
-        self.items: Set[int] = items
+        self.items: Set[T] = items
         self.transitions: Dict[GrammarToken, int] = {}
 
     def add_transition(self, token: GrammarToken, node: 'Node') -> None:

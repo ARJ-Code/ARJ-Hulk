@@ -1,6 +1,7 @@
 from .hulk_lexer import hulk_lexer_build
 from .hulk_parser import hulk_parser_build, hulk_to_grammar, hulk_parse
 from compiler_tools.lexer import Lexer
+from .hulk_grammar import hulk_grammar
 
 
 def hulk_build() -> bool:
@@ -13,8 +14,13 @@ def hulk_compile_str(program: str) -> bool:
     hulk_lexer.load('hulk')
 
     result = hulk_lexer.run(program)
+    tokens = result.tokens
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
+
+    if result.ok:
+        q = hulk_grammar.evaluate(result.derivation_tree, tokens)
+        print(q.expression)
 
     return result.ok
 
