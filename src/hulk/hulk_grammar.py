@@ -28,11 +28,7 @@ r4 = AttributedRule[ASTNode, LexerToken](lambda h, s: EOFNode())
 hulk_grammar.add_attributed_production('I2s', ['I2s I', ''], [r3, r00])
 
 
-hulk_grammar.add_attributed_production('I', ['C', 'F'
-                                            #  , 'Pr'
-                                             ], [r0, r0
-                                                #  , r0
-                                                 ])
+hulk_grammar.add_attributed_production('I', ['C', 'F', 'Pr'], [r0, r0, r0])
 
 
 # expression productions
@@ -261,20 +257,16 @@ hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [r52, r5])
 
 
 # protocol productions
-# r54 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolTypeNode(s[2]))
-# hulk_grammar.add_attributed_production('PT', 'protocol id', [r54])
+r54 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolTypeNode(s[2]))
+hulk_grammar.add_attributed_production('PT', 'protocol id', [r54])
 
-# r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[3]))
-# hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r55, r4])
+r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[3]))
+hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r55, r4])
 
-# r56 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolDeclarationNode(s[2], s[3], s[5]))
-# hulk_grammar.add_attributed_production(
-#     'Pr', ['PT Prex { PB }'], [r56])
+r56 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolDeclarationNode(s[1], s[2], s[4]))
+hulk_grammar.add_attributed_production('Pr', ['PT Prex { PB }'], [r56])
 
-# hulk_grammar.add_attributed_production(
-#     'PB', ['PB PF', 'PF'], [r3, r0])
+hulk_grammar.add_attributed_production('PB', ['PB PF', 'PF'], [r3, r01])
 
-# r57 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolFunctionNode(s[1], s[3], s[5]))
-# hulk_grammar.add_attributed_production(
-#     'PF', ['id ( D1 ) T ;'], [r57]
-# )
+r57 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolFunctionNode(s[1], s[3], s[5]))
+hulk_grammar.add_attributed_production('PF', ['id ( D1 ) T ;'], [r57])
