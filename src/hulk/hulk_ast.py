@@ -40,22 +40,27 @@ class TypedParameterNode(ASTNode):
 class EOFNode (ASTNode):
     pass
 
+
 class ProtocolTypeNode(ASTNode):
     def __init__(self, name):
         self.name = name
 
+
 class ClassTypeNode(ASTNode):
     def __init__(self, name):
         self.name = name
+
 
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters = parameters
 
+
 class ExtensionNode(ASTNode):
     def __init__(self, name):
         self.name = name
+
 
 class InheritanceNode(ASTNode):
     def __init__(self, name):
@@ -96,10 +101,12 @@ class FunctionCallNode (AtomicNode):
         super().__init__(name)
         self.parameters = parameters
 
+
 class ArrayCallNode(AtomicNode):
     def __init__(self, name, indexations):
         super().__init__(name)
         self.indexations = indexations
+
 
 class AttributedNode(AtomicNode):
     def __init__(self, base_instance, property_access):
@@ -143,11 +150,13 @@ class BooleanUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
+
 class ImplicitArrayDeclarationNode (ExpressionNode):
     def __init__(self, expression, variable, iterable):
         self.expression: ExpressionNode = expression
         self.variable: str = variable
         self.iterable: ExpressionNode = iterable
+
 
 class ExplicitArrayDeclarationNode(ExpressionNode):
     def __init__(self, values):
@@ -160,6 +169,7 @@ class FunctionDeclarationNode (InstructionNode):
         self.parameters = parameters
         self.return_type: str = return_type
         self.body: ExpressionNode = body
+
 
 class ProtocolDeclarationNode(InstructionNode):
     def __init__(self, protocol_type, extension, body):
@@ -178,8 +188,10 @@ class ClassDeclarationNode(InstructionNode):
 class ClassInstructionNode(InstructionNode):
     pass
 
+
 class ProtocolInstructionNode(InstructionNode):
     pass
+
 
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, type):
@@ -187,7 +199,7 @@ class ProtocolFunctionNode(ProtocolInstructionNode):
         self.parameters = parameters
         self.type: TypeNode = type
 
-    
+
 class ClassFunctionNode(ClassInstructionNode):
     def __init__(self, name, parameters, type, body):
         self.name: str = name
