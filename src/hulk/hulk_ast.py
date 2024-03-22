@@ -1,6 +1,7 @@
 from abc import ABC
 from enum import Enum
 from typing import List
+from .hulk_semantic_tools import Type
 
 # level 0
 
@@ -23,7 +24,8 @@ class InstructionNode (ASTNode):
 
 
 class ExpressionNode (ASTNode):
-    pass
+    def define_type(self, value: Type):
+        self.type = value
 
 
 class TypeNode (ASTNode):

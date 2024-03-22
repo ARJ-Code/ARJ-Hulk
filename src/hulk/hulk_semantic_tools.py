@@ -15,7 +15,7 @@ class Attribute:
 
 
 class Method:
-    def __init__(self, name: str, arguments: List[Attribute], returnType: 'Type') -> None:
+    def __init__(self, name: str,  returnType: 'Type', arguments: List[Attribute]) -> None:
         self.name: str = name
         self.arguments: List[Attribute] = arguments
         self.returnType: 'Type' = returnType
