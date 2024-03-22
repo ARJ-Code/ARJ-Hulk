@@ -69,6 +69,8 @@ hulk_grammar.add_attributed_production('Fb', ['! Cb', 'Cb'], [r10, r0])
 
 r11 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: BooleanBinaryNode(s[1], s[3], BooleanOperator.EQ))
+neq = AttributedRule[ASTNode, LexerToken](
+    lambda h, s: BooleanBinaryNode(s[1], s[3], BooleanOperator.NEQ))
 r12 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: BooleanBinaryNode(s[1], s[3], BooleanOperator.LT))
 r13 = AttributedRule[ASTNode, LexerToken](
@@ -78,7 +80,7 @@ r14 = AttributedRule[ASTNode, LexerToken](
 r15 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: BooleanBinaryNode(s[1], s[3], BooleanOperator.LTE))
 hulk_grammar.add_attributed_production(
-    'Cb', ['Gb == Gb', 'Gb < Gb', 'Gb > Gb', 'Gb >= Gb', 'Gb <= Gb', 'Gb'], [r11, r12, r13, r14, r15, r0])
+    'Cb', ['Gb == Gb', 'Gb != Gb', 'Gb < Gb', 'Gb > Gb', 'Gb >= Gb', 'Gb <= Gb', 'Gb'], [r11, neq, r12, r13, r14, r15, r0])
 
 hulk_grammar.add_attributed_production('Gb', ['Ea'], [r0])
 
@@ -251,7 +253,7 @@ hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [r52, r01])
 
 # array indexation productions
 r53 = AttributedRule[ASTNode, LexerToken](lambda h, s: ArrayCallNode(s[1], s[2]))
-hulk_grammar.add_attributed_production('Ac', ['id Y1'], [r53])
+hulk_grammar.add_attributed_production('Ac', ['id Y1', 'Ec Y1'], [r53, r53])
 
 hulk_grammar.add_attributed_production('Y1', ['Y1 [ E ]', '[ E ]'], [r52, r5])
 
