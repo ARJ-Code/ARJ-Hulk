@@ -48,6 +48,7 @@ class Parser:
     def reduce_action(self, stack_tokens: List[GrammarToken], ind: int, productions_result: List[GrammarToken]) -> GrammarToken:
         production = self.grammar.get_production(ind)
         productions_result.append(production)
+        # print(production)
 
         for t in production.body:
             stack_tokens.pop()

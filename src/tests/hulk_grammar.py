@@ -2,134 +2,198 @@ from hulk.hulk import hulk_compile_str
 
 
 def test():
-    p1 =\
+    string_test =\
         """
-        {
-            for (i in [2,3,4,4]){
-                3+4;
-                if (true) print("hello") else 3+3; 
+            let a = "hello" @@ "world" in {
+                print(a);
+                print("hello" @ "world");
             };
-        }
         """
 
-    assert hulk_compile_str(p1)
+    assert hulk_compile_str(string_test)
 
-    p2 =\
+    boolean_test =\
         """
-        let a=[2,3,4,5] in
-            let w=2 in while(true){
-                print(3);
+            let a = true in {
+                print(a);
+                print(!a);
+                print(a & false);
+                print(a | false);
+                1 != 2;
+                if (1 != 2) {
+                    print(3);
+                }
+                else {
+                    print(5);
+                };
+                1 > 2;
+                1 <= 2;
+                1 >= 2;
             }
         """
+    
+    assert hulk_compile_str(boolean_test)
 
-    assert hulk_compile_str(p2)
-
-    p3 =\
+    arithmetic_test =\
         """
-        /* klsdvmkm +/**-//9++
-
-        lkdnkn;2333@@@334667; */
-
-        hello:=34+4;
-        """
-
-    assert hulk_compile_str(p3)
-
-    p4 =\
-        """
-        let a='2333' in
-            let s=let w=9 in w*2 in 23;
-        """
-
-    assert hulk_compile_str(p4)
-
-    p5 =\
-        """
-        if(true)
-            for (i in [22]){
-                print(3);
+            let a = 2 + 3 * 4 in {
+                print(a);
+                +3;
+                -3;
+                3+3;
+                3 / 3;
             }
-        ;
         """
+    
+    assert hulk_compile_str(arithmetic_test)
 
-    assert not hulk_compile_str(p5)
-
-    p6 =\
+    declaration_test =\
         """
-        if (true ){
-            hello:=3;
-        } elif(false){
-            2+3;
-        } else 3+3;
-        """
-
-    assert hulk_compile_str(p6)
-
-    p7 =\
-        """
-        type A inherits B {
-            w=w;
-
-            hello() { print('hello');}
-            qwe(a:Number):Number => a+a;
-        }
-
-        print('hello');
-        """
-
-    assert hulk_compile_str(p7)
-
-    p8 =\
-        """
-        type E(w:Number) inherits B(w) {
-            consoleWriteLine(s) => print(s);
-        }
-
-        let b = new E(2) in {
-            b.consoleWriteLine('hello');
-        }
-        """
-
-    assert hulk_compile_str(p8)
-
-    p9 =\
-        """
-        type E {
-            consoleWriteLine(s) => print(s);
-
-            type A {
-                w=3;
+            let a = 2, b = 4, c = 8 in {
+                print(a * b - c);
+                a := 5;
+                print(a);
             }
-        }
-
-        print('hello');
         """
+    
+    assert hulk_compile_str(declaration_test)
 
-    assert not hulk_compile_str(p9)
+    array_test =\
+        """
+            let a = [2, 3, 4, 5] in {
+                print(a);
+                print(a[2]);
+                a[2] := 9;
+                print(a);
+            }
+        """
+    
+    assert hulk_compile_str(array_test)
 
-    p10 =\
+    explicit_array_test =\
         """
         let a=[e^2 || e in range(3)] in print(a);
         """
 
-    assert hulk_compile_str(p10)
+    assert hulk_compile_str(explicit_array_test)
 
-    p11 =\
+    while_test =\
         """
-        protocol A extends B{
-            hash():Number;
+            let a = [2, 3, 4, 5] in {
+                let w = 2 in while (true) {
+                    print(3);
+                };
+            }
+        """
+    
+    assert hulk_compile_str(while_test)
+
+    comment_test =\
+        """
+            /* klsdvmkm +/**-//9++ 
+            lkdnkn;2333@@@334667; */
+            hello := 34 + 4;
+        """
+    
+    assert hulk_compile_str(comment_test)
+
+    nested_let_test =\
+        """
+            let a = '2333' in {
+                let s = let w = 9 in w * 2 in 23;
+            }
+        """
+    
+    assert hulk_compile_str(nested_let_test)
+
+    for_test =\
+        """
+            for (i in [22, 33, 44]) {
+                print(i);
+            }
+        """
+    
+    assert hulk_compile_str(for_test)
+
+    if_test =\
+        """
+            if (true) {
+                hello := 3;
+            } elif (false) {
+                2 + 3;
+            } else {
+                3 + 3;
+            }
+        """
+    
+    assert hulk_compile_str(if_test)
+
+    type_test =\
+        """
+            type A inherits B {
+                w = 1;
+                hello() { print('hello'); }
+                qwe(a: Number): Number => a + a;
+            }   
+            
+            let a: A = new A() in {
+                a.hello();
+                print(a.qwe(2));
+            }
+        """
+    
+    assert hulk_compile_str(type_test)
+
+    variable_test =\
+        """
+            type B(w: Number) {
+                w = w;
+            }
+            type E(w: Number) inherits B(w) {
+                hello() => print(w);
+            }
+            let a = 2 in {
+                let b = 3 in {
+                    let c = a + b in {
+                        let d: E = new E(c) in {
+                            d.hello();
+                        };
+                    };
+                };
+            }
+        """
+    
+    assert hulk_compile_str(variable_test)
+
+    protocol_test =\
+        """
+            protocol A extends B{
+                hash():Number;
+            }
+
+            print('hello');
+        """
+
+    assert hulk_compile_str(protocol_test)
+
+    # bug with (p as Person).hello();
+    type_inference_test =\
+    """
+        type Person {
+            name = 'Alex';
+
+            hello() => print('Hello'@@name);
         }
 
-        print('hello');
-        """
-
-    assert hulk_compile_str(p11)
-
-    p12 =\
-        """
-        let a = [1,2,3,4,5] in {
-            print(a[3]);
+        let p = new Person() in {
+            if (p is Person) p.hello()
+            else {
+                print('Isnt a person');
+                let z = p as Person in {
+                    z.hello();
+                };
+            };
         }
-        """
+    """
 
-    assert hulk_compile_str(p12)
+    assert hulk_compile_str(type_inference_test)

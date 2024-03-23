@@ -20,7 +20,7 @@ def hulk_compile_str(program: str) -> bool:
 
     if result.ok:
         q = hulk_grammar.evaluate(result.derivation_tree, tokens)
-        print(q.expression)
+        # print(q.expression)
 
     return result.ok
 
