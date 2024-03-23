@@ -124,16 +124,20 @@ hulk_grammar.add_attributed_production(
 
 
 # type productions
-r26 = AttributedRule[ASTNode, LexerToken](lambda h, s: TypeNode(s[2]))
-hulk_grammar.add_attributed_production('T', [': id', ''], [r26, r4])
+hulk_grammar.add_attributed_production('Tno', [': T', ''], [r02, r4])
 
-hulk_grammar.add_attributed_production('To', [': id', [r26]])
+hulk_grammar.add_attributed_production('To', [': T'], [r02])
+
+r26 = AttributedRule[ASTNode, LexerToken](lambda h, s: TypeNode(s[1]))
+vt = AttributedRule[AsNode, LexerToken](lambda h, s: VectorTypeNode(s[2]))
+vtd = AttributedRule[AsNode, LexerToken](lambda h, s: VectorTypeNode(s[2], s[4]))
+hulk_grammar.add_attributed_production('T', ['id', '[ id ]', '[ id , num ]'], [r26, vt, vtd])
 
 
 # declarations productions
 r27 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: DeclarationNode(s[1], s[2], s[4]))
-hulk_grammar.add_attributed_production('Sl', ['id T = E'], [r27])
+hulk_grammar.add_attributed_production('Sl', ['id Tno = E'], [r27])
 
 r28 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: AssignmentNode(s[1], s[3]))
@@ -231,7 +235,7 @@ r45 = AttributedRule[ASTNode, LexerToken](
 r46 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ClassFunctionNode(s[1], s[3], s[5], s[6]))
 hulk_grammar.add_attributed_production(
-    'IC', ['id T = E ;', 'id ( D1 ) T FB'], [r45, r46])
+    'IC', ['id Tno = E ;', 'id ( D1 ) Tno FB'], [r45, r46])
 
 
 # type inference productions
@@ -242,7 +246,7 @@ hulk_grammar.add_attributed_production(
     'Et', ['Ids is id', 'Ids as id', 'new Ec'], [r47, r48, r49])
 
 
-# array productions
+# vector productions
 hulk_grammar.add_attributed_production('Ear', ['[ X1 ]'], [r5])
 
 r50 = AttributedRule[ASTNode, LexerToken](lambda h, s: ImplicitArrayDeclarationNode(s[1], s[3], s[5]))
@@ -253,7 +257,7 @@ r52 = AttributedRule[ASTNode, LexerToken](lambda h, s: s[1] + [s[3]])
 hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [r52, r01])
 
 
-# array indexation productions
+# vector indexation productions
 r53 = AttributedRule[ASTNode, LexerToken](lambda h, s: ArrayCallNode(s[1], s[2]))
 hulk_grammar.add_attributed_production('Ac', ['id Y1', 'Ec Y1'], [r53, r53])
 
@@ -273,4 +277,4 @@ hulk_grammar.add_attributed_production('Pr', ['PT Prex { PB }'], [r56])
 hulk_grammar.add_attributed_production('PB', ['PB PF', 'PF'], [r3, r01])
 
 r57 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolFunctionNode(s[1], s[3], s[5]))
-hulk_grammar.add_attributed_production('PF', ['id ( D1 ) T ;'], [r57])
+hulk_grammar.add_attributed_production('PF', ['id ( D1 ) Tno ;'], [r57])
