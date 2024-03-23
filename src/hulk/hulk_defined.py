@@ -45,7 +45,8 @@ BOOLEAN.define_inherits(OBJECT)
 
 
 def vector_t(c: Class) -> Class:
-    vector = Class('Vector['+c.name+']')
+    vector = Class('['+c.name+']')
+    vector.add_attribute(Attribute('dimension', NUMBER))
     vector.add_attribute(Attribute('length', NUMBER))
     vector.add_attribute(Attribute('capacity', NUMBER))
     vector.add_method(Method('add', OBJECT, [Attribute('a1', c)]))
