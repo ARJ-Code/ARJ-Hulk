@@ -197,3 +197,18 @@ def test():
     """
 
     assert hulk_compile_str(type_inference_test)
+
+    vector_type_test =\
+    """ 
+        function count(vector: [String]): Number 
+            => let a = 0 in 
+                for (char in vector) 
+                    let b = a in a := b + 1;
+
+        let a = ['h', 'e', 'l', 'l', 'o'] in {
+            let b: [Number, 2] = [[1, 2], [3, 4]] in print('hello');
+            print(count(a));
+        }
+    """
+
+    assert hulk_compile_str(vector_type_test)

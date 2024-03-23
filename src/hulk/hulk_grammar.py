@@ -129,7 +129,7 @@ hulk_grammar.add_attributed_production('Tno', [': T', ''], [r02, r4])
 hulk_grammar.add_attributed_production('To', [': T'], [r02])
 
 r26 = AttributedRule[ASTNode, LexerToken](lambda h, s: TypeNode(s[1]))
-vt = AttributedRule[AsNode, LexerToken](lambda h, s: VectorTypeNode(s[2]))
+vt = AttributedRule[AsNode, LexerToken](lambda h, s: VectorTypeNode(s[2], None))
 vtd = AttributedRule[AsNode, LexerToken](lambda h, s: VectorTypeNode(s[2], s[4]))
 hulk_grammar.add_attributed_production('T', ['id', '[ id ]', '[ id , num ]'], [r26, vt, vtd])
 
@@ -235,7 +235,7 @@ r45 = AttributedRule[ASTNode, LexerToken](
 r46 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ClassFunctionNode(s[1], s[3], s[5], s[6]))
 hulk_grammar.add_attributed_production(
-    'IC', ['id Tno = E ;', 'id ( D1 ) Tno FB'], [r45, r46])
+    'IC', ['id Tno = E ;', 'id ( D1 ) To FB'], [r45, r46])
 
 
 # type inference productions
@@ -277,4 +277,4 @@ hulk_grammar.add_attributed_production('Pr', ['PT Prex { PB }'], [r56])
 hulk_grammar.add_attributed_production('PB', ['PB PF', 'PF'], [r3, r01])
 
 r57 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolFunctionNode(s[1], s[3], s[5]))
-hulk_grammar.add_attributed_production('PF', ['id ( D1 ) Tno ;'], [r57])
+hulk_grammar.add_attributed_production('PF', ['id ( D1 ) To ;'], [r57])
