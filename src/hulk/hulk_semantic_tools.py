@@ -15,16 +15,16 @@ class Attribute:
 
 
 class Method:
-    def __init__(self, name: str,  returnType: 'Type', arguments: List[Attribute]) -> None:
+    def __init__(self, name: str,  return_type: 'Type', arguments: List[Attribute]) -> None:
         self.name: str = name
         self.arguments: List[Attribute] = arguments
-        self.returnType: 'Type' = returnType
+        self.return_type: 'Type' = return_type
 
     def __eq__(self, __value: object) -> bool:
         return self.name == __value.name and len(self.arguments) == len(__value.arguments)
 
     def comp(self, method: 'Method') -> bool:
-        if self.returnType.comp(method.returnType) and len(self.arguments) == len(method.arguments):
+        if self.return_type.comp(method.return_type) and len(self.arguments) == len(method.arguments):
             for i in range(len(self.arguments)):
                 if not self.arguments[i].type.comp(method.arguments[i].type):
                     return False
@@ -48,6 +48,12 @@ class Type(ABC):
 
     def __hash__(self) -> int:
         return hash(self.name)
+    
+    def covariant(self, value: 'Type') -> bool:
+        return self.comp(value)
+    
+    def contravariant(self, value: 'Type') -> bool:
+        return value.comp(self)
 
     def comp(self, value: 'Type') -> bool:
         if value.name == self.name:
@@ -113,13 +119,18 @@ class Class(Type):
     def implement_protocol(self, protocol: Protocol) -> bool:
         for mp in protocol.methods:
             mc = self.get_method(mp.name)
-            if mc is None and self.father is not None:
-                mc = self.father.get_method(mp.name)
-
-            find = mc is not None and mc.comp(mp)
-            if not find:
+            if mc is None:
                 return False
 
+            if not mc.return_type.covariant(mp.return_type):
+                return False
+            
+            if len(mc.arguments) != len(mp.arguments):
+                return False
+            
+            for i in range(len(mc.arguments)):
+                if not mc.arguments[i].type.contravariant(mp.arguments[i].type):
+                    return False
         return True
 
     def add_protocol(self, protocol: Protocol) -> None:
