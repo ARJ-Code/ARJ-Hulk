@@ -14,9 +14,9 @@ class ASTNode (ABC):
 
 class ProgramNode(ASTNode):
     def __init__(self, first_is, expression, second_is):
-        self.first_is = first_is
-        self.expression = expression
-        self.second_is = second_is
+        self.first_is: ASTNode = first_is
+        self.expression: ExpressionNode = expression
+        self.second_is: ASTNode = second_is
 
 
 class InstructionNode (ASTNode):
@@ -183,14 +183,14 @@ class ProtocolDeclarationNode(InstructionNode):
     def __init__(self, protocol_type, extension, body):
         self.protocol_type: ProtocolTypeNode = protocol_type
         self.inheritance: ExtensionNode = extension
-        self.body: ExpressionNode = body
+        self.body: ASTNode = body
 
 
 class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
         self.class_type: ClassTypeNode = class_type
         self.inheritance: InheritanceNode = inheritance
-        self.body: ExpressionNode = body
+        self.body: ASTNode = body
 
 
 class ClassInstructionNode(InstructionNode):
