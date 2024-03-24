@@ -591,6 +591,8 @@ Type *system_print(Type *t)
     return t;
 }
 
+// FINISH C TOOLS
+
 int main()
 {
     Type *a = system_createNumber(0);

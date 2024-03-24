@@ -2,6 +2,7 @@ from abc import ABC
 from enum import Enum
 from typing import List
 from .hulk_semantic_tools import Type
+from compiler_tools.lexer import LexerToken
 
 # level 0
 
@@ -95,7 +96,7 @@ class UnaryNode (ExpressionNode):
 
 class AtomicNode(ExpressionNode):
     def __init__(self, name):
-        self.name: str = name
+        self.name: LexerToken = name
 
 
 class InstancePropertyNode(AtomicNode):
@@ -107,7 +108,7 @@ class InstancePropertyNode(AtomicNode):
 class FunctionCallNode (AtomicNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        self.parameters = parameters
+        self.parameters: List[ExpressionNode] = parameters
 
 
 class ArrayCallNode(AtomicNode):
@@ -125,7 +126,7 @@ class AttributedNode(AtomicNode):
 class ConstantNode (AtomicNode):
     def __init__(self, value, type):
         super().__init__(value)
-        self.value = value
+        self.value: LexerToken = value
         self.type: ConstantTypes = type
 
 
@@ -190,7 +191,7 @@ class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
         self.class_type: ClassTypeNode = class_type
         self.inheritance: InheritanceNode = inheritance
-        self.body: ExpressionNode = body
+        self.body: List[InstructionNode] = body
 
 
 class ClassInstructionNode(InstructionNode):
