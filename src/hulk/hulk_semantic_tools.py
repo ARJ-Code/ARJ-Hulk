@@ -24,9 +24,9 @@ class Method:
         return self.name == __value.name and len(self.arguments) == len(__value.arguments)
 
     def comp(self, method: 'Method') -> bool:
-        if self.return_type.comp(method.return_type) and len(self.arguments) == len(method.arguments):
+        if self.return_type.covariant(method.return_type) and len(self.arguments) == len(method.arguments):
             for i in range(len(self.arguments)):
-                if not self.arguments[i].type.comp(method.arguments[i].type):
+                if not self.arguments[i].type.contravariant(method.arguments[i].type):
                     return False
             return True
 
@@ -118,19 +118,9 @@ class Class(Type):
 
     def implement_protocol(self, protocol: Protocol) -> bool:
         for mp in protocol.methods:
-            mc = self.get_method(mp.name)
-            if mc is None:
+            m = self.get_method(mp.name)
+            if m is None or not m.comp(mp):
                 return False
-
-            if not mc.return_type.covariant(mp.return_type):
-                return False
-            
-            if len(mc.arguments) != len(mp.arguments):
-                return False
-            
-            for i in range(len(mc.arguments)):
-                if not mc.arguments[i].type.contravariant(mp.arguments[i].type):
-                    return False
         return True
 
     def add_protocol(self, protocol: Protocol) -> None:
@@ -142,3 +132,72 @@ class Class(Type):
                 return True
 
         return super().comp(value)
+
+class Scope:
+    def __init__(self, parent=None) -> None:
+        self.parent: Scope = parent
+        self.attributes: List[Attribute] = []
+        self.methods: Set[Method] = set()
+        self.classes: Set[Class] = set()
+        self.protocols: Set[Protocol] = set()
+        self.attribute_index = 0 if parent is None else len(parent.attributes)
+
+    def define_attribute(self, attribute: Attribute) -> bool:
+        a = self.get_defined_attribute(attribute.name, len(self.attributes))
+        if a is not None:
+            return False
+        
+        self.attributes.append(attribute)
+        return True
+
+    def define_method(self, method: Method) -> bool:
+        m = self.get_defined_method(method.name)
+        if m is not None and not m.comp(method):
+            return False
+        
+        self.methods.add(method)
+        return True
+    
+    def define_class(self, class_: Class) -> bool:
+        c = self.get_defined_type(class_.name)
+        if c is not None and not c.comp(class_):
+            return False
+        
+        self.classes.add(class_)
+        return True
+    
+    def define_protocol(self, protocol: Protocol) -> bool:
+        p = self.get_defined_type(protocol.name)
+        if p is not None and not p.comp(protocol):
+            return False
+        
+        self.protocols.add(protocol)
+        return True
+    
+    def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
+        for i in range(index):
+            attribute: Attribute = self.attributes[i].name
+            if attribute.name == name:
+                return attribute
+        if self.parent is not None:
+            return self.parent.get_defined_attribute(name, self.attribute_index)
+        return None
+
+    def get_defined_method(self, name: str) -> Method | None:
+        for method in self.methods:
+            if method.name == name:
+                return method
+        if self.parent is not None:
+            return self.parent.get_defined_method(name)
+        return None
+
+    def get_defined_type(self, name: str) -> Type | None:
+        for class_ in self.classes:
+            if class_.name == name:
+                return class_
+        for protocol in self.protocols:
+            if protocol.name == name:
+                return protocol
+        if self.parent is not None:
+            return self.parent.get_defined_type(name)
+        return None
