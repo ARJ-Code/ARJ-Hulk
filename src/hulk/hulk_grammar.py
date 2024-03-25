@@ -150,7 +150,7 @@ hulk_grammar.add_attributed_production('El', ['let As in EB'], [r29])
 
 r30 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: [s[1]] + s[3])
-hulk_grammar.add_attributed_production('As', ['Sl , As', 'Sl'], [r30, r00])
+hulk_grammar.add_attributed_production('As', ['Sl , As', 'Sl'], [r30, r01])
 
 
 # if productions

@@ -48,7 +48,7 @@ class GeneratorContext:
 
     def get_v(self, v: str) -> str:
         if not v in self.dict_v:
-            self.dict_v[v] = self.new_v
+            self.dict_v[v] = self.new_v()
 
         return self.dict_v[v]
 
@@ -217,6 +217,56 @@ class HulkCodeGenerator(object):
         if is_defined_method(node.name.value):
             context.new_line(
                 f'{define_v(context.pop_v())} = system_{node.name.value}({params});')
+
+    @visitor.when(AssignmentNode)
+    def visit(self, node: AssignmentNode, context: GeneratorContext):
+        vn = context.get_v(node.name.value)
+        vc = context.new_v()
+
+        context.new_line(f'{vn} = {vc}')
+        context.new_line(f'{define_v(context.pop_v())} = {vc}')
+
+    @visitor.when(LetNode)
+    def visit(self, node: LetNode, context: GeneratorContext):
+        for a in node.assignments:
+            vn = context.get_v(a.name.value)
+            vc = context.new_v()
+
+            context.push_v(vc)
+            self.visit(a.value, context)
+
+            # if a.value.type.name == 'Number':
+            #     child_context.new_line(
+            #         f'{define_v(vn)} = system_copyNumber({vc});')
+            # elif a.value.type.name == 'Boolean':
+            #     child_context.new_line(
+            #         f'{define_v(vn)} = system_copyBoolean({vc});')
+            # else:
+            #     child_context.new_line(f'{define_v(vn)} = {vc};')
+            context.new_line(f'{define_v(vn)} = {vc};')
+
+        v = context.new_v()
+        context.push_v(v)
+
+        self.visit(node.body, context)
+
+        context.new_line(f'{define_v(context.pop_v())} = {v};')
+
+    @visitor.when(IfNode)
+    def visit(node: IfNode, context: GeneratorContext):
+        pass
+
+    @visitor.when(ElifNode)
+    def visit(node: ElifNode, context: GeneratorContext):
+        pass
+
+    @visitor.when(WhileNode)
+    def visit(node: WhileNode, context: GeneratorContext):
+        pass
+
+    @visitor.when(ForNode)
+    def visit(node: ForNode, context: GeneratorContext):
+        pass
 
 
 def load_c_tools() -> str:

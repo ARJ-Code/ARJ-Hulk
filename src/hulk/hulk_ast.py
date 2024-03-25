@@ -250,7 +250,7 @@ class DeclarationNode (ExpressionNode):
 
 class AssignmentNode (ExpressionNode):
     def __init__(self, name, value):
-        self.name: str = name
+        self.name: LexerToken = name
         self.value: ExpressionNode = value
 
 
