@@ -279,7 +279,7 @@ hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [r52, r01])
 
 # vector indexation productions
 r53 = AttributedRule[ASTNode, LexerToken](
-    lambda h, s: ArrayCallNode(AtomicNode(s[1]), s[2]))
+    lambda h, s: ArrayCallNode(AtomicNode(s[1]), s[3]))
 
 r531 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ArrayCallNode(s[1], s[3]))

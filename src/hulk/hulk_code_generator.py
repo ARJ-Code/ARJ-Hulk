@@ -113,13 +113,13 @@ class HulkCodeGenerator(object):
             context.new_line(f'system_addList({vec}, {v});')
 
     @visitor.when(ImplicitArrayDeclarationNode)
-    def visit(self,node: ImplicitArrayDeclarationNode,context:GeneratorContext):
+    def visit(self, node: ImplicitArrayDeclarationNode, context: GeneratorContext):
         vec = context.pop_v()
         context.new_line(f'{define_v(vec)} = system_createList();')
 
         vi = context.new_v()
         context.push_v(vi)
-        self.visit(node.iterable,context)
+        self.visit(node.iterable, context)
 
         v = context.get_v(node.variable.value)
 
@@ -129,15 +129,13 @@ class HulkCodeGenerator(object):
 
         context.new_line(f'{define_v(v)} = system_current({vi});')
 
-        exp=context.new_v()
+        exp = context.new_v()
         context.push_v(exp)
 
-        self.visit(node.expression,context)
+        self.visit(node.expression, context)
         context.new_line(f'system_addList({vec}, {exp});')
 
         context.new_line('}')
-
-
 
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, context: GeneratorContext):
@@ -374,13 +372,13 @@ class HulkCodeGenerator(object):
         context.new_line('}')
 
     @visitor.when(ForNode)
-    def visit(self,node: ForNode, context: GeneratorContext):
-        vr=context.pop_v()
+    def visit(self, node: ForNode, context: GeneratorContext):
+        vr = context.pop_v()
         context.new_line(f'{define_v(vr)};')
 
         vi = context.new_v()
         context.push_v(vi)
-        self.visit(node.iterable,context)
+        self.visit(node.iterable, context)
 
         v = context.get_v(node.variable.value)
 
@@ -390,14 +388,49 @@ class HulkCodeGenerator(object):
 
         context.new_line(f'{define_v(v)} = system_current({vi});')
 
-        body=context.new_v()
+        body = context.new_v()
         context.push_v(body)
 
-        self.visit(node.body,context)
+        self.visit(node.body, context)
         context.new_line(f'{vr} = {body};')
 
         context.new_line('}')
 
+    @visitor.when(ArrayCallNode)
+    def visit(self, node: ArrayCallNode, context: GeneratorContext):
+        vec = context.new_v()
+        context.push_v(vec)
+
+        self.visit(node.expression, context)
+
+        index = context.new_v()
+        context.push_v(index)
+
+        self.visit(node.indexer, context)
+
+        context.new_line(
+            f'{define_v(context.pop_v())} = system_get({vec}, {index});')
+        
+    @visitor.when(AssignmentArrayNode)
+    def visit(self,node:AssignmentArrayNode,context:GeneratorContext):
+        vec = context.new_v()
+        context.push_v(vec)
+
+        self.visit(node.array_call.expression, context)
+
+        index = context.new_v()
+        context.push_v(index)
+
+        self.visit(node.array_call.indexer, context)
+
+        value = context.new_v()
+        context.push_v(value)
+
+        self.visit(node.value, context)
+
+        context.new_line(
+            f'{define_v(context.pop_v())} = system_set({vec}, {index}, {value});')
+        
 
 
 def load_c_tools() -> str:

@@ -484,6 +484,7 @@ Type *system_orBoolean(Type *n1, Type *n2)
 {
     return system_createBoolean(system_typeToBoolean(n1) || system_typeToBoolean(n2));
 }
+
 Type *system_notBoolean(Type *n)
 {
     return system_createBoolean(!system_typeToBoolean(n));
@@ -689,6 +690,20 @@ Type *system_reset(Type *t)
     Type *(*reset)(Type *) = system_findEntry(t, "reset");
 
     return reset(t);
+}
+
+Type *system_get(Type *t, Type *index)
+{
+    Type *(*get)(Type *, Type *) = system_findEntry(t, "get");
+
+    return get(t, index);
+}
+
+Type *system_set(Type *t, Type *index, Type *item)
+{
+    Type *(*set)(Type *, Type *, Type *) = system_findEntry(t, "set");
+
+    return set(t, index, item);
 }
 
 Type *system_print(Type *t)
