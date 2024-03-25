@@ -14,7 +14,7 @@ def test():
             }
 
             protocol D {
-                hello(a: A, b: A): A;
+                hello(a: A, b: [A]): A;
             }
 
             protocol C extends D {

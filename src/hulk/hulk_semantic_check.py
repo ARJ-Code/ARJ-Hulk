@@ -151,6 +151,16 @@ class TypeBuilder:
         except SemanticError as error:
             self.errors.append(error.text)
 
+    @visitor.when(VectorTypeNode)
+    def visit(self, node: VectorTypeNode):
+        try:
+            typex = self.context.get_type(node.name)
+            for i in range(int(node.dimensions)):
+                self.context.add_type(vector_t(typex, i+1))
+        except SemanticError as error:
+            self.errors.append(error.text)
+            
+
 # class HierarchicalInfererVisitor(object):
 #     def __init__(self) -> None:
 

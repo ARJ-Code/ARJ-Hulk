@@ -43,23 +43,34 @@ BOOLEAN.add_method(Method('eq', BOOLEAN, [Attribute('a1', OBJECT)]))
 BOOLEAN.add_method(Method('comp', NUMBER, [Attribute('a1', OBJECT)]))
 BOOLEAN.define_inherits(OBJECT)
 
+memory: {str, Class} = {}
+def memoize_vector_t(f):
+    def helper(c: Class, dimension: int) -> Class:
+        if (c, dimension) not in memory:
+            memory[(c, dimension)] = f(c, dimension)
+        return memory[(c, dimension)]
+    return helper
 
-def vector_t(c: Class) -> Class:
-    vector = Class('['+c.name+']')
-    vector.add_attribute(Attribute('dimension', NUMBER))
-    vector.add_attribute(Attribute('length', NUMBER))
-    vector.add_attribute(Attribute('capacity', NUMBER))
-    vector.add_method(Method('add', OBJECT, [Attribute('a1', c)]))
-    vector.add_method(Method('remove', OBJECT, [Attribute('a1', NUMBER)]))
-    vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', c)]))
-    vector.add_method(Method('get', c, [Attribute('a1', NUMBER)]))
-    vector.add_method(
-        Method('set', OBJECT, [Attribute('a1', NUMBER), Attribute('a2', c)]))
-    vector.add_method(Method('next', BOOLEAN, []))
-    vector.add_method(Method('current', c, []))
-    vector.add_method(Method('reset', OBJECT, []))
-    vector.define_inherits(OBJECT)
-    return vector
+@memoize_vector_t
+def vector_t(c: Class, dimension: int) -> Class:
+    if dimension == 0:
+        return c
+    else:
+        vector = Class('['+c.name +(f', {dimension}' if dimension > 1 else '')+']')
+        vector.add_attribute(Attribute('dimension', NUMBER))
+        vector.add_attribute(Attribute('length', NUMBER))
+        vector.add_attribute(Attribute('capacity', NUMBER))
+        vector.add_method(Method('add', OBJECT, [Attribute('a1', vector_t(c, dimension-1))]))
+        vector.add_method(Method('remove', OBJECT, [Attribute('a1', NUMBER)]))
+        vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', vector_t(c, dimension-1))]))
+        vector.add_method(Method('get', vector_t(c, dimension-1), [Attribute('a1', NUMBER)]))
+        vector.add_method(
+            Method('set', OBJECT, [Attribute('a1', NUMBER), Attribute('a2', vector_t(c, dimension-1))]))
+        vector.add_method(Method('next', BOOLEAN, []))
+        vector.add_method(Method('current', vector_t(c, dimension-1), []))
+        vector.add_method(Method('reset', OBJECT, []))
+        vector.define_inherits(OBJECT)
+        return vector
 
 m_print = Method('print', OBJECT, [Attribute('a1', OBJECT)])
 m_sin = Method('sin', NUMBER, [Attribute('a1', NUMBER)])
@@ -71,7 +82,7 @@ m_log = Method('log', NUMBER, [Attribute(
 m_rand = Method('rand', NUMBER, [])
 
 defined_class = [OBJECT, STRING, NUMBER, BOOLEAN] + \
-    [vector_t(c) for c in [OBJECT, STRING, NUMBER, BOOLEAN]]
+    [vector_t(c, 1) for c in [OBJECT, STRING, NUMBER, BOOLEAN]]
 defined_protocols = [EQUATABLE, COMPARABLE,
                      ITERABLE, INDEXABLE_GET, INDEXABLE_SET]
 defined_methods = [m_print, m_sin, m_cos, m_tan, m_exp, m_log, m_rand]

@@ -36,7 +36,7 @@ class TypeNode (ASTNode):
 class VectorTypeNode (TypeNode):
     def __init__(self, name: str, dimensions: int | None):
         super().__init__(name)
-        self.dimensions = 1 if dimensions is None else dimensions
+        self.dimensions = 1 if dimensions is None else dimensions.value
 
 
 class TypedParameterNode(ASTNode):
