@@ -21,7 +21,7 @@ def hulk_compile_str(program: str) -> bool:
 
     if result.ok:
         q = hulk_grammar.evaluate(result.derivation_tree, tokens)
-        # hulk_code_generator(q)
+        hulk_code_generator(q)
 
     return result.ok
 

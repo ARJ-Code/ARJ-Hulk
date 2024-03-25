@@ -277,8 +277,8 @@ class IfNode (ExpressionNode):
     def __init__(self, condition, body, elif_clauses, else_body):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
-        self.elif_clauses: ExpressionNode | EOFNode = elif_clauses
-        self.else_body: ExpressionNode | EOFNode = else_body
+        self.elif_clauses: List[ElifNode] = elif_clauses
+        self.else_body: ExpressionNode = else_body
 
 
 class ElifNode(ExpressionNode):

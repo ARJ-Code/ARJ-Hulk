@@ -224,7 +224,21 @@ class HulkCodeGenerator(object):
         vc = context.new_v()
 
         context.new_line(f'{vn} = {vc}')
-        context.new_line(f'{define_v(context.pop_v())} = {vc}')
+        context.new_line(f'{define_v(context.pop_v())} = {vc};')
+
+    @visitor.when(AtomicNode)
+    def visit(self, node: AtomicNode, context: GeneratorContext):
+        context.new_line(
+            f'{define_v(context.pop_v())} = {context.get_v(node.name.value)};')
+
+    @visitor.when(ExpressionBlock)
+    def visit(self, node: ExpressionBlock, context: GeneratorContext):
+        for n in node.instructions[:-1]:
+            v = context.new_v()
+            context.push_v(v)
+            self.visit(n, context)
+
+        self.visit(node.instructions[-1], context)
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, context: GeneratorContext):
@@ -245,24 +259,56 @@ class HulkCodeGenerator(object):
             #     child_context.new_line(f'{define_v(vn)} = {vc};')
             context.new_line(f'{define_v(vn)} = {vc};')
 
-        v = context.new_v()
-        context.push_v(v)
-
         self.visit(node.body, context)
 
-        context.new_line(f'{define_v(context.pop_v())} = {v};')
+        for a in node.assignments:
+            del context.dict_v[a.name.value]
 
     @visitor.when(IfNode)
-    def visit(node: IfNode, context: GeneratorContext):
-        pass
+    def visit(self, node: IfNode, context: GeneratorContext):
+        vr = context.pop_v()
+        context.new_line(f'{define_v(vr)};')
+
+        l = [(node.condition, node.body)]+[(i.condition, i.body)
+                                           for i in node.elif_clauses]
+
+        for i, (c, b) in enumerate(l):
+            cond = context.new_v()
+            context.push_v(cond)
+            self.visit(c, context)
+
+            context.new_line(f'if ({cond})')
+            context.new_line('{')
+
+            body = context.new_v()
+            context.push_v(body)
+            self.visit(b, context)
+
+            context.new_line(f'{vr} = {body};')
+            context.new_line('}')
+            context.new_line('else')
+            context.new_line('{')
+
+            if i == len(l)-1:
+                body = context.new_v()
+                context.push_v(body)
+                self.visit(node.else_body, context)
+
+                context.new_line(f'{vr} = {body};')
+
+        for _ in l:
+            context.new_line('}')
 
     @visitor.when(ElifNode)
     def visit(node: ElifNode, context: GeneratorContext):
         pass
 
     @visitor.when(WhileNode)
-    def visit(node: WhileNode, context: GeneratorContext):
-        pass
+    def visit(self,node: WhileNode, context: GeneratorContext):
+        vr = context.pop_v()
+        context.new_line(f'{define_v(vr)};')
+
+      
 
     @visitor.when(ForNode)
     def visit(node: ForNode, context: GeneratorContext):
