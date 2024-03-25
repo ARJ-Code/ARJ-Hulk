@@ -79,6 +79,7 @@ class HulkCodeGenerator(object):
 
         context.new_line('int main()')
         context.new_line('{')
+        context.new_line('srand48(time(NULL));')
 
         context.push_v(context.new_v())
         self.visit(node.expression, context)

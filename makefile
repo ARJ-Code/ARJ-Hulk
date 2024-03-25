@@ -17,5 +17,5 @@ build:
 
 .PHONY: compile
 compile:
-	gcc -o cache/main cache/main.c && ./cache/main 
+	gcc -o cache/main cache/main.c -lm && ./cache/main 
 

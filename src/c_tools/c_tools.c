@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <time.h>
 
 #define bool int
 
@@ -719,12 +721,12 @@ Type *system_print(Type *t)
 
 Type *system_nextRange(Type *r)
 {
-    double *curr = (double*)system_findEntry(r, "curr_ind");
-   
+    double *curr = (double *)system_findEntry(r, "curr_ind");
+
     Type *end = system_findEntry(r, "end");
     double *end1 = system_findEntry(end, "value");
 
-    if (*curr == *end1)
+    if (*curr + 1 == *end1)
         return system_createBoolean(0);
 
     *curr = *curr + 1;
@@ -756,7 +758,6 @@ Type *system_range(Type *n1, Type *n2)
     double *curr = malloc(sizeof(double));
     *curr = *nn1 - 1;
 
-
     Type *range = system_createType();
     system_addEntry(range, "start", n1);
     system_addEntry(range, "end", n2);
@@ -764,6 +765,40 @@ Type *system_range(Type *n1, Type *n2)
     system_addEntry(range, "current", *system_currentRange);
     system_addEntry(range, "next", *system_nextRange);
     system_addEntry(range, "curr_ind", curr);
+}
+
+Type *system_sin(Type *n)
+{
+    double *nn1 = system_findEntry(n, "value");
+
+    return system_createNumber(sin(*nn1));
+}
+
+Type *system_cos(Type *n)
+{
+    double *nn1 = system_findEntry(n, "value");
+
+    return system_createNumber(cos(*nn1));
+}
+
+Type *system_tan(Type *n)
+{
+    double *nn1 = system_findEntry(n, "value");
+
+    return system_createNumber(tan(*nn1));
+}
+
+Type *system_log(Type *n1, Type *n2)
+{
+    double *nn1 = system_findEntry(n1, "value");
+    double *nn2 = system_findEntry(n2, "value");
+
+    return system_createNumber(log10(*nn2) / log10(*nn1));
+}
+
+Type *system_rand()
+{
+    return system_createNumber(drand48());
 }
 
 // FINISH C TOOLS
