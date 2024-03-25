@@ -717,6 +717,55 @@ Type *system_print(Type *t)
     return t;
 }
 
+Type *system_nextRange(Type *r)
+{
+    double *curr = (double*)system_findEntry(r, "curr_ind");
+   
+    Type *end = system_findEntry(r, "end");
+    double *end1 = system_findEntry(end, "value");
+
+    if (*curr == *end1)
+        return system_createBoolean(0);
+
+    *curr = *curr + 1;
+
+    return system_createBoolean(1);
+}
+
+Type *system_currentRange(Type *r)
+{
+    double *curr = system_findEntry(r, "curr_ind");
+
+    return system_createNumber(*curr);
+}
+
+Type *system_resetRange(Type *r)
+{
+    double *curr = system_findEntry(r, "curr_ind");
+    Type *start = system_findEntry(r, "start");
+    double *start1 = system_findEntry(start, "value");
+
+    *curr = *start1 - 1;
+
+    return r;
+}
+
+Type *system_range(Type *n1, Type *n2)
+{
+    double *nn1 = system_findEntry(n1, "value");
+    double *curr = malloc(sizeof(double));
+    *curr = *nn1 - 1;
+
+
+    Type *range = system_createType();
+    system_addEntry(range, "start", n1);
+    system_addEntry(range, "end", n2);
+    system_addEntry(range, "reset", *system_resetRange);
+    system_addEntry(range, "current", *system_currentRange);
+    system_addEntry(range, "next", *system_nextRange);
+    system_addEntry(range, "curr_ind", curr);
+}
+
 // FINISH C TOOLS
 
 int main()

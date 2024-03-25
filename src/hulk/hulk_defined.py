@@ -65,11 +65,13 @@ m_exp = Method('exp', NUMBER, [Attribute('a1', NUMBER)])
 m_log = Method('log', NUMBER, [Attribute(
     'a1', NUMBER), Attribute('a2', NUMBER)])
 m_rand = Method('rand', NUMBER, [])
+m_range = Method('range', ITERABLE, [Attribute(
+    'a1', NUMBER), Attribute('a2', NUMBER)])
 
 defined_class = [OBJECT, STRING, NUMBER, BOOLEAN] + \
     [vector_t(c) for c in [OBJECT, STRING, NUMBER, BOOLEAN]]
 defined_protocols = [COMPARABLE, ITERABLE, INDEXABLE_GET, INDEXABLE_SET]
-defined_methods = [m_print, m_sin, m_cos, m_tan, m_exp, m_log, m_rand]
+defined_methods = [m_print, m_sin, m_cos, m_tan, m_exp, m_log, m_rand, m_range]
 
 
 def is_defined_method(f: str) -> bool:
