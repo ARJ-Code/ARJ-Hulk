@@ -176,7 +176,6 @@ def test():
 
     assert hulk_compile_str(protocol_test)
 
-    # bug with (p as Person).hello();
     type_inference_test =\
     """
         type Person {
@@ -190,7 +189,7 @@ def test():
             else {
                 print('Isnt a person');
                 let z = p as Person in {
-                    z.hello();
+                     z.hello();
                 };
             };
         }

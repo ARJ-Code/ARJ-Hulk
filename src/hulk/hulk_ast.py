@@ -100,9 +100,15 @@ class AtomicNode(ExpressionNode):
 
 
 class InstancePropertyNode(AtomicNode):
-    def __init__(self, name, property):
+    def __init__(self, name, p_name):
         super().__init__(name)
-        self.property = property
+        self.property = p_name
+
+
+class InstanceFunctionNode(ExpressionNode):
+    def __init__(self, expression: ExpressionNode, p_name: LexerToken):
+        self.property: LexerToken = p_name
+        self.expression: ExpressionNode = expression
 
 
 class FunctionCallNode (AtomicNode):
@@ -111,16 +117,10 @@ class FunctionCallNode (AtomicNode):
         self.parameters: List[ExpressionNode] = parameters
 
 
-class ArrayCallNode(AtomicNode):
-    def __init__(self, name, indexations):
-        super().__init__(name)
-        self.indexations = indexations
-
-
-class AttributedNode(AtomicNode):
-    def __init__(self, base_instance, property_access):
-        self.base_instance = base_instance
-        self.property_access = property_access
+class ArrayCallNode(ExpressionNode):
+    def __init__(self, expression: ExpressionNode, indexer: ExpressionNode):
+        self.expression: ExpressionNode = expression
+        self.indexer: ExpressionNode = indexer
 
 
 class ConstantNode (AtomicNode):
@@ -249,8 +249,21 @@ class DeclarationNode (ExpressionNode):
 
 
 class AssignmentNode (ExpressionNode):
-    def __init__(self, name, value):
+    def __init__(self, name: LexerToken, value: ExpressionNode):
         self.name: LexerToken = name
+        self.value: ExpressionNode = value
+
+
+class AssignmentPropertyNode(ExpressionNode):
+    def __init__(self, name: LexerToken, p_name: LexerToken, value: ExpressionNode) -> None:
+        self.name: LexerToken = name
+        self.property: LexerToken = p_name
+        self.value: ExpressionNode = value
+
+
+class AssignmentArrayNode(ExpressionNode):
+    def __init__(self, array_call: ArrayCallNode, value: ExpressionNode) -> None:
+        self.array_call: ArrayCallNode = array_call
         self.value: ExpressionNode = value
 
 
@@ -285,6 +298,11 @@ class ForNode (ExpressionNode):
         self.variable: str = variable
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
+
+
+class ExpressionBlock(ExpressionNode):
+    def __init__(self, instructions: List[ASTNode]) -> None:
+        self.instructions: List[ASTNode] = instructions
 
 
 class BooleanOperator(Enum):
