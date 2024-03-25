@@ -138,7 +138,8 @@ hulk_grammar.add_attributed_production(
 
 
 # type productions
-hulk_grammar.add_attributed_production('Tno', [': T', ''], [r02, r4])
+eof_type = AttributedRule[ASTNode, LexerToken](lambda h, s: EOFTypeNode())
+hulk_grammar.add_attributed_production('Tno', [': T', ''], [r02, eof_type])
 
 hulk_grammar.add_attributed_production('To', [': T'], [r02])
 
@@ -221,7 +222,7 @@ hulk_grammar.add_attributed_production('FB', ['B', '=> E ;'], [r0, r5])
 
 hulk_grammar.add_attributed_production('D1', ['D2', ''], [r0, r00])
 
-hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [r30, r0])
+hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [r30, r01])
 
 r39 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: TypedParameterNode(s[1], s[2]))
@@ -239,7 +240,7 @@ r42 = AttributedRule[ASTNode, LexerToken](lambda h, s: InheritanceNode(s[2]))
 r43 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: InheritanceParameterNode(s[2], s[4]))
 hulk_grammar.add_attributed_production(
-    'Hih', ['inherits id', 'inherits id ( C2 )', ''], [r42, r43, r4])
+    'Hih', ['inherits id', 'inherits id ( C2 )', ''], [r42, r43, eof_type])
 
 r44 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ClassDeclarationNode(s[1], s[2], s[4]))
@@ -292,7 +293,8 @@ r54 = AttributedRule[ASTNode, LexerToken](lambda h, s: ProtocolTypeNode(s[2]))
 hulk_grammar.add_attributed_production('PT', ['protocol id'], [r54])
 
 r55 = AttributedRule[ASTNode, LexerToken](lambda h, s: ExtensionNode(s[2]))
-hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r55, r4])
+eof_extension = AttributedRule[ASTNode, LexerToken](lambda h, s: EOFExtensionNode())
+hulk_grammar.add_attributed_production('Prex', ['extends id', ''], [r55, eof_extension])
 
 r56 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ProtocolDeclarationNode(s[1], s[2], s[4]))

@@ -15,9 +15,9 @@ class ASTNode (ABC):
 
 class ProgramNode(ASTNode):
     def __init__(self, first_is, expression, second_is):
-        self.first_is = first_is
-        self.expression = expression
-        self.second_is = second_is
+        self.first_is: ASTNode = first_is
+        self.expression: ExpressionNode = expression
+        self.second_is: ASTNode = second_is
 
 
 class InstructionNode (ASTNode):
@@ -37,16 +37,22 @@ class TypeNode (ASTNode):
 class VectorTypeNode (TypeNode):
     def __init__(self, name: str, dimensions: int | None):
         super().__init__(name)
-        self.dimensions = 1 if dimensions is None else dimensions
+        self.dimensions = 1 if dimensions is None else dimensions.value
 
 
 class TypedParameterNode(ASTNode):
     def __init__(self, name, type):
-        self.name: str = name
+        self.name = name
         self.type: TypeNode = type
 
 
 class EOFNode (ASTNode):
+    pass
+
+class EOFExtensionNode(EOFNode):
+    pass
+
+class EOFTypeNode(EOFNode):
     pass
 
 
@@ -63,7 +69,7 @@ class ClassTypeNode(ASTNode):
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        self.parameters = parameters
+        self.parameters: List[TypedParameterNode] = parameters
 
 
 class ExtensionNode(ASTNode):
@@ -183,8 +189,8 @@ class FunctionDeclarationNode (InstructionNode):
 class ProtocolDeclarationNode(InstructionNode):
     def __init__(self, protocol_type, extension, body):
         self.protocol_type: ProtocolTypeNode = protocol_type
-        self.inheritance: ExtensionNode = extension
-        self.body: ExpressionNode = body
+        self.extension: ExtensionNode = extension
+        self.body: ASTNode = body
 
 
 class ClassDeclarationNode(InstructionNode):
@@ -205,7 +211,7 @@ class ProtocolInstructionNode(InstructionNode):
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, type):
         self.name: str = name
-        self.parameters = parameters
+        self.parameters: List[TypedParameterNode] = parameters
         self.type: TypeNode = type
 
 
