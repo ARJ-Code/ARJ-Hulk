@@ -13,3 +13,9 @@ test:
 .PHONY: build
 build:
 	python3 src/build.py
+
+
+.PHONY: compile
+compile:
+	gcc -o cache/main cache/main.c && ./cache/main 
+

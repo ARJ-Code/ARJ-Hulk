@@ -41,6 +41,11 @@ Type *system_toStringString(Type *string);
 Type *system_createNumber(double n);
 Type *system_eqNumber(Type *n1, Type *n2);
 Type *system_compNumber(Type *n1, Type *n2);
+Type *system_addNumber(Type *n1, Type *n2);
+Type *system_subNumber(Type *n1, Type *n2);
+Type *system_mulNumber(Type *n1, Type *n2);
+Type *system_divNumber(Type *n1, Type *n2);
+Type *system_powNumber(Type *n1, Type *n2);
 Type *system_toStringNumber(Type *n);
 
 // Boolean
@@ -48,6 +53,9 @@ Type *system_toStringNumber(Type *n);
 Type *system_createBoolean(bool n);
 Type *system_eqBoolean(Type *n1, Type *n2);
 Type *system_toStringBoolean(Type *n);
+Type *system_andBoolean(Type *n1, Type *n2);
+Type *system_orBoolean(Type *n1, Type *n2);
+Type *system_notBoolean(Type *n);
 
 // List Type
 
@@ -69,6 +77,8 @@ double system_typeToDouble(Type *t);
 bool system_typeToBoolean(Type *t);
 Type *system_copyNumber(Type *t);
 Type *system_copyBoolean(Type *t);
+Type *system_eq(Type *t1, Type *t2);
+Type *system_comp(Type *t1, Type *t2);
 
 // Type
 
@@ -264,6 +274,12 @@ Type *system_resetString(Type *list)
 
 Type *system_concatString(Type *string1, Type *string2)
 {
+    Type *(*toString1)(Type *) = system_findEntry(string1, "toString");
+    Type *(*toString2)(Type *) = system_findEntry(string2, "toString");
+
+    string1 = toString1(string1);
+    string2 = toString2(string2);
+
     int *len1 = system_findEntry(string1, "len");
     int *len2 = system_findEntry(string2, "len");
 
@@ -278,6 +294,12 @@ Type *system_concatString(Type *string1, Type *string2)
 
 Type *system_concatWithSpaceString(Type *string1, Type *string2)
 {
+    Type *(*toString1)(Type *) = system_findEntry(string1, "toString");
+    Type *(*toString2)(Type *) = system_findEntry(string2, "toString");
+
+    string1 = toString1(string1);
+    string2 = toString2(string2);
+
     int *len1 = system_findEntry(string1, "len");
     int *len2 = system_findEntry(string2, "len");
 
@@ -348,11 +370,11 @@ Type *system_compNumber(Type *n1, Type *n2)
     double nn2 = system_typeToDouble(n2);
 
     if (nn1 > nn2)
-        return system_createBoolean(1);
+        return system_createNumber(1);
     if (nn1 == nn2)
-        return system_createBoolean(0);
+        return system_createNumber(0);
 
-    return system_createBoolean(-1);
+    return system_createNumber(-1);
 }
 
 Type *system_toStringNumber(Type *n)
@@ -373,6 +395,50 @@ double system_typeToDouble(Type *t)
 Type *system_copyNumber(Type *t)
 {
     return system_createNumber(system_typeToDouble(t));
+}
+
+Type *system_addNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
+
+    return system_createNumber(nn1 + nn2);
+}
+
+Type *system_subNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
+
+    return system_createNumber(nn1 - nn2);
+}
+Type *system_mulNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
+
+    return system_createNumber(nn1 * nn2);
+}
+
+Type *system_divNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
+
+    return system_createNumber(nn1 / nn2);
+}
+
+Type *system_powNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
+
+    double pow = 1;
+
+    for (int i = 0; i < nn2; i++)
+        pow *= nn1;
+
+    return system_createNumber(pow);
 }
 
 // Boolean
@@ -412,6 +478,20 @@ bool system_typeToBoolean(Type *t)
 Type *system_copyBoolean(Type *t)
 {
     return system_createBoolean(system_typeToBoolean(t));
+}
+
+Type *system_andBoolean(Type *n1, Type *n2)
+{
+    return system_createBoolean(system_typeToBoolean(n1) && system_typeToBoolean(n2));
+}
+
+Type *system_orBoolean(Type *n1, Type *n2)
+{
+    return system_createBoolean(system_typeToBoolean(n1) || system_typeToBoolean(n2));
+}
+Type *system_notBoolean(Type *n)
+{
+    return system_createBoolean(!system_typeToBoolean(n));
 }
 
 // List
@@ -558,8 +638,7 @@ Type *system_toStringList(Type *list)
 
     for (int i = 0; i < *len; i++)
     {
-        Type *(*toString)(Type *) = system_findEntry(array[i], "toString");
-        Type *aux = system_concatString(s, toString(array[i]));
+        Type *aux = system_concatString(s, array[i]);
         free(s);
         s = aux;
 
@@ -578,6 +657,20 @@ Type *system_toStringList(Type *list)
     free(q);
 
     s = aux;
+}
+
+Type *system_eq(Type *t1, Type *t2)
+{
+    Type *(*eq)(Type *, Type *) = system_findEntry(t1, "eq");
+
+    return eq(t1, t2);
+}
+
+Type *system_comp(Type *t1, Type *t2)
+{
+    Type *(*comp)(Type *, Type *) = system_findEntry(t1, "comp");
+
+    return comp(t1, t2);
 }
 
 Type *system_print(Type *t)
