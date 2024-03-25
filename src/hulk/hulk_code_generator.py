@@ -222,8 +222,11 @@ class HulkCodeGenerator(object):
     def visit(self, node: AssignmentNode, context: GeneratorContext):
         vn = context.get_v(node.name.value)
         vc = context.new_v()
+        context.push_v(vc)
 
-        context.new_line(f'{vn} = {vc}')
+        self.visit(node.value,context)
+
+        context.new_line(f'{vn} = {vc};')
         context.new_line(f'{define_v(context.pop_v())} = {vc};')
 
     @visitor.when(AtomicNode)
@@ -306,7 +309,30 @@ class HulkCodeGenerator(object):
     @visitor.when(WhileNode)
     def visit(self,node: WhileNode, context: GeneratorContext):
         vr = context.pop_v()
+        vc=context.new_v()
         context.new_line(f'{define_v(vr)};')
+      
+        cond=context.new_v()
+        context.push_v(cond)
+        self.visit(node.condition,context)
+
+        context.new_line(f'{define_v(vc)} = {cond};')
+        context.new_line(f'while(system_typeToBoolean({vc}))')
+        context.new_line('{')
+
+        body=context.new_v()
+        context.push_v(body)
+        self.visit(node.body,context)
+
+        context.new_line(f'{vr} = {body};')
+
+        cond=context.new_v()
+        context.push_v(cond)
+        self.visit(node.condition,context)
+
+        context.new_line(f'{vc} = {cond};')
+        
+        context.new_line('}')
 
       
 
