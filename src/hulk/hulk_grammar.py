@@ -282,9 +282,9 @@ r53 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ArrayCallNode(AtomicNode(s[1]), s[2]))
 
 r531 = AttributedRule[ASTNode, LexerToken](
-    lambda h, s: ArrayCallNode(s[1], s[2]))
+    lambda h, s: ArrayCallNode(s[1], s[3]))
 hulk_grammar.add_attributed_production(
-    'Ac', ['id [ E ]', 'Ec [ E ]', 'Ac [ E ]'], [r53, r531, r531])
+    'Ac', ['id [ E ]', 'Ec [ E ]', 'Ac [ E ]', 'Epc [ E ]'], [r53, r531, r531, r531])
 
 
 # protocol productions

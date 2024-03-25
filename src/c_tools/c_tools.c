@@ -170,14 +170,11 @@ Type *system_createString(char *value)
     int *len = malloc(sizeof(int));
     int *curr = malloc(sizeof(int));
 
-    char *s_value = malloc(sizeof(strlen(value)));
-    strcpy(s_value, value);
-
     *len = strlen(value);
     *curr = 0;
 
     system_addEntry(s, "type", "String");
-    system_addEntry(s, "value", s_value);
+    system_addEntry(s, "value", value);
     system_addEntry(s, "len", len);
     system_addEntry(s, "curr", curr);
 
@@ -209,13 +206,11 @@ Type *system_lengthString(Type *string)
 Type *system_getString(Type *string, Type *p_index)
 {
     int index = system_typeToDouble(p_index);
-    char *aux = malloc(sizeof(char));
+    char *aux = malloc(sizeof(char) + 1);
     char *value = system_findEntry(string, "value");
     aux[0] = value[index];
     aux[1] = '\0';
     Type *q = system_createString(aux);
-
-    free(aux);
 
     return q;
 }
@@ -245,7 +240,7 @@ Type *system_currentString(Type *list)
 {
     int *curr = (int *)system_findEntry(list, "curr");
 
-    Type *aux = system_createNumber(*curr);
+    Type *aux = system_createNumber(*curr - 1);
     Type *res = system_getString(list, aux);
     free(aux);
     return res;
@@ -340,7 +335,7 @@ Type *system_createNumber(double n)
 {
     Type *t = system_createType();
 
-    double *value = malloc(sizeof(int));
+    double *value = malloc(sizeof(double));
     *value = n;
 
     system_addEntry(t, "type", "Number");
@@ -381,7 +376,7 @@ Type *system_toStringNumber(Type *n)
 {
     double *value = system_findEntry(n, "value");
 
-    char str[1024];
+    char *str = malloc(1024);
     sprintf(str, "%f", *value);
     return system_createString(str);
 }
@@ -602,8 +597,8 @@ Type *system_currentList(Type *list)
 {
     int *curr = (int *)system_findEntry(list, "curr");
 
-    Type *aux = system_createNumber(*curr);
-    Type *res = system_getString(list, aux);
+    Type *aux = system_createNumber(*curr - 1);
+    Type *res = system_getList(list, aux);
     free(aux);
     return res;
 }
@@ -644,7 +639,7 @@ Type *system_toStringList(Type *list)
 
         if (i != *len - 1)
         {
-            aux = system_concatString(s, system_createString(","));
+            aux = system_concatString(s, system_createString(", "));
             free(s);
             s = aux;
         }
@@ -657,6 +652,8 @@ Type *system_toStringList(Type *list)
     free(q);
 
     s = aux;
+
+    return s;
 }
 
 Type *system_eq(Type *t1, Type *t2)
@@ -671,6 +668,27 @@ Type *system_comp(Type *t1, Type *t2)
     Type *(*comp)(Type *, Type *) = system_findEntry(t1, "comp");
 
     return comp(t1, t2);
+}
+
+Type *system_current(Type *t)
+{
+    Type *(*current)(Type *) = system_findEntry(t, "current");
+
+    return current(t);
+}
+
+Type *system_next(Type *t)
+{
+    Type *(*next)(Type *) = system_findEntry(t, "next");
+
+    return next(t);
+}
+
+Type *system_reset(Type *t)
+{
+    Type *(*reset)(Type *) = system_findEntry(t, "reset");
+
+    return reset(t);
 }
 
 Type *system_print(Type *t)

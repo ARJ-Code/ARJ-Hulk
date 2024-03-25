@@ -163,13 +163,13 @@ class BooleanUnaryNode (UnaryNode):
 class ImplicitArrayDeclarationNode (ExpressionNode):
     def __init__(self, expression, variable, iterable):
         self.expression: ExpressionNode = expression
-        self.variable: str = variable
+        self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
 
 
 class ExplicitArrayDeclarationNode(ExpressionNode):
-    def __init__(self, values):
-        self.values: ExpressionNode = values
+    def __init__(self, values: List[ExpressionNode]):
+        self.values: List[ExpressionNode] = values
 
 
 class FunctionDeclarationNode (InstructionNode):
@@ -294,8 +294,8 @@ class WhileNode (ExpressionNode):
 
 
 class ForNode (ExpressionNode):
-    def __init__(self, variable, iterable, body):
-        self.variable: str = variable
+    def __init__(self, variable: LexerToken, iterable: ExpressionNode, body):
+        self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
 

@@ -100,6 +100,45 @@ class HulkCodeGenerator(object):
             context.new_line(
                 f'{define_v(context.pop_v())} = system_createNumber({node.value.value});')
 
+    @visitor.when(ExplicitArrayDeclarationNode)
+    def visit(self, node: ExplicitArrayDeclarationNode, context: GeneratorContext):
+        vec = context.pop_v()
+        context.new_line(f'{define_v(vec)} = system_createList();')
+
+        for e in node.values:
+            v = context.new_v()
+            context.push_v(v)
+
+            self.visit(e, context)
+            context.new_line(f'system_addList({vec}, {v});')
+
+    @visitor.when(ImplicitArrayDeclarationNode)
+    def visit(self,node: ImplicitArrayDeclarationNode,context:GeneratorContext):
+        vec = context.pop_v()
+        context.new_line(f'{define_v(vec)} = system_createList();')
+
+        vi = context.new_v()
+        context.push_v(vi)
+        self.visit(node.iterable,context)
+
+        v = context.get_v(node.variable.value)
+
+        context.new_line(f'system_reset({vi});')
+        context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
+        context.new_line('{')
+
+        context.new_line(f'{define_v(v)} = system_current({vi});')
+
+        exp=context.new_v()
+        context.push_v(exp)
+
+        self.visit(node.expression,context)
+        context.new_line(f'system_addList({vec}, {exp});')
+
+        context.new_line('}')
+
+
+
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, context: GeneratorContext):
         lv = context.new_v()
@@ -224,7 +263,7 @@ class HulkCodeGenerator(object):
         vc = context.new_v()
         context.push_v(vc)
 
-        self.visit(node.value,context)
+        self.visit(node.value, context)
 
         context.new_line(f'{vn} = {vc};')
         context.new_line(f'{define_v(context.pop_v())} = {vc};')
@@ -307,38 +346,58 @@ class HulkCodeGenerator(object):
         pass
 
     @visitor.when(WhileNode)
-    def visit(self,node: WhileNode, context: GeneratorContext):
+    def visit(self, node: WhileNode, context: GeneratorContext):
         vr = context.pop_v()
-        vc=context.new_v()
+        vc = context.new_v()
         context.new_line(f'{define_v(vr)};')
-      
-        cond=context.new_v()
+
+        cond = context.new_v()
         context.push_v(cond)
-        self.visit(node.condition,context)
+        self.visit(node.condition, context)
 
         context.new_line(f'{define_v(vc)} = {cond};')
         context.new_line(f'while(system_typeToBoolean({vc}))')
         context.new_line('{')
 
-        body=context.new_v()
+        body = context.new_v()
         context.push_v(body)
-        self.visit(node.body,context)
+        self.visit(node.body, context)
 
         context.new_line(f'{vr} = {body};')
 
-        cond=context.new_v()
+        cond = context.new_v()
         context.push_v(cond)
-        self.visit(node.condition,context)
+        self.visit(node.condition, context)
 
         context.new_line(f'{vc} = {cond};')
-        
+
         context.new_line('}')
 
-      
-
     @visitor.when(ForNode)
-    def visit(node: ForNode, context: GeneratorContext):
-        pass
+    def visit(self,node: ForNode, context: GeneratorContext):
+        vr=context.pop_v()
+        context.new_line(f'{define_v(vr)};')
+
+        vi = context.new_v()
+        context.push_v(vi)
+        self.visit(node.iterable,context)
+
+        v = context.get_v(node.variable.value)
+
+        context.new_line(f'system_reset({vi});')
+        context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
+        context.new_line('{')
+
+        context.new_line(f'{define_v(v)} = system_current({vi});')
+
+        body=context.new_v()
+        context.push_v(body)
+
+        self.visit(node.body,context)
+        context.new_line(f'{vr} = {body};')
+
+        context.new_line('}')
+
 
 
 def load_c_tools() -> str:
