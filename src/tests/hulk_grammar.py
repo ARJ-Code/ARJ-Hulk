@@ -132,7 +132,7 @@ def test():
         """
             type A inherits B {
                 w = 1;
-                hello() { print('hello'); }
+                hello():Object { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }   
             
@@ -150,7 +150,7 @@ def test():
                 w = w;
             }
             type E(w: Number) inherits B(w) {
-                hello() => print(w);
+                hello():Object => print(w);
             }
             let a = 2 in {
                 let b = 3 in {
@@ -176,13 +176,12 @@ def test():
 
     assert hulk_compile_str(protocol_test)
 
-    # bug with (p as Person).hello();
     type_inference_test =\
     """
         type Person {
             name = 'Alex';
 
-            hello() => print('Hello'@@name);
+            hello():Object => print('Hello'@@name);
         }
 
         let p = new Person() in {
@@ -190,7 +189,7 @@ def test():
             else {
                 print('Isnt a person');
                 let z = p as Person in {
-                    z.hello();
+                     z.hello();
                 };
             };
         }

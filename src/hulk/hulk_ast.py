@@ -2,6 +2,7 @@ from abc import ABC
 from enum import Enum
 from typing import List
 from .hulk_semantic_tools import Type
+from compiler_tools.lexer import LexerToken
 
 # level 0
 
@@ -101,37 +102,37 @@ class UnaryNode (ExpressionNode):
 
 class AtomicNode(ExpressionNode):
     def __init__(self, name):
-        self.name: str = name
+        self.name: LexerToken = name
 
 
 class InstancePropertyNode(AtomicNode):
-    def __init__(self, name, property):
+    def __init__(self, name, p_name):
         super().__init__(name)
-        self.property = property
+        self.property = p_name
+
+
+class InstanceFunctionNode(ExpressionNode):
+    def __init__(self, expression: ExpressionNode, p_name: LexerToken):
+        self.property: LexerToken = p_name
+        self.expression: ExpressionNode = expression
 
 
 class FunctionCallNode (AtomicNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        self.parameters = parameters
+        self.parameters: List[ExpressionNode] = parameters
 
 
-class ArrayCallNode(AtomicNode):
-    def __init__(self, name, indexations):
-        super().__init__(name)
-        self.indexations = indexations
-
-
-class AttributedNode(AtomicNode):
-    def __init__(self, base_instance, property_access):
-        self.base_instance = base_instance
-        self.property_access = property_access
+class ArrayCallNode(ExpressionNode):
+    def __init__(self, expression: ExpressionNode, indexer: ExpressionNode):
+        self.expression: ExpressionNode = expression
+        self.indexer: ExpressionNode = indexer
 
 
 class ConstantNode (AtomicNode):
     def __init__(self, value, type):
         super().__init__(value)
-        self.value = value
+        self.value: LexerToken = value
         self.type: ConstantTypes = type
 
 
@@ -168,13 +169,13 @@ class BooleanUnaryNode (UnaryNode):
 class ImplicitArrayDeclarationNode (ExpressionNode):
     def __init__(self, expression, variable, iterable):
         self.expression: ExpressionNode = expression
-        self.variable: str = variable
+        self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
 
 
 class ExplicitArrayDeclarationNode(ExpressionNode):
-    def __init__(self, values):
-        self.values: ExpressionNode = values
+    def __init__(self, values: List[ExpressionNode]):
+        self.values: List[ExpressionNode] = values
 
 
 class FunctionDeclarationNode (InstructionNode):
@@ -196,7 +197,7 @@ class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
         self.class_type: ClassTypeNode = class_type
         self.inheritance: InheritanceNode = inheritance
-        self.body: ASTNode = body
+        self.body: List[InstructionNode] = body
 
 
 class ClassInstructionNode(InstructionNode):
@@ -254,8 +255,21 @@ class DeclarationNode (ExpressionNode):
 
 
 class AssignmentNode (ExpressionNode):
-    def __init__(self, name, value):
-        self.name: str = name
+    def __init__(self, name: LexerToken, value: ExpressionNode):
+        self.name: LexerToken = name
+        self.value: ExpressionNode = value
+
+
+class AssignmentPropertyNode(ExpressionNode):
+    def __init__(self, name: LexerToken, p_name: LexerToken, value: ExpressionNode) -> None:
+        self.name: LexerToken = name
+        self.property: LexerToken = p_name
+        self.value: ExpressionNode = value
+
+
+class AssignmentArrayNode(ExpressionNode):
+    def __init__(self, array_call: ArrayCallNode, value: ExpressionNode) -> None:
+        self.array_call: ArrayCallNode = array_call
         self.value: ExpressionNode = value
 
 
@@ -269,8 +283,8 @@ class IfNode (ExpressionNode):
     def __init__(self, condition, body, elif_clauses, else_body):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
-        self.elif_clauses: ExpressionNode | EOFNode = elif_clauses
-        self.else_body: ExpressionNode | EOFNode = else_body
+        self.elif_clauses: List[ElifNode] = elif_clauses
+        self.else_body: ExpressionNode = else_body
 
 
 class ElifNode(ExpressionNode):
@@ -286,10 +300,15 @@ class WhileNode (ExpressionNode):
 
 
 class ForNode (ExpressionNode):
-    def __init__(self, variable, iterable, body):
-        self.variable: str = variable
+    def __init__(self, variable: LexerToken, iterable: ExpressionNode, body):
+        self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
+
+
+class ExpressionBlock(ExpressionNode):
+    def __init__(self, instructions: List[ASTNode]) -> None:
+        self.instructions: List[ASTNode] = instructions
 
 
 class BooleanOperator(Enum):
