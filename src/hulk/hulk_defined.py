@@ -59,6 +59,7 @@ def vector_t(c: Class) -> Class:
     vector.add_method(Method('current', c, []))
     vector.add_method(Method('reset', OBJECT, []))
     vector.define_inherits(OBJECT)
+    return vector
 
 m_print = Method('print', OBJECT, [Attribute('a1', OBJECT)])
 m_sin = Method('sin', NUMBER, [Attribute('a1', NUMBER)])

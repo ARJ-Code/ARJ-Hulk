@@ -182,7 +182,7 @@ class FunctionDeclarationNode (InstructionNode):
 class ProtocolDeclarationNode(InstructionNode):
     def __init__(self, protocol_type, extension, body):
         self.protocol_type: ProtocolTypeNode = protocol_type
-        self.inheritance: ExtensionNode = extension
+        self.extension: ExtensionNode = extension
         self.body: ASTNode = body
 
 
@@ -204,7 +204,7 @@ class ProtocolInstructionNode(InstructionNode):
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, type):
         self.name: str = name
-        self.parameters = parameters
+        self.parameters: ASTNode = parameters
         self.type: TypeNode = type
 
 
