@@ -41,7 +41,7 @@ class VectorTypeNode (TypeNode):
 
 class TypedParameterNode(ASTNode):
     def __init__(self, name, type):
-        self.name: str = name
+        self.name = name
         self.type: TypeNode = type
 
 
@@ -204,7 +204,7 @@ class ProtocolInstructionNode(InstructionNode):
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, type):
         self.name: str = name
-        self.parameters: ASTNode = parameters
+        self.parameters: List[TypedParameterNode] = parameters
         self.type: TypeNode = type
 
 

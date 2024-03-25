@@ -1,4 +1,4 @@
-from hulk.hulk_semantic_check import TypeCollector
+from hulk.hulk_semantic_check import TypeBuilder, TypeCollector
 from .hulk_lexer import hulk_lexer_build
 from .hulk_parser import hulk_parser_build, hulk_to_grammar, hulk_parse
 from compiler_tools.lexer import Lexer
@@ -28,6 +28,9 @@ def hulk_compile_str(program: str) -> bool:
         collector.visit(ast)
 
         context = collector.context
+
+        builder = TypeBuilder(context, errors)
+        builder.visit(ast)
 
         print('Errors:', errors)
         print('Context:')

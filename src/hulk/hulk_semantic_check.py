@@ -2,6 +2,7 @@ from compiler_tools import visitor
 from hulk.hulk_ast import *
 from hulk.hulk_semantic_tools import *
 from hulk.hulk_defined import *
+from typing import Tuple
 
 
 class TypeCollector(object):
@@ -16,10 +17,10 @@ class TypeCollector(object):
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode):
         self.context = Context()
-        # for df in defined_class:
-        #     self.context.add_type(df)
-        # for dp in defined_protocols:
-        #     self.context.add_type(dp)
+        for df in defined_class:
+            self.context.add_type(df)
+        for dp in defined_protocols:
+            self.context.add_type(dp)
 
         for statement in node.first_is:
             self.visit(statement)
@@ -48,6 +49,107 @@ class TypeCollector(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
+class TypeBuilder:
+    def __init__(self, context, errors=[]):
+        self.context: Context = context
+        self.current_type: Type = None
+        self.errors: List[str] = errors
+
+    @visitor.on('node')
+    def visit(self, node):
+        pass
+    
+    @visitor.when(ProgramNode)
+    def visit(self, node: ProgramNode):
+        for statement in node.first_is:
+            self.visit(statement)
+        for statement in node.second_is:
+            self.visit(statement)
+
+    @visitor.when(ProtocolDeclarationNode)
+    def visit(self, node: ProtocolDeclarationNode):
+        extension_type = self.visit(node.extension)
+        self.current_type = self.context.get_protocol(node.protocol_type.name)
+        self.current_type.set_parent(extension_type)
+        for statement in node.body:
+            self.visit(statement)
+        self.current_type = None
+
+    @visitor.when(ExtensionNode)
+    def visit(self, node: ExtensionNode):
+        try:
+            return self.context.get_protocol(node.name)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(ProtocolFunctionNode)
+    def visit(self, node: ProtocolFunctionNode) -> Attribute:
+        def _build_attribute(param: TypedParameterNode):
+            p_type = self.visit(param)
+            return Attribute(param.name.value, p_type)
+
+        try:
+            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            return_type = self.visit(node.type[0])
+            self.current_type.define_method(node.name, parameters, return_type)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(ClassDeclarationNode)
+    def visit(self, node: ClassDeclarationNode):
+        inheritance_type = self.visit(node.inheritance)
+        self.current_type = self.context.get_type(node.class_type.name)
+        self.current_type.set_parent(inheritance_type)
+        for statement in node.body:
+            self.visit(statement)
+        self.current_type = None
+
+    @visitor.when(InheritanceNode)
+    def visit(self, node: InheritanceNode):
+        try:
+            return self.context.get_type(node.name)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(ClassFunctionNode)
+    def visit(self, node: ClassFunctionNode):
+        def _build_attribute(param: TypedParameterNode):
+            p_type = self.visit(param)
+            return Attribute(param.name.value, p_type)
+
+        try:
+            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            return_type = self.visit(node.type[0])
+            self.current_type.define_method(node.name, parameters, return_type)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(ClassPropertyNode)
+    def visit(self, node: ClassPropertyNode):
+        try:
+            attr_type = self.visit(node.type)
+            self.current_type.define_attribute(node.name, attr_type)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(EOFNode)
+    def visit(self, node: EOFNode):
+        return OBJECT
+
+    @visitor.when(TypedParameterNode)
+    def visit(self, node: TypedParameterNode):
+        try:
+            param_type = self.visit(node.type[0])
+            return param_type
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+    @visitor.when(TypeNode)
+    def visit(self, node: TypeNode):
+        try:
+            return self.context.get_type(node.name)
+        except SemanticError as error:
+            self.errors.append(error.text)
 
 # class HierarchicalInfererVisitor(object):
 #     def __init__(self) -> None:

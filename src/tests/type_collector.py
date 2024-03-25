@@ -5,18 +5,20 @@ def test():
         """
             type A inherits B {
                 w = 1;
-                hello() { print('hello'); }
+                hello(): Number { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
 
-            protocol C {
+            type B {
+                a = 2;
+            }
+
+            protocol D {
+                hello(a: A, b: A): A;
+            }
+
+            protocol C extends D {
                 qwe(a: Number): Number;
-            }
-
-            type D {
-                w = 1;
-                hello() { print('hello'); }
-                qwe(a: Number): Number => a + a;
             }
             
             let a: A = new A() in {

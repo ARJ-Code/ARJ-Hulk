@@ -204,7 +204,7 @@ hulk_grammar.add_attributed_production('FB', ['B', '=> E ;'], [r0, r5])
 
 hulk_grammar.add_attributed_production('D1', ['D2', ''], [r0, r00])
 
-hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [r30, r0])
+hulk_grammar.add_attributed_production('D2', ['D3 , D2', 'D3'], [r30, r01])
 
 r39 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: TypedParameterNode(s[1], s[2]))

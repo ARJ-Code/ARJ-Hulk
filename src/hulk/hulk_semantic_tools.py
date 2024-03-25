@@ -21,7 +21,7 @@ class Attribute:
         return hash(self.name)
     
     def __str__(self) -> str:
-        return f'{self.name} : {self.type.name}'
+        return f'{self.name}' + (': Error' if self.type is None else f': {self.type.name}')
 
 class Method:
     def __init__(self, name: str, return_type: 'Type', arguments: List[Attribute] = []) -> None:
@@ -48,7 +48,7 @@ class Method:
     def __str__(self) -> str:
         output = f'method {self.name}('
         output += ', '.join(str(x) for x in self.arguments)
-        output += f') -> {self.return_type.name}'
+        output += ') -> Error' if self.return_type is None else f') -> {self.return_type.name}'
         return output
 
 class Type(ABC):
@@ -58,31 +58,37 @@ class Type(ABC):
         self.methods: List[Method] = []
         self.parent: Type = None
 
+    def decompact(self, token: LexerToken):
+        return (token.row, token.col, token.value)
+    
+    def error_location(self, row, col) -> str:
+        return f' Error at {row}:{col}'
+
     def set_parent(self, parent: 'Type') -> None:
         if self.parent is not None:
             raise SemanticError(f'Parent type is already set for {self.name}.')
         self.parent = parent
 
-    def get_attribute(self, name: str) -> Attribute:
+    def get_attribute(self, id: LexerToken) -> Attribute:
+        row, col, name = self.decompact(id)
         try:
             return next(attr for attr in self.attributes if attr.name == name)
         except StopIteration:
             if self.parent is None:
-                raise SemanticError(f'Attribute "{name}" is not defined in {self.name}.')
+                raise SemanticError(f'Attribute "{name}" is not defined in {self.name}.' + self.error_location(row, col))
             try:
                 return self.parent.get_attribute(name)
             except SemanticError:
-                raise SemanticError(f'Attribute "{name}" is not defined in {self.name}.')
+                raise SemanticError(f'Attribute "{name}" is not defined in {self.name}.' + self.error_location(row, col))
 
-    def define_attribute(self, name:str, typex: 'Type') -> None:
-        try:
-            self.get_attribute(name)
-        except SemanticError:
-            attribute = Attribute(name, typex)
-            self.attributes.append(attribute)
-            return attribute
-        else:
-            raise SemanticError(f'Attribute "{name}" is already defined in {self.name}.')
+    def define_attribute(self, id: LexerToken, typex: 'Type') -> Attribute:
+        row, col, name = self.decompact(id)
+        if name in (attribute for attribute in self.all_attributes()):
+            raise SemanticError(f'Attribute "{name}" already defined in {self.name}' + self.error_location(row, col))
+
+        attribute = Attribute(name, typex)
+        self.attributes.append(attribute)
+        return attribute
         
     def add_attribute(self, attribute: Attribute):
         self.attributes.append(attribute)
@@ -98,11 +104,12 @@ class Type(ABC):
             except SemanticError:
                 raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
 
-    def define_method(self, name:str, arguments: List[Attribute], return_type: 'Type'):
-        if name in (method.name for method in self.methods):
-            raise SemanticError(f'Method "{name}" already defined in {self.name}')
+    def define_method(self, id: LexerToken, arguments: List[Attribute], return_type: 'Type') -> Method:
+        row, col, name = self.decompact(id)
+        if name in (method for method in self.all_methods()):
+            raise SemanticError(f'Method "{name}" already defined in {self.name}' + self.error_location(row, col))
 
-        method = Method(name,arguments, return_type)
+        method = Method(name, return_type, arguments)
         self.methods.append(method)
         return method
     
@@ -218,8 +225,11 @@ class Protocol(Type):
     def __init__(self, name: str) -> None:
         super().__init__(name)
 
+    def set_parent(self, parent: Type) -> None:
+        return self.define_extends(parent)
+
     def define_extends(self, extends: 'Protocol') -> None:
-        self.father = extends
+        self.parent = extends
 
     def __str__(self):
         output = f'protocol {self.name}'
@@ -228,7 +238,7 @@ class Protocol(Type):
         output += ' {'
         output += '\n\t' if self.methods else ''
         output += '\n\t'.join(str(x) for x in self.methods)
-        output += '\n\t' if self.methods else ''
+        output += '\n' if self.methods else ''
         output += '}\n'
         return output
 
@@ -238,8 +248,11 @@ class Class(Type):
         super().__init__(name)
         self.protocols: List[Protocol] = []
 
+    def set_parent(self, parent: Type) -> None:
+        return self.define_inherits(parent)
+
     def define_inherits(self, inherits: 'Class') -> None:
-        self.father = inherits
+        self.parent = inherits
 
     def implement_protocol(self, protocol: Protocol) -> bool:
         for mp in protocol.methods:
@@ -267,7 +280,7 @@ class Class(Type):
         output += '\n\t'.join(str(x) for x in self.attributes)
         output += '\n\t' if self.attributes else ''
         output += '\n\t'.join(str(x) for x in self.methods)
-        output += '\n\t' if self.methods else ''
+        output += '\n' if self.methods else ''
         output += '\n\t'.join(str(x) for x in self.protocols)
         output += '\n' if self.protocols else ''
         output += '}\n'
@@ -275,8 +288,8 @@ class Class(Type):
     
 class Context:
     def __init__(self):
-        self.types = {}
-        self.protocols = {}
+        self.types: {str, Type} = {}
+        self.protocols: {str, Type} = {}
 
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
@@ -288,7 +301,7 @@ class Context:
         row, col, name = self.decompact(id)
         if name in self.types:
             raise SemanticError(f'Type with the same name ({name}) already in context.' + self.error_location(row, col))
-        typex = self.types[name] = Type(name)
+        typex = self.types[name] = Class(name)
         return typex
     
     def create_protocol(self, id: LexerToken) -> Protocol:
@@ -306,7 +319,7 @@ class Context:
         self.protocols[protocol.name] = protocol
         return protocol
 
-    def get_type(self, id: LexerToken) -> Type:
+    def get_type(self, id: LexerToken) -> Class:
         row, col, name = self.decompact(id)
         try:
             return self.types[name]
