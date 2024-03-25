@@ -3,8 +3,8 @@ from hulk.hulk import hulk_compile_str
 def test():
     type_test =\
         """
-            type A inherits B {
-                w = 1;
+            type A(x: Number, y: String) inherits B {
+                w = x;
                 hello(): Number { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
@@ -14,7 +14,7 @@ def test():
             }
 
             protocol D {
-                hello(a: A, b: [A]): A;
+                hello(a: A, b: [A, 2]): A;
             }
 
             protocol C extends D {

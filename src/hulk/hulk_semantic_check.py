@@ -20,7 +20,7 @@ class TypeCollector(object):
         for df in defined_class:
             self.context.add_type(df)
         for dp in defined_protocols:
-            self.context.add_type(dp)
+            self.context.add_protocol(dp)
 
         for statement in node.first_is:
             self.visit(statement)
@@ -97,12 +97,18 @@ class TypeBuilder:
 
     @visitor.when(ClassDeclarationNode)
     def visit(self, node: ClassDeclarationNode):
+        self.visit(node.class_type)
         inheritance_type = self.visit(node.inheritance)
         self.current_type = self.context.get_type(node.class_type.name)
         self.current_type.set_parent(inheritance_type)
         for statement in node.body:
             self.visit(statement)
         self.current_type = None
+
+    @visitor.when(ClassTypeParameterNode)
+    def visit(self, node: ClassTypeParameterNode):
+        for param in node.parameters:
+            self.visit(param)
 
     @visitor.when(InheritanceNode)
     def visit(self, node: InheritanceNode):
@@ -132,17 +138,17 @@ class TypeBuilder:
         except SemanticError as error:
             self.errors.append(error.text)
 
-    @visitor.when(EOFNode)
-    def visit(self, node: EOFNode):
+    @visitor.when(EOFTypeNode)
+    def visit(self, node: EOFTypeNode):
         return OBJECT
+    
+    @visitor.when(EOFExtensionNode)
+    def visit(self, node: EOFExtensionNode):
+        return None
 
     @visitor.when(TypedParameterNode)
     def visit(self, node: TypedParameterNode):
-        try:
-            param_type = self.visit(node.type[0])
-            return param_type
-        except SemanticError as error:
-            self.errors.append(error.text)
+        return self.visit(node.type[0])
 
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode):
@@ -155,8 +161,10 @@ class TypeBuilder:
     def visit(self, node: VectorTypeNode):
         try:
             typex = self.context.get_type(node.name)
+            vector_type = typex
             for i in range(int(node.dimensions)):
-                self.context.add_type(vector_t(typex, i+1))
+                vector_type = self.context.add_type(vector_t(typex, i+1))
+            return vector_type
         except SemanticError as error:
             self.errors.append(error.text)
             

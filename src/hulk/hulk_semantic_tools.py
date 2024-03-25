@@ -21,7 +21,8 @@ class Attribute:
         return hash(self.name)
     
     def __str__(self) -> str:
-        return f'{self.name}' + (': Error' if self.type is None else f': {self.type.name}')
+        output = f'{self.name}' + (': Error' if self.type is None else f': {self.type.name}')
+        return output
 
 class Method:
     def __init__(self, name: str, return_type: 'Type', arguments: List[Attribute] = []) -> None:
@@ -244,9 +245,12 @@ class Protocol(Type):
 
 
 class Class(Type):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, params: List[Attribute] = []) -> None:
         super().__init__(name)
         self.protocols: List[Protocol] = []
+        self.params = params
+        for param in params:
+            self.add_attribute(param)
 
     def set_parent(self, parent: Type) -> None:
         return self.define_inherits(parent)
@@ -297,7 +301,7 @@ class Context:
     def error_location(self, row, col) -> str:
         return f' Error at {row}:{col}'
 
-    def create_type(self, id: LexerToken) -> Type:
+    def create_type(self, id: LexerToken) -> Class:
         row, col, name = self.decompact(id)
         if name in self.types:
             raise SemanticError(f'Type with the same name ({name}) already in context.' + self.error_location(row, col))
@@ -311,7 +315,7 @@ class Context:
         protocol = self.protocols[name] = Protocol(name)
         return protocol
     
-    def add_type(self, type: Type) -> Type:
+    def add_type(self, type: Class) -> Class:
         typex = self.types[type.name] = type
         return typex
     

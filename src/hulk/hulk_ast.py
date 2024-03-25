@@ -48,6 +48,12 @@ class TypedParameterNode(ASTNode):
 class EOFNode (ASTNode):
     pass
 
+class EOFExtensionNode(EOFNode):
+    pass
+
+class EOFTypeNode(EOFNode):
+    pass
+
 
 class ProtocolTypeNode(ASTNode):
     def __init__(self, name):
@@ -62,7 +68,7 @@ class ClassTypeNode(ASTNode):
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        self.parameters = parameters
+        self.parameters: List[TypedParameterNode] = parameters
 
 
 class ExtensionNode(ASTNode):
