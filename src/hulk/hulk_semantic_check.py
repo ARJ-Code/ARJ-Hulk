@@ -49,11 +49,31 @@ class TypeCollector(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
-class TypeBuilder:
+class TypeBuilder(object):
     def __init__(self, context, errors=[]):
         self.context: Context = context
         self.current_type: Type = None
         self.errors: List[str] = errors
+
+    def check_circular_inheritance(self):
+        for t in self.context.types.values():
+            s = set()
+            while t is not None:
+                if t in s:
+                    self.errors.append(f'Circular inheritance detected in class {t.name}')
+                    break
+                s.add(t)
+                t = t.parent
+
+        for p in self.context.protocols.values():
+            s = set()
+            while p is not None:
+                if p in s:
+                    self.errors.append(f'Circular inheritance detected in protocol {p.name}')
+                    break
+                s.add(p)
+                p = p.parent
+
 
     @visitor.on('node')
     def visit(self, node):
@@ -65,6 +85,8 @@ class TypeBuilder:
             self.visit(statement)
         for statement in node.second_is:
             self.visit(statement)
+        
+        self.check_circular_inheritance()
 
     @visitor.when(ProtocolDeclarationNode)
     def visit(self, node: ProtocolDeclarationNode):
@@ -84,7 +106,7 @@ class TypeBuilder:
 
     @visitor.when(ProtocolFunctionNode)
     def visit(self, node: ProtocolFunctionNode) -> Attribute:
-        def _build_attribute(param: TypedParameterNode):
+        def _build_attribute(param: ParameterNode):
             p_type = self.visit(param)
             return Attribute(param.name.value, p_type)
 
@@ -119,7 +141,7 @@ class TypeBuilder:
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode):
-        def _build_attribute(param: TypedParameterNode):
+        def _build_attribute(param: ParameterNode):
             p_type = self.visit(param)
             return Attribute(param.name.value, p_type)
 
@@ -146,8 +168,8 @@ class TypeBuilder:
     def visit(self, node: EOFExtensionNode):
         return None
 
-    @visitor.when(TypedParameterNode)
-    def visit(self, node: TypedParameterNode):
+    @visitor.when(ParameterNode)
+    def visit(self, node: ParameterNode):
         return self.visit(node.type[0])
 
     @visitor.when(TypeNode)

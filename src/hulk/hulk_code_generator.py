@@ -239,8 +239,8 @@ class HulkCodeGenerator(object):
             context.new_line(
                 f'{define_v(context.pop_v())} = system_notBoolean({v});')
 
-    @visitor.when(FunctionCallNode)
-    def visit(self, node: FunctionCallNode, context: GeneratorContext):
+    @visitor.when(ExpressionCallNode)
+    def visit(self, node: ExpressionCallNode, context: GeneratorContext):
         v = []
 
         for p in node.parameters:
