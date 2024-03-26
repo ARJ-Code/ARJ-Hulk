@@ -205,7 +205,7 @@ hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) EB'], [r34])
 
 # function call productions
 r35 = AttributedRule[ASTNode, LexerToken](
-    lambda h, s: FunctionCallNode(s[1], s[3]))
+    lambda h, s: ExpressionCallNode(s[1], s[3]))
 hulk_grammar.add_attributed_production('Ec', ['id ( C1 )'], [r35])
 
 hulk_grammar.add_attributed_production('C1', ['C2', ''], [r0, r00])
