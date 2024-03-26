@@ -535,6 +535,22 @@ class HulkCodeGenerator(object):
         context.new_line(
             f'{define_v(context.pop_v())} = {f}({params});')
 
+    @visitor.when(NewNode)
+    def visit(self, node: NewNode, context: GeneratorContext):
+        vp = []
+
+        for p in node.name.parameters:
+            aux = context.new_v()
+            context.push_v(aux)
+            vp.append(aux)
+
+            self.visit(p, context)
+
+        params = ', '.join(vp)
+
+        context.new_line(
+            f'{define_v(context.pop_v())} = create_{node.name.name.value}({params});')
+
 
 def hulk_code_generator(ast: ASTNode):
     generator = HulkCodeGenerator()
