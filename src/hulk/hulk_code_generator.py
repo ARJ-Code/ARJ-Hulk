@@ -68,25 +68,62 @@ class GeneratorContext:
         return self.stack_v[-1]
 
 
+class GeneratorProgram:
+    def __init__(self) -> None:
+        self.functions: List[GeneratorContext] = []
+        self.declarations: List[str] = []
+
+    def new_function(self) -> GeneratorContext:
+        context = GeneratorContext()
+        self.functions.append(context)
+        return context
+
+    def new_declaration(self, code: str):
+        self.declarations.append(code)
+
+    def load_c_tools(self) -> str:
+        f = open("src/c_tools/c_tools.c", "r")
+        c = f.read()
+        f.close()
+
+        return c.split("// FINISH C TOOLS")[0]
+
+    def get_code(self) -> str:
+        code = self.load_c_tools()
+        declarations = '\n\n'.join(d for d in self.declarations)
+        functions = '\n\n'.join(f.get_code() for f in self.functions)
+
+        return f'{code}\n\n{declarations}\n\n{functions}'
+
+
 class HulkCodeGenerator(object):
+    def __init__(self):
+        self.generator_program: GeneratorProgram = GeneratorProgram()
+
+    def get_code(self) -> str:
+        return self.generator_program.get_code()
+
     @visitor.on('node')
     def visit(self, node):
         pass
 
     @visitor.when(ProgramNode)
-    def visit(self, node: ProgramNode) -> str:
-        context = GeneratorContext()
+    def visit(self, node: ProgramNode):
+        for i in node.first_is:
+            self.visit(i)
+        for i in node.second_is:
+            self.visit(i)
 
-        context.new_line('int main()')
-        context.new_line('{')
-        context.new_line('srand48(time(NULL));')
+        main_context = self.generator_program.new_function()
 
-        context.push_v(context.new_v())
-        self.visit(node.expression, context)
+        main_context.new_line('int main()')
+        main_context.new_line('{')
+        main_context.new_line('srand48(time(NULL));')
 
-        context.new_line('}')
+        main_context.push_v(main_context.new_v())
+        self.visit(node.expression, main_context)
 
-        return context.get_code()
+        main_context.new_line('}')
 
     @visitor.when(ConstantNode)
     def visit(self, node: ConstantNode, context: GeneratorContext):
@@ -239,8 +276,8 @@ class HulkCodeGenerator(object):
             context.new_line(
                 f'{define_v(context.pop_v())} = system_notBoolean({v});')
 
-    @visitor.when(FunctionCallNode)
-    def visit(self, node: FunctionCallNode, context: GeneratorContext):
+    @visitor.when(ExpressionCallNode)
+    def visit(self, node: ExpressionCallNode, context: GeneratorContext):
         v = []
 
         for p in node.parameters:
@@ -252,9 +289,10 @@ class HulkCodeGenerator(object):
 
         params = ', '.join(v)
 
-        if is_defined_method(node.name.value):
-            context.new_line(
-                f'{define_v(context.pop_v())} = system_{node.name.value}({params});')
+        fc = 'system' if is_defined_method(node.name.value) else 'global'
+
+        context.new_line(
+            f'{define_v(context.pop_v())} = {fc}_{node.name.value}({params});')
 
     @visitor.when(AssignmentNode)
     def visit(self, node: AssignmentNode, context: GeneratorContext):
@@ -290,14 +328,6 @@ class HulkCodeGenerator(object):
             context.push_v(vc)
             self.visit(a.value, context)
 
-            # if a.value.type.name == 'Number':
-            #     child_context.new_line(
-            #         f'{define_v(vn)} = system_copyNumber({vc});')
-            # elif a.value.type.name == 'Boolean':
-            #     child_context.new_line(
-            #         f'{define_v(vn)} = system_copyBoolean({vc});')
-            # else:
-            #     child_context.new_line(f'{define_v(vn)} = {vc};')
             context.new_line(f'{define_v(vn)} = {vc};')
 
         self.visit(node.body, context)
@@ -318,7 +348,7 @@ class HulkCodeGenerator(object):
             context.push_v(cond)
             self.visit(c, context)
 
-            context.new_line(f'if ({cond})')
+            context.new_line(f'if (system_typeToBoolean({cond}))')
             context.new_line('{')
 
             body = context.new_v()
@@ -411,9 +441,9 @@ class HulkCodeGenerator(object):
 
         context.new_line(
             f'{define_v(context.pop_v())} = system_get({vec}, {index});')
-        
+
     @visitor.when(AssignmentArrayNode)
-    def visit(self,node:AssignmentArrayNode,context:GeneratorContext):
+    def visit(self, node: AssignmentArrayNode, context: GeneratorContext):
         vec = context.new_v()
         context.push_v(vec)
 
@@ -431,23 +461,31 @@ class HulkCodeGenerator(object):
 
         context.new_line(
             f'{define_v(context.pop_v())} = system_set({vec}, {index}, {value});')
-        
 
+    @visitor.when(FunctionDeclarationNode)
+    def visit(self, node: FunctionDeclarationNode):
+        context = self.generator_program.new_function()
 
-def load_c_tools() -> str:
-    f = open("src/c_tools/c_tools.c", "r")
-    c = f.read()
-    f.close()
+        declaration = f'Type *global_{node.name.value}({", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
+        self.generator_program.new_declaration(declaration)
 
-    return c.split("// FINISH C TOOLS")[0]
+        context.new_line(declaration[:-1])
+        context.new_line('{')
+
+        vr = context.new_v()
+        context.push_v(vr)
+
+        self.visit(node.body, context)
+
+        context.new_line(f'return {vr};')
+        context.new_line('}')
 
 
 def hulk_code_generator(ast: ASTNode):
-    c_tools = load_c_tools()
-
     generator = HulkCodeGenerator()
 
-    code = c_tools+'\n'+generator.visit(ast)
+    generator.visit(ast)
+    code = generator.get_code()
 
     f = open('cache/main.c', 'w')
     f.write(code)
