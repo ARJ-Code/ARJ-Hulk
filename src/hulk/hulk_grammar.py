@@ -271,8 +271,10 @@ r50 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ImplicitArrayDeclarationNode(s[1], s[3], s[5]))
 r51 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ExplicitArrayDeclarationNode(s[1]))
+r512 = AttributedRule[ASTNode, LexerToken](
+    lambda h, s: ExplicitArrayDeclarationNode([]))
 hulk_grammar.add_attributed_production(
-    'X1', ['E || id in E', 'X2', ''], [r50, r51, r4])
+    'X1', ['E || id in E', 'X2', ''], [r50, r51, r512])
 
 r52 = AttributedRule[ASTNode, LexerToken](lambda h, s: s[1] + [s[3]])
 hulk_grammar.add_attributed_production('X2', ['X2 , E', 'E'], [r52, r01])

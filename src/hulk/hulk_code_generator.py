@@ -519,7 +519,7 @@ class HulkCodeGenerator(object):
 
         f = context.new_v()
         context.new_line(
-            f'Type *(*{f})({", ".join("Type *" for _ in range(len(node.property.parameters)+1))}) = system_findEntry({v}, "f_{node.property.name.value}");')
+            f'Type *(*{f})({", ".join("Type *" for _ in range(len(node.property.parameters)+1))}) = system_findEntry({v}, "{node.property.name.value}");')
 
         vp = []
 
