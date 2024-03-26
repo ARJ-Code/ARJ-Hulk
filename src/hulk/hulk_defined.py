@@ -57,8 +57,8 @@ def vector_t(c: Class, dimension: int) -> Class:
         vector.add_attribute(Attribute('dimension', NUMBER))
         vector.add_attribute(Attribute('length', NUMBER))
         vector.add_attribute(Attribute('capacity', NUMBER))
-        vector.add_method(Method('add', OBJECT, [Attribute('a1', vector_t(c, dimension-1))]))
-        vector.add_method(Method('remove', OBJECT, [Attribute('a1', NUMBER)]))
+        vector.add_method(Method('add', vector_t(c, dimension-1), [Attribute('a1', vector_t(c, dimension-1))]))
+        vector.add_method(Method('remove', vector_t(c, dimension-1), [Attribute('a1', NUMBER)]))
         vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', vector_t(c, dimension-1))]))
         vector.add_method(Method('get', vector_t(c, dimension-1), [Attribute('a1', NUMBER)]))
         vector.add_method(

@@ -21,7 +21,7 @@ class Attribute:
         return hash(self.name)
     
     def __str__(self) -> str:
-        output = f'{self.name}' + (': Error' if self.type is None else f': {self.type.name}')
+        output = f'{self.name}' + (f' : {self.type.name}' if self.type else '')
         return output
 
 class Method:
@@ -47,9 +47,9 @@ class Method:
         return True
     
     def __str__(self) -> str:
-        output = f'method {self.name}('
+        output = f'{self.name}('
         output += ', '.join(str(x) for x in self.arguments)
-        output += ') -> Error' if self.return_type is None else f') -> {self.return_type.name}'
+        output += f') -> {self.return_type.name}' if self.return_type else ')'
         return output
 
 class Type(ABC):
@@ -256,15 +256,18 @@ class Protocol(Type):
 
 
 class Class(Type):
-    def __init__(self, name: str, params: List[Attribute] = []) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__(name)
         self.protocols: List[Protocol] = []
-        self.params = params
-        for param in params:
-            self.add_attribute(param)
+        self.params: List[Attribute] = []
+        # for param in params:
+        #     self.add_attribute(param)
 
     def set_parent(self, parent: Type) -> None:
         return self.define_inherits(parent)
+    
+    def add_param(self, param: Attribute) -> None:
+        self.params.append(param)
 
     def define_inherits(self, inherits: 'Class') -> None:
         self.parent = inherits
@@ -288,6 +291,7 @@ class Class(Type):
     
     def __str__(self):
         output = f'type {self.name}'
+        output += f'({", ".join(str(x) for x in self.params)})' if self.params else ''
         parent = '' if self.parent is None else f' : {self.parent.name}'
         output += parent
         output += ' {'

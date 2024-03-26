@@ -8,7 +8,7 @@ hulk_grammar.add_main('P')
 
 r00 = AttributedRule[ASTNode, LexerToken](lambda _, s: [])
 r01 = AttributedRule[ASTNode, LexerToken](lambda _, s: [s[1]])
-r02 = AttributedRule[ASTNode, LexerToken](lambda _, s: [s[2]])
+r02 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[2])
 
 # program productions
 r0 = AttributedRule[ASTNode, LexerToken](lambda _, s: s[1])
@@ -239,8 +239,9 @@ hulk_grammar.add_attributed_production(
 r42 = AttributedRule[ASTNode, LexerToken](lambda h, s: InheritanceNode(s[2]))
 r43 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: InheritanceParameterNode(s[2], s[4]))
+eof_inheritance = AttributedRule[ASTNode, LexerToken](lambda h, s: EOFInheritsNode())
 hulk_grammar.add_attributed_production(
-    'Hih', ['inherits id', 'inherits id ( C2 )', ''], [r42, r43, eof_type])
+    'Hih', ['inherits id', 'inherits id ( C2 )', ''], [r42, r43, eof_inheritance])
 
 r44 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ClassDeclarationNode(s[1], s[2], s[4]))

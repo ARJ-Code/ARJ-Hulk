@@ -42,7 +42,7 @@ class VectorTypeNode (TypeNode):
 
 class ParameterNode(ASTNode):
     def __init__(self, name, type):
-        self.name = name
+        self.name:LexerToken = name
         self.type: TypeNode = type
 
 
@@ -53,6 +53,8 @@ class EOFNode (ASTNode):
 class EOFExtensionNode(EOFNode):
     pass
 
+class EOFInheritsNode(EOFNode):
+    pass
 
 class EOFTypeNode(EOFNode):
     pass

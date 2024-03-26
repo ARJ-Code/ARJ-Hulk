@@ -4,7 +4,7 @@ def test():
     type_test =\
         """
             type A(x: Number, y: String) inherits B {
-                w = x;
+                w: Number = x;
                 hello(): Number { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
@@ -28,3 +28,19 @@ def test():
         """
     
     assert hulk_compile_str(type_test)
+
+    type_test =\
+        """
+            type A(x, y) {
+                w = x;
+                hello() { print('hello'); }
+                qwe(a: Number): Number => a + a;
+            }
+            
+            let a: A = new A() in {
+                a.hello();
+                print(a.qwe(2));
+            }
+        """
+    
+    # assert hulk_compile_str(type_test)

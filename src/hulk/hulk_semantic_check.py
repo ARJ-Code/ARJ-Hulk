@@ -112,7 +112,7 @@ class TypeBuilder(object):
 
         try:
             parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
-            return_type = self.visit(node.type[0])
+            return_type = self.visit(node.type)
             self.current_type.define_method(node.name, parameters, return_type)
         except SemanticError as error:
             self.errors.append(error.text)
@@ -129,8 +129,12 @@ class TypeBuilder(object):
 
     @visitor.when(ClassTypeParameterNode)
     def visit(self, node: ClassTypeParameterNode):
-        for param in node.parameters:
-            self.visit(param)
+        class_type = self.context.get_type(node.name)
+        params: List[Attribute] = [self.visit(param) for param in node.parameters]
+        for param in params:
+            class_type.add_param(param)
+        class_type.add_method(Method('init', class_type, params))
+        return class_type
 
     @visitor.when(InheritanceNode)
     def visit(self, node: InheritanceNode):
@@ -147,7 +151,7 @@ class TypeBuilder(object):
 
         try:
             parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
-            return_type = self.visit(node.type[0])
+            return_type = self.visit(node.type)
             self.current_type.define_method(node.name, parameters, return_type)
         except SemanticError as error:
             self.errors.append(error.text)
@@ -160,17 +164,23 @@ class TypeBuilder(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
-    @visitor.when(EOFTypeNode)
-    def visit(self, node: EOFTypeNode):
+    @visitor.when(EOFInheritsNode)
+    def visit(self, node: EOFInheritsNode):
         return OBJECT
     
     @visitor.when(EOFExtensionNode)
     def visit(self, node: EOFExtensionNode):
         return None
+    
+    @visitor.when(EOFNode)
+    def visit(self, node: EOFNode):
+        return None
 
     @visitor.when(ParameterNode)
     def visit(self, node: ParameterNode):
-        return self.visit(node.type[0])
+        p_type = self.visit(node.type)
+        attribute: Attribute = Attribute(node.name.value, p_type)
+        return attribute
 
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode):
@@ -178,6 +188,7 @@ class TypeBuilder(object):
             return self.context.get_type(node.name)
         except SemanticError as error:
             self.errors.append(error.text)
+            return None
 
     @visitor.when(VectorTypeNode)
     def visit(self, node: VectorTypeNode):
@@ -190,62 +201,13 @@ class TypeBuilder(object):
         except SemanticError as error:
             self.errors.append(error.text)
             
-
-# class HierarchicalInfererVisitor(object):
-#     def __init__(self) -> None:
-
-#     @visitor.on('node')
-#     def visit(self, node: ASTNode, scope: Scope):
-#         pass
+class SemanticCheckerVisitor(object):
+    def __init__(self):
+        self.errors = []
     
-#     @visitor.when(ProgramNode)
-#     def visit(self, node: ProgramNode, scope: Scope):
-#         for statement in node.first_is:
-#             self.visit(statement, scope)
-#         for statement in node.second_is:
-#             self.visit(statement, scope)
-
-#     @visitor.when(ProtocolDeclarationNode)
-#     def visit(self, node: ProtocolDeclarationNode, scope: Scope):
-#         p1: Protocol = scope.get_defined_type(node.protocol_type.name)
-#         p2: Protocol = scope.get_defined_type(node.extension.name)
-#         assert p1 is not None, f'Protocol {node.protocol_type.name} not defined'
-
-#         p1.define_extends(p2)
-
-#         for statement in node.body:
-#             assert p1.get_attribute(statement.name) is None, f'Function {statement.name} already defined'
-
-#             self.visit(statement, scope.create_child_scope())
-#             p1.add_method(Method(statement.name, statement.params, statement.return_type))
-    
-#     @visitor.when(ProtocolFunctionNode)
-#     def visit(self, node: ProtocolFunctionNode, scope: Scope):
-#         for param in node.params:
-#             self.visit(param, scope)
-#         self.visit(node.type, scope)
-
-
-#     @visitor.when(ProtocolTypeNode)
-#     def visit(self, node: ProtocolTypeNode, scope: Scope):
-#         scope.define_protocol(Protocol(node.name))
-
-#     @visitor.when(ClassDeclarationNode)
-#     def visit(self, node: ClassDeclarationNode, scope: Scope):
-#         self.visit(node.class_type, scope)
-
-#     @visitor.when(ClassTypeNode)
-#     def visit(self, node: ClassTypeNode, scope: Scope):
-#         scope.define_class(Class(node.name))
-
-
-# class SemanticCheckerVisitor(object):
-#     def __init__(self):
-#         self.errors = []
-    
-#     @visitor.on('node')
-#     def visit(self, node, scope):
-#         pass
+    @visitor.on('node')
+    def visit(self, node, scope):
+        pass
     
 #     @visitor.when(ProgramNode)
 #     def visit(self, node: ProgramNode, scope=None):
