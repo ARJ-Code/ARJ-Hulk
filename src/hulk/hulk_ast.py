@@ -115,7 +115,7 @@ class InstancePropertyNode(AtomicNode):
 
 class InstanceFunctionNode(ExpressionNode):
     def __init__(self, expression: ExpressionNode, expression_call: 'ExpressionCallNode'):
-        self.property: LexerToken = expression_call
+        self.property: ExpressionCallNode = expression_call
         self.expression: ExpressionNode = expression
 
 
@@ -217,14 +217,14 @@ class ProtocolInstructionNode(TypedInstructionNode):
 
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, p_type):
-        super.__init__(name)
+        super().__init__(name)
         self.parameters: List[TypedParameterNode] = parameters
         self.type: TypeNode = p_type
 
 
 class ClassFunctionNode(ClassInstructionNode):
     def __init__(self, name, parameters, p_type, body):
-        super.__init__(name)
+        super().__init__(name)
         self.parameters: List[TypedParameterNode] = parameters
         self.type: TypeNode = p_type
         self.body: ExpressionNode = body
@@ -232,7 +232,7 @@ class ClassFunctionNode(ClassInstructionNode):
 
 class ClassPropertyNode(ClassInstructionNode):
     def __init__(self, name, p_type, expression):
-        super.__init__(name)
+        super().__init__(name)
         self.type: TypeNode = p_type
         self.expression: ExpressionNode = expression
 

@@ -480,6 +480,61 @@ class HulkCodeGenerator(object):
         context.new_line(f'return {vr};')
         context.new_line('}')
 
+    @visitor.when(ClassDeclarationNode)
+    def visit(self, node: ClassDeclarationNode):
+        for i in node.body:
+            self.visit(i, node.class_type.name.value)
+
+    @visitor.when(ClassFunctionNode)
+    def visit(self, node: ClassFunctionNode, t_name: str):
+        context = self.generator_program.new_function()
+
+        ct = context.get_v('self')
+
+        declaration = f'Type *type_{t_name}_{node.name.value}({ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
+        self.generator_program.new_declaration(declaration)
+
+        context.new_line(declaration[:-1])
+        context.new_line('{')
+
+        vr = context.new_v()
+        context.push_v(vr)
+
+        self.visit(node.body, context)
+
+        context.new_line(f'return {vr};')
+        context.new_line('}')
+
+    @visitor.when(InstancePropertyNode)
+    def visit(self, node: InstancePropertyNode, context: GeneratorContext):
+        context.new_line(
+            f'{define_v(context.pop_v())} = system_findEntry({context.get_v("self")}, "p_{node.property.value}");')
+
+    @visitor.when(InstanceFunctionNode)
+    def visit(self, node: InstanceFunctionNode, context: GeneratorContext):
+        v = context.new_v()
+        context.push_v(v)
+
+        self.visit(node.expression, context)
+
+        f = context.new_v()
+        context.new_line(
+            f'Type *(*{f})({", ".join("Type *" for _ in range(len(node.property.parameters)+1))}) = system_findEntry({v}, "f_{node.property.name.value}");')
+
+        vp = []
+
+        for p in node.property.parameters:
+            aux = context.new_v()
+            context.push_v(aux)
+            vp.append(aux)
+
+            self.visit(p, context)
+
+        params = f'{v}{", "if len(node.property.parameters)!=0 else ""}{", ".join(vp)}'
+
+        context.new_line(
+            f'{define_v(context.pop_v())} = {f}({params});')
+
 
 def hulk_code_generator(ast: ASTNode):
     generator = HulkCodeGenerator()
