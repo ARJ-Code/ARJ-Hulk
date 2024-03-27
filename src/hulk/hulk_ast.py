@@ -75,7 +75,6 @@ class ClassTypeNode(ASTNode):
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        print(parameters)
         self.parameters: List[ParameterNode] = parameters
 
 

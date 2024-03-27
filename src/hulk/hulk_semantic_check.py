@@ -2,7 +2,6 @@ from compiler_tools import visitor
 from hulk.hulk_ast import *
 from hulk.hulk_semantic_tools import *
 from hulk.hulk_defined import *
-from typing import Tuple
 
 
 class TypeCollector(object):
@@ -13,7 +12,7 @@ class TypeCollector(object):
     @visitor.on('node')
     def visit(self, node: ASTNode):
         pass
-    
+
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode):
         self.context = Context()
@@ -49,6 +48,7 @@ class TypeCollector(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
+
 class TypeBuilder(object):
     def __init__(self, context, errors=[]):
         self.context: Context = context
@@ -65,7 +65,8 @@ class TypeBuilder(object):
             while t is not None and not visited[t.name]:
                 visited[t.name] = True
                 if t in s:
-                    self.errors.append(f'Circular inheritance detected in class {t.name}')
+                    self.errors.append(
+                        f'Circular inheritance detected in class {t.name}')
                     break
                 s.add(t)
                 t = t.parent
@@ -79,7 +80,8 @@ class TypeBuilder(object):
             while p is not None and not visited[p.name]:
                 visited[p.name] = True
                 if p in s:
-                    self.errors.append(f'Circular inheritance detected in protocol {p.name}')
+                    self.errors.append(
+                        f'Circular inheritance detected in protocol {p.name}')
                     break
                 s.add(p)
                 p = p.parent
@@ -88,18 +90,17 @@ class TypeBuilder(object):
     #     for t in self.context.types.values():
     #         for method in t.methods:
 
-
     @visitor.on('node')
     def visit(self, node):
         pass
-    
+
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode):
         for statement in node.first_is:
             self.visit(statement)
         for statement in node.second_is:
             self.visit(statement)
-        
+
         self.check_circular_inheritance()
 
     @visitor.when(FunctionDeclarationNode)
@@ -109,7 +110,8 @@ class TypeBuilder(object):
             return Attribute(param.name.value, p_type)
 
         try:
-            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            parameters: List[Attribute] = [
+                _build_attribute(param) for param in node.parameters]
             return_type = self.visit(node.return_type)
             self.context.create_method(node.name, parameters, return_type)
         except SemanticError as error:
@@ -138,7 +140,8 @@ class TypeBuilder(object):
             return Attribute(param.name.value, p_type)
 
         try:
-            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            parameters: List[Attribute] = [
+                _build_attribute(param) for param in node.parameters]
             return_type = self.visit(node.type)
             self.current_type.define_method(node.name, parameters, return_type)
         except SemanticError as error:
@@ -163,7 +166,8 @@ class TypeBuilder(object):
     @visitor.when(ClassTypeParameterNode)
     def visit(self, node: ClassTypeParameterNode):
         class_type = self.context.get_type(node.name)
-        params: List[Attribute] = [self.visit(param) for param in node.parameters]
+        params: List[Attribute] = [self.visit(
+            param) for param in node.parameters]
         for param in params:
             class_type.add_param(param)
         class_type.add_method(Method('init', class_type, params))
@@ -182,7 +186,8 @@ class TypeBuilder(object):
             return self.visit(param)
 
         try:
-            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            parameters: List[Attribute] = [
+                _build_attribute(param) for param in node.parameters]
             return_type = self.visit(node.type)
             self.current_type.define_method(node.name, parameters, return_type)
         except SemanticError as error:
@@ -199,11 +204,11 @@ class TypeBuilder(object):
     @visitor.when(EOFInheritsNode)
     def visit(self, node: EOFInheritsNode):
         return OBJECT
-    
+
     @visitor.when(EOFExtensionNode)
     def visit(self, node: EOFExtensionNode):
         return None
-    
+
     @visitor.when(EOFNode)
     def visit(self, node: EOFNode):
         return None
@@ -232,21 +237,22 @@ class TypeBuilder(object):
             return vector_type
         except SemanticError as error:
             self.errors.append(error.text)
-            
+
+
 class SemanticChecker(object):
     def __init__(self, context: Context):
         self.errors = []
         self.contex: Context = context
-    
+
     @visitor.on('node')
     def visit(self, node, scope):
         pass
-    
+
 #     @visitor.when(ProgramNode)
 #     def visit(self, node: ProgramNode, scope=None):
 #         for statement in node.statements:
 #             self.visit(statement, scope)
-    
+
     # @visitor.when(VarDeclarationNode)
     # def visit(self, node: VarDeclarationNode, scope: Scope):
     #     if scope.is_var_defined(node.id, len(scope.local_vars)):
@@ -254,7 +260,7 @@ class SemanticChecker(object):
     #     else:
     #         scope.define_variable(node.id)
     #         self.visit(node.expr, scope)
-    
+
     # @visitor.when(FuncDeclarationNode)
     # def visit(self, node: FuncDeclarationNode, scope: Scope):
     #     if scope.is_func_defined(node.id, len(scope.local_funcs)):
@@ -265,15 +271,15 @@ class SemanticChecker(object):
     #         for param in node.params:
     #             child_scope.define_variable(param)
     #         self.visit(node.body, child_scope)
-    
+
     # @visitor.when(PrintNode)
     # def visit(self, node: PrintNode, scope: Scope):
     #     self.visit(node.expr, scope)
-     
+
     # @visitor.when(ConstantNumNode)
     # def visit(self, node: ConstantNumNode, scope: Scope):
     #     pass
-    
+
     # @visitor.when(VariableNode)
     # def visit(self, node: VariableNode, scope: Scope):
     #     if not scope.is_var_defined(node.lex, len(scope.local_vars)):
@@ -285,8 +291,27 @@ class SemanticChecker(object):
     #         self.errors.append(f'Function {node.lex}/{len(node.args)} not defined')
     #     for arg in node.args:
     #             self.visit(arg, scope)
-    
+
     # @visitor.when(BinaryNode)
     # def visit(self, node: BinaryNode, scope: Scope):
     #     self.visit(node.left, scope)
     #     self.visit(node.right, scope)
+
+
+def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
+    errors = []
+
+    collector = TypeCollector(errors)
+    collector.visit(ast)
+
+    context = collector.context
+
+    builder = TypeBuilder(context, errors)
+    builder.visit(ast)
+
+    scope = Scope()
+
+    semantic_checker = SemanticChecker(context)
+    semantic_checker.visit(ast, scope)
+
+    return SemanticResult(context, errors)

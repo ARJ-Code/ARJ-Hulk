@@ -1,10 +1,10 @@
-from hulk.hulk_semantic_check import SemanticChecker, TypeBuilder, TypeCollector
-from hulk.hulk_semantic_tools import Scope
+from hulk.hulk_semantic_check import hulk_semantic_check
 from .hulk_lexer import hulk_lexer_build
 from .hulk_parser import hulk_parser_build, hulk_to_grammar, hulk_parse
 from compiler_tools.lexer import Lexer
 from .hulk_grammar import hulk_grammar
 from .hulk_code_generator import hulk_code_generator
+import subprocess
 
 
 def hulk_build() -> bool:
@@ -19,34 +19,33 @@ def hulk_compile_str(program: str) -> bool:
     result = hulk_lexer.run(program)
     tokens = result.tokens
 
+    if not result.ok:
+        print(
+            f'Lexer error:\nrow {result.error.row+1} col {result.error.col+1}')
+        return False
+
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
 
-    if result.ok:
+    if not result.ok:
+        print(
+            f'Parser error:\nrow {tokens[result.error-1].row+1} col {tokens[result.error-1].col+1}')
+        return False
+    
+    ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
+    result=hulk_semantic_check(ast)
 
-        ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
+    if not result.ok:
+        error='\n'.join(result.errors)
+        print(f'Semantic errors:\n{error}')
+        return False
 
-        errors = []
+    hulk_code_generator(ast, result.context)
 
-        collector = TypeCollector(errors)
-        collector.visit(ast)
+    result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
+    result = subprocess.run(["./cache/main"], capture_output=True, text=True)
+    print(result.stdout)
 
-        context = collector.context
-
-        builder = TypeBuilder(context, errors)
-        builder.visit(ast)
-
-        scope = Scope()
-
-        semantic_checker = SemanticChecker(context)
-        semantic_checker.visit(ast, scope)
-
-        print('Errors:', errors)
-        print('Context:')
-        print(context)
-
-        hulk_code_generator(ast, context)
-
-    return result.ok
+    return True
 
 
 def hulk_compile():
