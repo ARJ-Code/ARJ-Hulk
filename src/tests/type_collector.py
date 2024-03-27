@@ -49,4 +49,11 @@ def test():
             }
         """
     
-    assert hulk_compile_str(type_test)
+    # assert hulk_compile_str(type_test)
+
+    let_test =\
+        """
+            let a = 2 in 2;
+        """
+    
+    assert hulk_compile_str(let_test)

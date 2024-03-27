@@ -2,7 +2,6 @@ from compiler_tools import visitor
 from hulk.hulk_ast import *
 from hulk.hulk_semantic_tools import *
 from hulk.hulk_defined import *
-from typing import Tuple
 
 
 class TypeCollector(object):
@@ -236,16 +235,56 @@ class TypeBuilder(object):
 class SemanticChecker(object):
     def __init__(self, context: Context):
         self.errors = []
-        self.contex: Context = context
+        self.context: Context = context
+        self.graph = SemanticGraph()
     
     @visitor.on('node')
     def visit(self, node, scope):
         pass
     
-#     @visitor.when(ProgramNode)
-#     def visit(self, node: ProgramNode, scope=None):
-#         for statement in node.statements:
-#             self.visit(statement, scope)
+    @visitor.when(ProgramNode)
+    def visit(self, node: ProgramNode, scope: Scope):
+        # for statement in node.first_is:
+        #     self.visit(statement, scope)
+        # for statement in node.second_is:
+        #     self.visit(statement, scope)
+        program_node = self.graph.add_node()
+        self.graph.add_child(program_node, self.visit(node.expression, scope))
+
+    @visitor.when(LetNode)
+    def visit(self, node: LetNode, scope: Scope):
+        let_node = self.graph.add_node()
+        for assignment in node.assignments:
+            self.visit(assignment, scope)
+        return self.graph.add_child(let_node, self.visit(node.body, scope.create_child_scope()))
+
+    @visitor.when(DeclarationNode)
+    def visit(self, node: DeclarationNode, scope: Scope):
+        var_type = self.visit(node.type, scope)
+        var_node = self.graph.add_node(var_type)
+        scope.define_variable(node.name, var_node)
+        self.graph.add_child(var_node, self.visit(node.value, scope.create_child_scope()))
+
+    @visitor.when(TypeNode)
+    def visit(self, node: TypeNode):
+        return self.context.get_type(node.name)
+    
+    @visitor.when(EOFTypeNode)
+    def visit(self, node: EOFTypeNode, scope: Scope):
+        return None
+
+    @visitor.when(ConstantNode)
+    def visit(self, node: ConstantNode, scope: Scope):
+        constant_type = OBJECT
+        if node.type == ConstantTypes.STRING:
+            constant_type = STRING
+        elif node.type == ConstantTypes.BOOLEAN:
+            constant_type = BOOLEAN
+        else:
+            constant_type = NUMBER
+        
+        return self.graph.add_node(constant_type)
+
     
     # @visitor.when(VarDeclarationNode)
     # def visit(self, node: VarDeclarationNode, scope: Scope):

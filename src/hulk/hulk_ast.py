@@ -256,7 +256,7 @@ class NewNode(ExpressionNode):
         self.name: ExpressionCallNode = name
 
 
-class DeclarationNode (ExpressionNode):
+class DeclarationNode (ASTNode):
     def __init__(self, name, p_type, value):
         self.name: LexerToken = name
         self.type: TypeNode = p_type

@@ -324,46 +324,104 @@ class Context:
 
     def __repr__(self):
         return str(self)
+    
+class SemanticGraph:
+    def __init__(self):
+        self.nodes: List[SemanticNode] = []
+        self.index: int = 0
+
+    def add_node(self, node_type: Type = None) -> 'SemanticNode':
+        self.index = self.index + 1
+        new_node = SemanticNode(self.index, node_type)
+        self.nodes.append(new_node)
+        return new_node
+
+    def add_child(self, parent: 'SemanticNode', child: 'SemanticNode') -> 'SemanticNode':
+        parent.add_child(child)
+        return parent
+
+    def correct_type_inference(self):
+        visited = [False for node in self.nodes]
+        def dfs(node: SemanticNode) -> Type:
+            visited[node.index] = True
+            ancient_type = None
+            for child in node.children:
+                child_type = dfs(child)
+
+
+        nodes = sorted(self.nodes, lambda n: n.index)
+
+class SemanticNode(object):
+    def __init__(self, index: int, node_type: Type = None):
+        self.index = index
+        self.node_type = node_type
+        self.children: List[SemanticNode] = []
+
+    def add_child(self, child: 'SemanticNode'):
+        self.children.append(child)
 
 class Scope:
     def __init__(self, parent: 'Scope'=None) -> None:
         self.parent: Scope = parent
-        self.attributes: List[Attribute] = []
+        self.variables: {str, SemanticNode} = {}
+        # self.attributes: List[Attribute] = []
         self.methods: Set[Method] = set()
-        self.attribute_index = 0 if parent is None else len(parent.attributes)
+        # self.attribute_index = 0 if parent is None else len(parent.attributes)
+
+    def decompact(self, token: LexerToken):
+        return (token.row, token.col, token.value)
+    
+    def error_location(self, row, col) -> str:
+        return f' Error at {row}:{col}'
 
     def create_child_scope(self) -> 'Scope':
         return Scope(self)
 
-    def define_attribute(self, attribute: Attribute) -> bool:
-        a = self.get_defined_attribute(attribute.name, len(self.attributes))
-        if a is not None:
-            return False
+    # def define_attribute(self, attribute: Attribute) -> bool:
+    #     a = self.get_defined_attribute(attribute.name, len(self.attributes))
+    #     if a is not None:
+    #         return False
         
-        self.attributes.append(attribute)
-        return True
+    #     self.attributes.append(attribute)
+    #     return True
 
-    def define_method(self, method: Method) -> bool:
-        m = self.get_defined_method(method.name)
-        if m is not None and not m.comp(method):
-            return False
+    def define_variable(self, id: LexerToken, node: SemanticNode) -> SemanticNode:
+        row, col, name = self.decompact(id)
+        v = self.get_defined_variable(name)
+        if v is not None:
+            raise SemanticError(f'Variable {name} already defined in this scope.' + self.error_location(row, col))
+        self.variables[name] = node
+        return node
+
+    # def define_method(self, method: Method) -> bool:
+    #     m = self.get_defined_method(method.name)
+    #     if m is not None and not m.comp(method):
+    #         return False
         
-        self.methods.add(method)
-        return True
+    #     self.methods.add(method)
+    #     return True
     
-    def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
-        for i in range(index):
-            attribute: Attribute = self.attributes[i].name
-            if attribute.name == name:
-                return attribute
+    # def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
+    #     for i in range(index):
+    #         attribute: Attribute = self.attributes[i].name
+    #         if attribute.name == name:
+    #             return attribute
+    #     if self.parent is not None:
+    #         return self.parent.get_defined_attribute(name, self.attribute_index)
+    #     return None
+
+    def get_defined_variable(self, name: str) -> SemanticNode | None:
+        for variable in self.variables.keys():
+            if variable == name:
+                return self.variables[name]
         if self.parent is not None:
-            return self.parent.get_defined_attribute(name, self.attribute_index)
+            return self.parent.get_defined_variable(name)
         return None
 
-    def get_defined_method(self, name: str) -> Method | None:
-        for method in self.methods:
-            if method.name == name:
-                return method
-        if self.parent is not None:
-            return self.parent.get_defined_method(name)
-        return None
+    # def get_defined_method(self, name: str) -> Method | None:
+    #     for method in self.methods:
+    #         if method.name == name:
+    #             return method
+    #     if self.parent is not None:
+    #         return self.parent.get_defined_method(name)
+    #     return None
