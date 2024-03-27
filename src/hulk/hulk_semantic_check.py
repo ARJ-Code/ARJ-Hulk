@@ -233,9 +233,10 @@ class TypeBuilder(object):
         except SemanticError as error:
             self.errors.append(error.text)
             
-class SemanticCheckerVisitor(object):
-    def __init__(self):
+class SemanticChecker(object):
+    def __init__(self, context: Context):
         self.errors = []
+        self.contex: Context = context
     
     @visitor.on('node')
     def visit(self, node, scope):

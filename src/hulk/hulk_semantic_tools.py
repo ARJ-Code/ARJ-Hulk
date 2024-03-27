@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import List, Set
+from typing import List, Set, Tuple
 from abc import ABC
 
 from compiler_tools.lexer import LexerToken
@@ -97,7 +97,7 @@ class Type(ABC):
 
     def define_attribute(self, id: LexerToken, typex: 'Type') -> Attribute:
         row, col, name = self.decompact(id)
-        if name in (attribute for attribute in self.all_attributes()):
+        if name in (attribute.name for attribute in self.attributes):
             raise SemanticError(f'Attribute "{name}" already defined in {self.name}' + self.error_location(row, col))
 
         attribute = Attribute(name, typex)
@@ -130,13 +130,13 @@ class Type(ABC):
     def add_method(self, method: Method):
         self.methods.append(method)
 
-    def all_attributes(self, clean=True) -> List[Attribute]:
-        plain = OrderedDict()
+    def all_attributes(self, clean=True) -> List[Tuple[Attribute, 'Type']]:
+        plain = OrderedDict() if self.parent is None else self.parent.all_attributes(False)
         for attr in self.attributes:
             plain[attr.name] = (attr, self)
         return plain.values() if clean else plain
 
-    def all_methods(self, clean=True) -> List[Method]:
+    def all_methods(self, clean=True) -> List[Tuple[Method, 'Type']]:
         plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
         for method in self.methods:
             plain[method.name] = (method, self)
@@ -325,74 +325,45 @@ class Context:
     def __repr__(self):
         return str(self)
 
-# class Scope:
-#     def __init__(self, parent=None) -> None:
-#         self.parent: Scope = parent
-#         self.attributes: List[Attribute] = []
-#         self.methods: Set[Method] = set()
-#         self.classes: Set[Class] = set()
-#         self.protocols: Set[Protocol] = set()
-#         self.attribute_index = 0 if parent is None else len(parent.attributes)
+class Scope:
+    def __init__(self, parent: 'Scope'=None) -> None:
+        self.parent: Scope = parent
+        self.attributes: List[Attribute] = []
+        self.methods: Set[Method] = set()
+        self.attribute_index = 0 if parent is None else len(parent.attributes)
 
-#     def create_child_scope(self) -> 'Scope':
-#         return Scope(self)
+    def create_child_scope(self) -> 'Scope':
+        return Scope(self)
 
-#     def define_attribute(self, attribute: Attribute) -> bool:
-#         a = self.get_defined_attribute(attribute.name, len(self.attributes))
-#         if a is not None:
-#             return False
+    def define_attribute(self, attribute: Attribute) -> bool:
+        a = self.get_defined_attribute(attribute.name, len(self.attributes))
+        if a is not None:
+            return False
         
-#         self.attributes.append(attribute)
-#         return True
+        self.attributes.append(attribute)
+        return True
 
-#     def define_method(self, method: Method) -> bool:
-#         m = self.get_defined_method(method.name)
-#         if m is not None and not m.comp(method):
-#             return False
+    def define_method(self, method: Method) -> bool:
+        m = self.get_defined_method(method.name)
+        if m is not None and not m.comp(method):
+            return False
         
-#         self.methods.add(method)
-#         return True
+        self.methods.add(method)
+        return True
     
-#     def define_class(self, class_: Class) -> bool:
-#         c = self.get_defined_type(class_.name)
-#         if c is not None and not c.comp(class_):
-#             return False
-        
-#         self.classes.add(class_)
-#         return True
-    
-#     def define_protocol(self, protocol: Protocol) -> bool:
-#         p = self.get_defined_type(protocol.name)
-#         if p is not None and not p.comp(protocol):
-#             return False
-        
-#         self.protocols.add(protocol)
-#         return True
-    
-#     def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
-#         for i in range(index):
-#             attribute: Attribute = self.attributes[i].name
-#             if attribute.name == name:
-#                 return attribute
-#         if self.parent is not None:
-#             return self.parent.get_defined_attribute(name, self.attribute_index)
-#         return None
+    def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
+        for i in range(index):
+            attribute: Attribute = self.attributes[i].name
+            if attribute.name == name:
+                return attribute
+        if self.parent is not None:
+            return self.parent.get_defined_attribute(name, self.attribute_index)
+        return None
 
-#     def get_defined_method(self, name: str) -> Method | None:
-#         for method in self.methods:
-#             if method.name == name:
-#                 return method
-#         if self.parent is not None:
-#             return self.parent.get_defined_method(name)
-#         return None
-
-#     def get_defined_type(self, name: str) -> Type | None:
-#         for class_ in self.classes:
-#             if class_.name == name:
-#                 return class_
-#         for protocol in self.protocols:
-#             if protocol.name == name:
-#                 return protocol
-#         if self.parent is not None:
-#             return self.parent.get_defined_type(name)
-#         return None
+    def get_defined_method(self, name: str) -> Method | None:
+        for method in self.methods:
+            if method.name == name:
+                return method
+        if self.parent is not None:
+            return self.parent.get_defined_method(name)
+        return None
