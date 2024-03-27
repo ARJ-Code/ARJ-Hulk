@@ -4,7 +4,7 @@ def test():
     type_test =\
         """
             type A(x: Number, y: String) inherits B {
-                w = x;
+                w: Number = x;
                 hello(): Number { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
@@ -20,6 +20,28 @@ def test():
             protocol C extends D {
                 qwe(a: Number): Number;
             }
+            
+            let a: A = new A() in {
+                a.hello();
+                print(a.qwe(2));
+            }
+        """
+    
+    # assert hulk_compile_str(type_test)
+
+    type_test =\
+        """
+            type A(x, y) {
+                w = x;
+                hello() { print('hello'); }
+                qwe(a: Number): Number => a + a;
+            }
+
+            type B {
+                y: Number = 2;
+            }
+
+            function raudel(a: A) => 2;
             
             let a: A = new A() in {
                 a.hello();

@@ -1,4 +1,5 @@
-from hulk.hulk_semantic_check import TypeBuilder, TypeCollector
+from hulk.hulk_semantic_check import SemanticChecker, TypeBuilder, TypeCollector
+from hulk.hulk_semantic_tools import Scope
 from .hulk_lexer import hulk_lexer_build
 from .hulk_parser import hulk_parser_build, hulk_to_grammar, hulk_parse
 from compiler_tools.lexer import Lexer
@@ -34,11 +35,14 @@ def hulk_compile_str(program: str) -> bool:
         # builder = TypeBuilder(context, errors)
         # builder.visit(ast)
 
-        # print('Errors:', errors)
-        # print('Context:')
-        # print(context)
+        scope = Scope()
 
-        # return errors == []
+        semantic_checker = SemanticChecker(context)
+        semantic_checker.visit(ast, scope)
+
+        print('Errors:', errors)
+        print('Context:')
+        print(context)
 
         hulk_code_generator(ast)
 
