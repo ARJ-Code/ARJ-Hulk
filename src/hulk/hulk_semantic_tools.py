@@ -255,6 +255,7 @@ class Context:
     def __init__(self):
         self.types: {str, Type} = {}
         self.protocols: {str, Type} = {}
+        self.methods: {str, Method} = {}
 
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
@@ -276,6 +277,14 @@ class Context:
         protocol = self.protocols[name] = Protocol(name)
         return protocol
     
+    def create_method(self, id: LexerToken, parameters: List[Attribute], return_type: Type) -> Method:
+        row, col, name = self.decompact(id)
+        if name in self.methods:
+            raise SemanticError(f'Method with the same name ({name}) already in context.' + self.error_location(row, col))
+        method = self.methods[name] = Method(name, return_type, parameters)
+        return method
+    
+    
     def add_type(self, type: Class) -> Class:
         typex = self.types[type.name] = type
         return typex
@@ -283,6 +292,10 @@ class Context:
     def add_protocol(self, protocol: Protocol) -> Protocol:
         self.protocols[protocol.name] = protocol
         return protocol
+    
+    def add_method(self, method: Method) -> Method:
+        self.methods[method.name] = method
+        return method
 
     def get_type(self, id: LexerToken) -> Class:
         row, col, name = self.decompact(id)
@@ -295,6 +308,13 @@ class Context:
         row, col, name = self.decompact(id)
         try:
             return self.protocols[name]
+        except KeyError:
+            raise SemanticError(f'Protocol "{name}" is not defined.'+ self.error_location(row, col))
+        
+    def get_method(self, id: LexerToken) -> Method:
+        row, col, name = self.decompact(id)
+        try:
+            return self.methods[name]
         except KeyError:
             raise SemanticError(f'Protocol "{name}" is not defined.'+ self.error_location(row, col))
 

@@ -102,6 +102,19 @@ class TypeBuilder(object):
         
         self.check_circular_inheritance()
 
+    @visitor.when(FunctionDeclarationNode)
+    def visit(self, node: FunctionDeclarationNode):
+        def _build_attribute(param: ParameterNode):
+            p_type = self.visit(param)
+            return Attribute(param.name.value, p_type)
+
+        try:
+            parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]
+            return_type = self.visit(node.return_type)
+            self.context.create_method(node.name, parameters, return_type)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
     @visitor.when(ProtocolDeclarationNode)
     def visit(self, node: ProtocolDeclarationNode):
         extension_type = self.visit(node.extension)

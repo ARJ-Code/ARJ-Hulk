@@ -40,6 +40,8 @@ def test():
             type B {
                 y: Number = 2;
             }
+
+            function raudel(a: A) => 2;
             
             let a: A = new A() in {
                 a.hello();
