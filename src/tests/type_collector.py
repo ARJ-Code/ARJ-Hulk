@@ -31,13 +31,13 @@ def test():
 
     type_test =\
         """
-            type A(x, y) {
+            type A(x, y) inherits B {
                 w = x;
                 hello() { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
 
-            type B {
+            type B inherits A {
                 y: Number = 2;
             }
 

@@ -3,6 +3,7 @@ from typing import List, Set, Tuple
 from abc import ABC
 
 from compiler_tools.lexer import LexerToken
+from hulk.hulk_defined import ERROR
 
 class SemanticError(Exception):
     @property
@@ -148,6 +149,21 @@ class Type(ABC):
         if self.parent is not None:
             return self.parent.conforms_to(other)
         return False
+    
+    @staticmethod
+    def low_common_ancester(t1: 'Type', t2: 'Type') -> 'Type':
+        if t1 == ERROR or t2 == ERROR:
+            return ERROR 
+        elif t1 is None:
+            return t2
+        elif t2 is None:
+            return t1
+        elif t1.conforms_to(t2):
+            return t2
+        elif t2.conforms_to(t1):
+            return t1
+        else:
+            Type.low_common_ancester(t1.parent, t2.parent)
 
     def __str__(self):
         output = f'type {self.name}'
@@ -340,16 +356,32 @@ class SemanticGraph:
         parent.add_child(child)
         return parent
 
-    def correct_type_inference(self):
-        visited = [False for node in self.nodes]
+    def correct_type_inference(self) -> bool:
+        visited = [None for node in self.nodes]
         def dfs(node: SemanticNode) -> Type:
-            visited[node.index] = True
+            if len(node.children) == 0:
+                visited[child.index] = ERROR if node.node_type is None else None
+                return visited[child.index]
             ancient_type = None
             for child in node.children:
-                child_type = dfs(child)
+                if visited[child.index] is None:
+                    dfs(child)
+                ancient_type = Type.low_common_ancester(ancient_type, visited[child.index])
+            if node.node_type is None:
+                visited[child.index] = ancient_type
+                return ancient_type
+            elif ancient_type.conforms_to(node.node_type):
+                return node.node_type
+            else: 
+                return ERROR
 
 
         nodes = sorted(self.nodes, lambda n: n.index)
+        for node in nodes:
+            if visited[node.index] is None:
+                if dfs(node) is ERROR:
+                    return False
+        return True
 
 class SemanticNode(object):
     def __init__(self, index: int, node_type: Type = None):

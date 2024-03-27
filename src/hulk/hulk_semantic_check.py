@@ -250,6 +250,7 @@ class SemanticChecker(object):
         #     self.visit(statement, scope)
         program_node = self.graph.add_node()
         self.graph.add_child(program_node, self.visit(node.expression, scope))
+        print(self.graph.correct_type_inference())
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
@@ -266,7 +267,7 @@ class SemanticChecker(object):
         self.graph.add_child(var_node, self.visit(node.value, scope.create_child_scope()))
 
     @visitor.when(TypeNode)
-    def visit(self, node: TypeNode):
+    def visit(self, node: TypeNode, scope: Scope):
         return self.context.get_type(node.name)
     
     @visitor.when(EOFTypeNode)

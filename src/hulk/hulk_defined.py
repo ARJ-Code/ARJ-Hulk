@@ -5,6 +5,7 @@ OBJECT = Class('Object')
 STRING = Class('String')
 NUMBER = Class('Number')
 BOOLEAN = Class('Boolean')
+ERROR = Type('Error')
 
 COMPARABLE = Protocol('Comparable')
 COMPARABLE.add_method(Method('comp', NUMBER, [Attribute('a1', OBJECT)]))
