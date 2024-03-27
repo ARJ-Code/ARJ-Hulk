@@ -67,7 +67,7 @@ Type *system_addList(Type *list, Type *item);
 Type *system_getList(Type *list, Type *index);
 Type *system_setList(Type *list, Type *index, Type *item);
 Type *system_containsList(Type *list, Type *item);
-Type *system_removedList(Type *list, Type *index);
+Type *system_removeList(Type *list, Type *index);
 Type *system_currentList(Type *list);
 Type *system_nextList(Type *list);
 Type *system_resetList(Type *list);
@@ -516,7 +516,7 @@ Type *system_createList()
     system_addEntry(l, "length", *system_lengthList);
     system_addEntry(l, "add", *system_addList);
     system_addEntry(l, "contains", *system_containsList);
-    system_addEntry(l, "removed", *system_removedList);
+    system_addEntry(l, "remove", *system_removeList);
 
     system_addEntry(l, "get", *system_getList);
 
@@ -578,7 +578,7 @@ Type *system_containsList(Type *list, Type *item)
     return system_createBoolean(0);
 }
 
-Type *system_removedList(Type *list, Type *p_index)
+Type *system_removeList(Type *list, Type *p_index)
 {
     int index = system_typeToDouble(p_index);
 

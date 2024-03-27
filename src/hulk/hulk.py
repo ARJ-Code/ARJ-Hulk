@@ -25,15 +25,15 @@ def hulk_compile_str(program: str) -> bool:
 
         ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
 
-        errors = []
+        # errors = []
 
-        collector = TypeCollector(errors)
-        collector.visit(ast)
+        # collector = TypeCollector(errors)
+        # collector.visit(ast)
 
-        context = collector.context
+        # context = collector.context
 
-        builder = TypeBuilder(context, errors)
-        builder.visit(ast)
+        # builder = TypeBuilder(context, errors)
+        # builder.visit(ast)
 
         scope = Scope()
 
@@ -44,7 +44,7 @@ def hulk_compile_str(program: str) -> bool:
         print('Context:')
         print(context)
 
-        return errors == []
+        hulk_code_generator(ast)
 
     return result.ok
 
