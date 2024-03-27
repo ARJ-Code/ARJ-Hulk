@@ -462,6 +462,19 @@ class HulkCodeGenerator(object):
         context.new_line(
             f'{define_v(context.pop_v())} = system_set({vec}, {index}, {value});')
 
+    @visitor.when(AssignmentPropertyNode)
+    def visit(self, node: AssignmentPropertyNode, context: GeneratorContext):
+        v = context.new_v()
+        context.push_v(v)
+
+        self.visit(node.value, context)
+
+        context.new_line(
+            f'system_removeEntry({context.get_v("self")}, "p_{node.property.value}");')
+        context.new_line(
+            f'system_addEntry({context.get_v("self")}, "p_{node.property.value}", {v});')
+        context.new_line(f'{define_v( context.pop_v())} = {v};')
+
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode):
         context = self.generator_program.new_function()
@@ -491,7 +504,7 @@ class HulkCodeGenerator(object):
 
         ct = context.get_v('self')
 
-        declaration = f'Type *type_{t_name}_{node.name.value}({ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
+        declaration = f'Type *type_{t_name}_{node.name.value}(Type *{ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
         self.generator_program.new_declaration(declaration)
 
         context.new_line(declaration[:-1])
@@ -519,7 +532,7 @@ class HulkCodeGenerator(object):
 
         f = context.new_v()
         context.new_line(
-            f'Type *(*{f})({", ".join("Type *" for _ in range(len(node.property.parameters)+1))}) = system_findEntry({v}, "{node.property.name.value}");')
+            f'Type *(*{f})({", ".join("Type *" for _ in range(len(node.property.parameters)+1))}) = system_findEntry({v}, "f_{node.property.name.value}");')
 
         vp = []
 

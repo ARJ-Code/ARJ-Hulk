@@ -15,25 +15,25 @@ def hulk_build() -> bool:
 def hulk_compile_str(program: str) -> bool:
     hulk_lexer = Lexer()
     hulk_lexer.load('hulk')
-
+    
     result = hulk_lexer.run(program)
     tokens = result.tokens
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
-
+    
     if result.ok:
-
+        
         ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
 
-        # errors = []
+        errors = []
 
-        # collector = TypeCollector(errors)
-        # collector.visit(ast)
+        collector = TypeCollector(errors)
+        collector.visit(ast)
 
-        # context = collector.context
+        context = collector.context
 
-        # builder = TypeBuilder(context, errors)
-        # builder.visit(ast)
+        builder = TypeBuilder(context, errors)
+        builder.visit(ast)
 
         scope = Scope()
 

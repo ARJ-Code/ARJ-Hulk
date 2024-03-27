@@ -182,18 +182,18 @@ Type *system_createString(char *value)
 
     system_addEntry(s, "length", *system_lengthString);
 
-    system_addEntry(s, "get", *system_getString);
+    system_addEntry(s, "f_get", *system_getString);
 
-    system_addEntry(s, "comp", *system_compString);
+    system_addEntry(s, "f_comp", *system_compString);
 
-    system_addEntry(s, "current", *system_currentString);
-    system_addEntry(s, "next", *system_nextString);
-    system_addEntry(s, "reset", *system_resetString);
+    system_addEntry(s, "f_current", *system_currentString);
+    system_addEntry(s, "f_next", *system_nextString);
+    system_addEntry(s, "f_reset", *system_resetString);
 
     system_addEntry(s, "subString", *system_subString);
 
-    system_addEntry(s, "eq", *system_eqString);
-    system_addEntry(s, "toString", *system_toStringString);
+    system_addEntry(s, "f_eq", *system_eqString);
+    system_addEntry(s, "f_toString", *system_toStringString);
 
     return s;
 }
@@ -271,8 +271,8 @@ Type *system_resetString(Type *list)
 
 Type *system_concatString(Type *string1, Type *string2)
 {
-    Type *(*toString1)(Type *) = system_findEntry(string1, "toString");
-    Type *(*toString2)(Type *) = system_findEntry(string2, "toString");
+    Type *(*toString1)(Type *) = system_findEntry(string1, "f_toString");
+    Type *(*toString2)(Type *) = system_findEntry(string2, "f_toString");
 
     string1 = toString1(string1);
     string2 = toString2(string2);
@@ -291,8 +291,8 @@ Type *system_concatString(Type *string1, Type *string2)
 
 Type *system_concatWithSpaceString(Type *string1, Type *string2)
 {
-    Type *(*toString1)(Type *) = system_findEntry(string1, "toString");
-    Type *(*toString2)(Type *) = system_findEntry(string2, "toString");
+    Type *(*toString1)(Type *) = system_findEntry(string1, "f_toString");
+    Type *(*toString2)(Type *) = system_findEntry(string2, "f_toString");
 
     string1 = toString1(string1);
     string2 = toString2(string2);
@@ -343,10 +343,10 @@ Type *system_createNumber(double n)
     system_addEntry(t, "type", "Number");
     system_addEntry(t, "value", value);
 
-    system_addEntry(t, "comp", *system_compNumber);
+    system_addEntry(t, "f_comp", *system_compNumber);
 
-    system_addEntry(t, "eq", *system_eqNumber);
-    system_addEntry(t, "toString", *system_toStringNumber);
+    system_addEntry(t, "f_eq", *system_eqNumber);
+    system_addEntry(t, "f_toString", *system_toStringNumber);
 }
 
 Type *system_parseNumber(Type *string)
@@ -449,8 +449,8 @@ Type *system_createBoolean(bool n)
     system_addEntry(t, "type", "Boolean");
     system_addEntry(t, "value", value);
 
-    system_addEntry(t, "eq", *system_eqBoolean);
-    system_addEntry(t, "toString", *system_toStringBoolean);
+    system_addEntry(t, "f_eq", *system_eqBoolean);
+    system_addEntry(t, "f_toString", *system_toStringBoolean);
 }
 
 Type *system_eqBoolean(Type *n1, Type *n2)
@@ -513,21 +513,21 @@ Type *system_createList()
     system_addEntry(l, "len", len);
     system_addEntry(l, "curr", curr);
 
-    system_addEntry(l, "length", *system_lengthList);
-    system_addEntry(l, "add", *system_addList);
-    system_addEntry(l, "contains", *system_containsList);
-    system_addEntry(l, "remove", *system_removeList);
+    system_addEntry(l, "f_length", *system_lengthList);
+    system_addEntry(l, "f_add", *system_addList);
+    system_addEntry(l, "f_contains", *system_containsList);
+    system_addEntry(l, "f_remove", *system_removeList);
 
-    system_addEntry(l, "get", *system_getList);
+    system_addEntry(l, "f_get", *system_getList);
 
-    system_addEntry(l, "set", *system_setList);
+    system_addEntry(l, "f_set", *system_setList);
 
-    system_addEntry(l, "current", *system_currentList);
-    system_addEntry(l, "next", *system_nextList);
-    system_addEntry(l, "reset", *system_resetList);
+    system_addEntry(l, "f_current", *system_currentList);
+    system_addEntry(l, "f_next", *system_nextList);
+    system_addEntry(l, "f_reset", *system_resetList);
 
-    system_addEntry(l, "eq", *system_eqType);
-    system_addEntry(l, "toString", *system_toStringList);
+    system_addEntry(l, "f_eq", *system_eqType);
+    system_addEntry(l, "f_toString", *system_toStringList);
 
     return l;
 }
@@ -661,56 +661,56 @@ Type *system_toStringList(Type *list)
 
 Type *system_eq(Type *t1, Type *t2)
 {
-    Type *(*eq)(Type *, Type *) = system_findEntry(t1, "eq");
+    Type *(*eq)(Type *, Type *) = system_findEntry(t1, "f_eq");
 
     return eq(t1, t2);
 }
 
 Type *system_comp(Type *t1, Type *t2)
 {
-    Type *(*comp)(Type *, Type *) = system_findEntry(t1, "comp");
+    Type *(*comp)(Type *, Type *) = system_findEntry(t1, "f_comp");
 
     return comp(t1, t2);
 }
 
 Type *system_current(Type *t)
 {
-    Type *(*current)(Type *) = system_findEntry(t, "current");
+    Type *(*current)(Type *) = system_findEntry(t, "f_current");
 
     return current(t);
 }
 
 Type *system_next(Type *t)
 {
-    Type *(*next)(Type *) = system_findEntry(t, "next");
+    Type *(*next)(Type *) = system_findEntry(t, "f_next");
 
     return next(t);
 }
 
 Type *system_reset(Type *t)
 {
-    Type *(*reset)(Type *) = system_findEntry(t, "reset");
+    Type *(*reset)(Type *) = system_findEntry(t, "f_reset");
 
     return reset(t);
 }
 
 Type *system_get(Type *t, Type *index)
 {
-    Type *(*get)(Type *, Type *) = system_findEntry(t, "get");
+    Type *(*get)(Type *, Type *) = system_findEntry(t, "f_get");
 
     return get(t, index);
 }
 
 Type *system_set(Type *t, Type *index, Type *item)
 {
-    Type *(*set)(Type *, Type *, Type *) = system_findEntry(t, "set");
+    Type *(*set)(Type *, Type *, Type *) = system_findEntry(t, "f_set");
 
     return set(t, index, item);
 }
 
 Type *system_print(Type *t)
 {
-    Type *(*toString)(Type *) = system_findEntry(t, "toString");
+    Type *(*toString)(Type *) = system_findEntry(t, "f_toString");
     Type *s = toString(t);
 
     char *value = system_findEntry(s, "value");
@@ -723,10 +723,9 @@ Type *system_nextRange(Type *r)
 {
     double *curr = (double *)system_findEntry(r, "curr_ind");
 
-    Type *end = system_findEntry(r, "end");
-    double *end1 = system_findEntry(end, "value");
-
-    if (*curr + 1 == *end1)
+    double *end = system_findEntry(r, "end");
+  
+    if (*curr + 1 == *end)
         return system_createBoolean(0);
 
     *curr = *curr + 1;
@@ -744,10 +743,9 @@ Type *system_currentRange(Type *r)
 Type *system_resetRange(Type *r)
 {
     double *curr = system_findEntry(r, "curr_ind");
-    Type *start = system_findEntry(r, "start");
-    double *start1 = system_findEntry(start, "value");
-
-    *curr = *start1 - 1;
+    double *start = system_findEntry(r, "start");
+  
+    *curr = *start - 1;
 
     return r;
 }
@@ -755,15 +753,16 @@ Type *system_resetRange(Type *r)
 Type *system_range(Type *n1, Type *n2)
 {
     double *nn1 = system_findEntry(n1, "value");
+    double *nn2 = system_findEntry(n1, "value");
     double *curr = malloc(sizeof(double));
     *curr = *nn1 - 1;
 
     Type *range = system_createType();
-    system_addEntry(range, "start", n1);
-    system_addEntry(range, "end", n2);
-    system_addEntry(range, "reset", *system_resetRange);
-    system_addEntry(range, "current", *system_currentRange);
-    system_addEntry(range, "next", *system_nextRange);
+    system_addEntry(range, "start", nn1);
+    system_addEntry(range, "end", nn2);
+    system_addEntry(range, "f_reset", *system_resetRange);
+    system_addEntry(range, "f_current", *system_currentRange);
+    system_addEntry(range, "f_next", *system_nextRange);
     system_addEntry(range, "curr_ind", curr);
 }
 
