@@ -110,12 +110,12 @@ class AtomicNode(ExpressionNode):
 class InstancePropertyNode(AtomicNode):
     def __init__(self, name, p_name):
         super().__init__(name)
-        self.property: LetNode = p_name
+        self.property: LexerToken = p_name
 
 
 class InstanceFunctionNode(ExpressionNode):
-    def __init__(self, expression: ExpressionNode, expression_call: 'ExpressionCallNode',):
-        self.property: LexerToken = expression_call
+    def __init__(self, expression: ExpressionNode, expression_call: 'ExpressionCallNode'):
+        self.property: ExpressionCallNode = expression_call
         self.expression: ExpressionNode = expression
 
 
