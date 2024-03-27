@@ -753,7 +753,7 @@ Type *system_resetRange(Type *r)
 Type *system_range(Type *n1, Type *n2)
 {
     double *nn1 = system_findEntry(n1, "value");
-    double *nn2 = system_findEntry(n1, "value");
+    double *nn2 = system_findEntry(n2, "value");
     double *curr = malloc(sizeof(double));
     *curr = *nn1 - 1;
 
