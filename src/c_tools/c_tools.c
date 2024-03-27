@@ -20,8 +20,8 @@ typedef struct Type
 
 // Type
 
-Type *system_eqType(Type *t1, Type *t2);
-Type *system_toStringType(Type *t);
+Type *type_Object_eq(Type *t1, Type *t2);
+Type *type_Object_toString(Type *t);
 
 // String
 
@@ -152,12 +152,12 @@ void system_freeType(Type *dict)
     free(dict);
 }
 
-Type *system_eqType(Type *t1, Type *t2)
+Type *type_Object_eq(Type *t1, Type *t2)
 {
     return system_createBoolean(t1 == t2);
 }
 
-Type *system_toStringType(Type *t)
+Type *type_Object_toString(Type *t)
 {
     char *type = system_findEntry(t, "type");
 
@@ -526,7 +526,7 @@ Type *system_createList()
     system_addEntry(l, "f_next", *system_nextList);
     system_addEntry(l, "f_reset", *system_resetList);
 
-    system_addEntry(l, "f_eq", *system_eqType);
+    system_addEntry(l, "f_eq", *type_Object_eq);
     system_addEntry(l, "f_toString", *system_toStringList);
 
     return l;
@@ -724,7 +724,7 @@ Type *system_nextRange(Type *r)
     double *curr = (double *)system_findEntry(r, "curr_ind");
 
     double *end = system_findEntry(r, "end");
-  
+
     if (*curr + 1 == *end)
         return system_createBoolean(0);
 
@@ -744,7 +744,7 @@ Type *system_resetRange(Type *r)
 {
     double *curr = system_findEntry(r, "curr_ind");
     double *start = system_findEntry(r, "start");
-  
+
     *curr = *start - 1;
 
     return r;

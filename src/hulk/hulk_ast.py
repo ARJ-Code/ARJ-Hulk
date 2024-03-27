@@ -42,7 +42,7 @@ class VectorTypeNode (TypeNode):
 
 class ParameterNode(ASTNode):
     def __init__(self, name, type):
-        self.name:LexerToken = name
+        self.name: LexerToken = name
         self.type: TypeNode = type
 
 
@@ -53,8 +53,10 @@ class EOFNode (ASTNode):
 class EOFExtensionNode(EOFNode):
     pass
 
+
 class EOFInheritsNode(EOFNode):
     pass
+
 
 class EOFTypeNode(EOFNode):
     pass
@@ -73,6 +75,7 @@ class ClassTypeNode(ASTNode):
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
+        print(parameters)
         self.parameters: List[ParameterNode] = parameters
 
 
@@ -199,7 +202,7 @@ class ProtocolDeclarationNode(InstructionNode):
 
 class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
-        self.class_type: ClassTypeNode = class_type
+        self.class_type: ClassTypeNode | ClassDeclarationNode = class_type
         self.inheritance: InheritanceNode = inheritance
         self.body: List[TypedInstructionNode] = body
 

@@ -234,7 +234,7 @@ r40 = AttributedRule[ASTNode, LexerToken](lambda h, s: ClassTypeNode(s[2]))
 r41 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ClassTypeParameterNode(s[2], s[4]))
 hulk_grammar.add_attributed_production(
-    'Hc', ['type id', 'type id ( D2 )'], [r40, r41])
+    'Hc', ['type id', 'type id ( D1 )'], [r40, r41])
 
 r42 = AttributedRule[ASTNode, LexerToken](lambda h, s: InheritanceNode(s[2]))
 r43 = AttributedRule[ASTNode, LexerToken](

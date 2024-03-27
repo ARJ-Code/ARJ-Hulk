@@ -15,14 +15,14 @@ def hulk_build() -> bool:
 def hulk_compile_str(program: str) -> bool:
     hulk_lexer = Lexer()
     hulk_lexer.load('hulk')
-    
+
     result = hulk_lexer.run(program)
     tokens = result.tokens
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
-    
+
     if result.ok:
-        
+
         ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
 
         errors = []
@@ -44,7 +44,7 @@ def hulk_compile_str(program: str) -> bool:
         print('Context:')
         print(context)
 
-        hulk_code_generator(ast)
+        hulk_code_generator(ast, context)
 
     return result.ok
 

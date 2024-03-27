@@ -2,9 +2,7 @@ from .hulk_ast import *
 import compiler_tools.visitor as visitor
 from typing import Dict, List
 from .hulk_defined import is_defined_method
-
-B1 = '{'
-B2 = '}'
+from .hulk_semantic_check import Context
 
 
 def define_v(v: str):
@@ -97,8 +95,9 @@ class GeneratorProgram:
 
 
 class HulkCodeGenerator(object):
-    def __init__(self):
+    def __init__(self, semantic_context: Context):
         self.generator_program: GeneratorProgram = GeneratorProgram()
+        self.semantic_context: Context = semantic_context
 
     def get_code(self) -> str:
         return self.generator_program.get_code()
@@ -495,7 +494,76 @@ class HulkCodeGenerator(object):
 
     @visitor.when(ClassDeclarationNode)
     def visit(self, node: ClassDeclarationNode):
+        functions = self.semantic_context.get_type(
+            node.class_type.name).all_methods()
+
+        create_context = self.generator_program.new_function()
+        attributes_context = self.generator_program.new_function()
+
+        parameters = [] if not isinstance(node.class_type, ClassTypeParameterNode) else [
+            p.name.value for p in node.class_type.parameters]
+
+        declaration_c = f'Type *create_{node.class_type.name.value}({", ".join(f"Type *{create_context.get_v(p)}" for p in parameters)});'
+
+        ct = attributes_context.new_v()
+        declaration_a = f'void attributes_{node.class_type.name.value}(Type *{ct}{", " if len(parameters)!=0 else ""}{", ".join(f"Type *{attributes_context.get_v(p)}" for p in parameters)});'
+
+        self.generator_program.new_declaration(declaration_c)
+        self.generator_program.new_declaration(declaration_a)
+
+        attributes_context.new_line(declaration_a[:-1])
+        attributes_context.new_line('{')
+
         for i in node.body:
+            if not isinstance(i, ClassPropertyNode):
+                continue
+            v = attributes_context.new_v()
+            attributes_context.push_v(v)
+
+            self.visit(i.expression, attributes_context)
+            attributes_context.new_line(
+                f'system_addEntry({ct}, "p_{i.name.value}", {v});')
+
+        if isinstance(node.inheritance, InheritanceNode):
+            if isinstance(node.inheritance, InheritanceParameterNode):
+                parameters_ih = []
+
+                for p in node.inheritance.parameters:
+                    v = attributes_context.new_v()
+                    attributes_context.push_v(v)
+                    self.visit(p, attributes_context)
+                    parameters_ih.append(v)
+
+                attributes_context.new_line(
+                    f'attributes_{node.inheritance.name.value}({ct}{"" if len(parameters_ih)==0 else ", "}{", ".join(parameters_ih)});')
+            else:
+                attributes_context.new_line(
+                    f'attributes_{node.inheritance.name.value}({ct});')
+
+        attributes_context.new_line('}')
+
+        create_context.new_line(declaration_c[:-1])
+        create_context.new_line('{')
+
+        ct = create_context.new_v()
+        create_context.new_line(f'Type *{ct} = system_createType();')
+
+        for f, t in functions:
+            if f.name == 'init':
+                continue
+            create_context.new_line(
+                f'system_addEntry({ct}, "f_{f.name}", *type_{t.name}_{f.name});')
+
+        create_context.new_line(f'system_addEntry({ct}, "type", "{t.name}");')
+        create_context.new_line(
+            f'attributes_{node.class_type.name.value}({ct}{", " if len(parameters)!=0 else ""}{", ".join(create_context.get_v(p) for p in parameters)});')
+
+        create_context.new_line(f'return {ct};')
+        create_context.new_line('}')
+
+        for i in node.body:
+            if not isinstance(i, ClassFunctionNode):
+                continue
             self.visit(i, node.class_type.name.value)
 
     @visitor.when(ClassFunctionNode)
@@ -565,8 +633,8 @@ class HulkCodeGenerator(object):
             f'{define_v(context.pop_v())} = create_{node.name.name.value}({params});')
 
 
-def hulk_code_generator(ast: ASTNode):
-    generator = HulkCodeGenerator()
+def hulk_code_generator(ast: ASTNode, semantic_context: Context):
+    generator = HulkCodeGenerator(semantic_context)
 
     generator.visit(ast)
     code = generator.get_code()
