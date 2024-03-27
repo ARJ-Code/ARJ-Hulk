@@ -55,24 +55,38 @@ class TypeBuilder(object):
         self.current_type: Type = None
         self.errors: List[str] = errors
 
-    def check_circular_inheritance(self):
+    def check_circular_inheritance(self) -> None:
+        visited: {str, bool} = {}
+
+        for k in self.context.types.keys():
+            visited[k] = False
         for t in self.context.types.values():
             s = set()
-            while t is not None:
+            while t is not None and not visited[t.name]:
+                visited[t.name] = True
                 if t in s:
                     self.errors.append(f'Circular inheritance detected in class {t.name}')
                     break
                 s.add(t)
                 t = t.parent
 
+        visited = {}
+
+        for k in self.context.protocols.keys():
+            visited[k] = False
         for p in self.context.protocols.values():
             s = set()
-            while p is not None:
+            while p is not None and not visited[p.name]:
+                visited[p.name] = True
                 if p in s:
                     self.errors.append(f'Circular inheritance detected in protocol {p.name}')
                     break
                 s.add(p)
                 p = p.parent
+
+    # def check_overriding(self) -> None:
+    #     for t in self.context.types.values():
+    #         for method in t.methods:
 
 
     @visitor.on('node')
@@ -127,6 +141,12 @@ class TypeBuilder(object):
             self.visit(statement)
         self.current_type = None
 
+    @visitor.when(ClassTypeNode)
+    def visit(self, node: ClassTypeNode):
+        class_type = self.context.get_type(node.name)
+        class_type.add_method(Method('init', class_type, []))
+        return class_type
+
     @visitor.when(ClassTypeParameterNode)
     def visit(self, node: ClassTypeParameterNode):
         class_type = self.context.get_type(node.name)
@@ -146,8 +166,7 @@ class TypeBuilder(object):
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode):
         def _build_attribute(param: ParameterNode):
-            p_type = self.visit(param)
-            return Attribute(param.name.value, p_type)
+            return self.visit(param)
 
         try:
             parameters: List[Attribute] = [_build_attribute(param) for param in node.parameters]

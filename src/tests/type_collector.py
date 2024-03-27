@@ -27,7 +27,7 @@ def test():
             }
         """
     
-    assert hulk_compile_str(type_test)
+    # assert hulk_compile_str(type_test)
 
     type_test =\
         """
@@ -36,6 +36,10 @@ def test():
                 hello() { print('hello'); }
                 qwe(a: Number): Number => a + a;
             }
+
+            type B {
+                y: Number = 2;
+            }
             
             let a: A = new A() in {
                 a.hello();
@@ -43,4 +47,4 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(type_test)
+    assert hulk_compile_str(type_test)

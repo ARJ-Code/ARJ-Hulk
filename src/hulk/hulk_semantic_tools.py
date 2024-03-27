@@ -45,6 +45,19 @@ class Method:
                 return False
 
         return True
+
+    def is_overriding(self, value: 'Method'):
+        if self.name != value.name or len(self.arguments) != len(value.arguments):
+            return False
+        
+        for i in range(len(self.arguments)):
+            if self.arguments[i].type != value.arguments[i].type:
+                return False
+            
+        if self.return_type != value.return_type:
+            return False
+            
+        return True
     
     def __str__(self) -> str:
         output = f'{self.name}('
@@ -53,7 +66,7 @@ class Method:
         return output
 
 class Type(ABC):
-    def __init__(self, name:str):
+    def __init__(self, name: str):
         self.name = name
         self.attributes: List[Attribute] = []
         self.methods: List[Method] = []
@@ -107,7 +120,7 @@ class Type(ABC):
 
     def define_method(self, id: LexerToken, arguments: List[Attribute], return_type: 'Type') -> Method:
         row, col, name = self.decompact(id)
-        if name in (method for method in self.all_methods()):
+        if name in (method.name for method in self.methods):
             raise SemanticError(f'Method "{name}" already defined in {self.name}' + self.error_location(row, col))
 
         method = Method(name, return_type, arguments)
@@ -122,23 +135,12 @@ class Type(ABC):
         for attr in self.attributes:
             plain[attr.name] = (attr, self)
         return plain.values() if clean else plain
-    
-    def circular_inheritance(self, visited: Set['Type']) -> bool:
-        if self in visited:
-            return True
-        visited.add(self)
-        if self.parent is not None:
-            return self.parent.circular_inheritance(visited)
-        return False
 
     def all_methods(self, clean=True) -> List[Method]:
-        if self.circular_inheritance(set()):
-            raise SemanticError(f'Circular inheritance detected in {self.name}.')
-        else:
-            plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
-            for method in self.methods:
-                plain[method.name] = (method, self)
-            return plain.values() if clean else plain
+        plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
+        for method in self.methods:
+            plain[method.name] = (method, self)
+        return plain.values() if clean else plain
 
     def conforms_to(self, other: 'Type') -> bool:
         if self == other:
@@ -168,70 +170,6 @@ class Type(ABC):
 
     def __hash__(self) -> int:
         return hash(self.name)
-
-# class Type(ABC):
-#     def __init__(self, name: str) -> None:
-#         self.name: str = name
-#         self.methods: Set[Method] = set()
-#         self.father: 'Type | None' = None
-#         self.attributes: Set[Attribute] = set()
-
-#     def __eq__(self, __value: object) -> bool:
-#         return self.name == __value.name
-
-#     def __hash__(self) -> int:
-#         return hash(self.name)
-    
-#     def covariant(self, value: 'Type') -> bool:
-#         return self.comp(value)
-    
-#     def contravariant(self, value: 'Type') -> bool:
-#         return value.comp(self)
-
-#     def comp(self, value: 'Type') -> bool:
-#         if value.name == self.name:
-#             return True
-
-#         return self.father is not None and self.father.comp(value)
-
-#     def add_method(self, method: Method) -> bool:
-#         if method in self.methods:
-#             return False
-
-#         m = self.get_method(method.name)
-#         if m is not None and not method.comp(m):
-#             return False
-
-#         self.methods.add(method)
-#         return True
-
-#     def add_attribute(self, attribute: Attribute) -> bool:
-#         if attribute in self.attributes:
-#             return False
-
-#         a = self.get_attribute(attribute.name)
-#         if a is not None and not attribute.comp(a):
-#             return False
-
-#         self.attributes.add(attribute)
-#         return True
-
-#     def get_method(self, name: str) -> Method | None:
-#         for method in self.methods:
-#             if method.name == name:
-#                 return method
-#         if self.father is not None:
-#             return self.father.get_method(name)
-#         return None
-
-#     def get_attribute(self, name: str) -> Attribute | None:
-#         for attribute in self.attributes:
-#             if attribute.name == name:
-#                 return attribute
-#         if self.father is not None:
-#             return self.father.get_attribute(name)
-#         return None
-
 
 class Protocol(Type):
     def __init__(self, name: str) -> None:
@@ -288,6 +226,14 @@ class Class(Type):
 
     def add_protocol(self, protocol: Protocol) -> None:
         self.protocols.append(protocol)
+
+    # def add_parents_methods(self):
+    #     parents_methods = self.parent.all_methods()
+    #     for m1 in parents_methods:
+    #         are_override = False
+    #         for m2 in self.methods:
+    #             if m2.is_overriding(m1):
+    #                 are_override = True
     
     def __str__(self):
         output = f'type {self.name}'
