@@ -30,12 +30,12 @@ def hulk_compile_str(program: str) -> bool:
         print(
             f'Parser error:\nrow {tokens[result.error-1].row+1} col {tokens[result.error-1].col+1}')
         return False
-    
+
     ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
-    result=hulk_semantic_check(ast)
+    result = hulk_semantic_check(ast)
 
     if not result.ok:
-        error='\n'.join(result.errors)
+        error = '\n'.join(result.errors)
         print(f'Semantic errors:\n{error}')
         return False
 
@@ -46,12 +46,3 @@ def hulk_compile_str(program: str) -> bool:
     print(result.stdout)
 
     return True
-
-
-def hulk_compile():
-
-    f = open('cache/main.hulk')
-    p = f.read()
-    f.close()
-
-    print(hulk_compile_str(p))
