@@ -118,16 +118,27 @@ class Type(ABC):
         self.methods.append(method)
 
     def all_attributes(self, clean=True) -> List[Attribute]:
-        plain = OrderedDict() if self.parent is None else self.parent.all_attributes(False)
+        plain = OrderedDict()
         for attr in self.attributes:
             plain[attr.name] = (attr, self)
         return plain.values() if clean else plain
+    
+    def circular_inheritance(self, visited: Set['Type']) -> bool:
+        if self in visited:
+            return True
+        visited.add(self)
+        if self.parent is not None:
+            return self.parent.circular_inheritance(visited)
+        return False
 
     def all_methods(self, clean=True) -> List[Method]:
-        plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
-        for method in self.methods:
-            plain[method.name] = (method, self)
-        return plain.values() if clean else plain
+        if self.circular_inheritance(set()):
+            raise SemanticError(f'Circular inheritance detected in {self.name}.')
+        else:
+            plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
+            for method in self.methods:
+                plain[method.name] = (method, self)
+            return plain.values() if clean else plain
 
     def conforms_to(self, other: 'Type') -> bool:
         if self == other:

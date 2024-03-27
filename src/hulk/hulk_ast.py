@@ -40,7 +40,7 @@ class VectorTypeNode (TypeNode):
         self.dimensions = 1 if dimensions is None else dimensions.value
 
 
-class TypedParameterNode(ASTNode):
+class ParameterNode(ASTNode):
     def __init__(self, name, type):
         self.name = name
         self.type: TypeNode = type
@@ -71,7 +71,7 @@ class ClassTypeNode(ASTNode):
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
-        self.parameters: List[TypedParameterNode] = parameters
+        self.parameters: List[ParameterNode] = parameters
 
 
 class ExtensionNode(ASTNode):
@@ -183,7 +183,7 @@ class ExplicitArrayDeclarationNode(ExpressionNode):
 class FunctionDeclarationNode (InstructionNode):
     def __init__(self, name, parameters, return_type, body):
         self.name: LexerToken = name
-        self.parameters: List[TypedParameterNode] = parameters
+        self.parameters: List[ParameterNode] = parameters
         self.return_type: LexerToken = return_type
         self.body: ExpressionNode = body
 
@@ -218,14 +218,14 @@ class ProtocolInstructionNode(TypedInstructionNode):
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, p_type):
         super().__init__(name)
-        self.parameters: List[TypedParameterNode] = parameters
+        self.parameters: List[ParameterNode] = parameters
         self.type: TypeNode = p_type
 
 
 class ClassFunctionNode(ClassInstructionNode):
     def __init__(self, name, parameters, p_type, body):
         super().__init__(name)
-        self.parameters: List[TypedParameterNode] = parameters
+        self.parameters: List[ParameterNode] = parameters
         self.type: TypeNode = p_type
         self.body: ExpressionNode = body
 
