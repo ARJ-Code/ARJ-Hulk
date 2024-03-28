@@ -249,7 +249,7 @@ class SemanticChecker(object):
         # for statement in node.second_is:
         #     self.visit(statement, scope)
         program_node = self.graph.add_node()
-        self.graph.add_child(program_node, self.visit(node.expression, scope))
+        self.graph.add_path(program_node, self.visit(node.expression, scope))
         try: 
             self.graph.type_inference()
         except SemanticError as error:
@@ -260,14 +260,14 @@ class SemanticChecker(object):
         let_node = self.graph.add_node()
         for assignment in node.assignments:
             self.visit(assignment, scope)
-        return self.graph.add_child(let_node, self.visit(node.body, scope.create_child_scope()))
+        return self.graph.add_path(let_node, self.visit(node.body, scope.create_child_scope()))
 
     @visitor.when(DeclarationNode)
     def visit(self, node: DeclarationNode, scope: Scope):
         var_type = self.visit(node.type, scope)
         var_node = self.graph.add_node(var_type)
         scope.define_variable(node.name, var_node)
-        self.graph.add_child(var_node, self.visit(node.value, scope.create_child_scope()))
+        self.graph.add_path(var_node, self.visit(node.value, scope.create_child_scope()))
 
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode, scope: Scope):
