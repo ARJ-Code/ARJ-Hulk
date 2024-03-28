@@ -402,8 +402,10 @@ class SemanticGraph:
                 node.node_type = ancient_type
                 return ancient_type
             elif ancient_type.conforms_to(node.node_type):
+                visited[node.index] = node.node_type
                 return node.node_type
             else:
+                visited[node.index] = ERROR
                 return ERROR
 
         nodes = self.nodes
@@ -418,6 +420,7 @@ class SemanticGraph:
         for i in range(self.adj):
             for j in self.adj[i]:
                 new_ajd[j].append(i)
+        return new_ajd
 
     def dfs_visit(self, n: int, adj: List[List[int]], mask: List[bool], q: List[int], cc: int, cc_list: List[int]):
         mask[n] = True

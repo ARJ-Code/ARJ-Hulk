@@ -288,6 +288,54 @@ class SemanticChecker(object):
             constant_type = NUMBER
         
         return self.graph.add_node(constant_type)
+    
+    @visitor.when(BooleanUnaryNode)
+    def visit(self, node: BooleanUnaryNode, scope: Scope):
+        boolean_node = self.graph.add_node(BOOLEAN)
+        expression_node = self.visit(node.child, scope.create_child_scope())
+        self.graph.add_path(boolean_node, expression_node)
+        return boolean_node
+    
+    @visitor.when(ArithmeticUnaryNode)
+    def visit(self, node: ArithmeticUnaryNode, scope: Scope):
+        number_node = self.graph.add_node(NUMBER)
+        expression_node = self.visit(node.child, scope.create_child_scope())
+        self.graph.add_path(number_node, expression_node)
+        return number_node
+    
+    @visitor.when(BooleanBinaryNode)
+    def visit(self, node: BooleanBinaryNode, scope: Scope):
+        boolean_node = self.graph.add_node(BOOLEAN)
+        is_boolean_operation = node.operator in [BooleanOperator.AND, BooleanOperator.OR]
+        left_node = self.graph.add_node(BOOLEAN if is_boolean_operation else NUMBER)
+        left_expression_node = self.visit(node.left, scope.create_child_scope())
+        self.graph.add_path(left_node, left_expression_node)
+        right_node = self.graph.add_node(BOOLEAN if is_boolean_operation else NUMBER)
+        right_expression_node = self.visit(node.right, scope.create_child_scope())
+        self.graph.add_path(right_node, right_expression_node)
+        return boolean_node
+    
+    @visitor.when(ArithmeticBinaryNode)
+    def visit(self, node: ArithmeticBinaryNode, scope: Scope):
+        boolean_node = self.graph.add_node(NUMBER)
+        left_node = self.graph.add_node(NUMBER)
+        left_expression_node = self.visit(node.left, scope.create_child_scope())
+        self.graph.add_path(left_node, left_expression_node)
+        right_node = self.graph.add_node(NUMBER)
+        right_expression_node = self.visit(node.right, scope.create_child_scope())
+        self.graph.add_path(right_node, right_expression_node)
+        return boolean_node
+    
+    @visitor.when(StringBinaryNode)
+    def visit(self, node: StringBinaryNode, scope: Scope):
+        string_node = self.graph.add_node(STRING)
+        left_node = self.graph.add_node(STRING)
+        left_expression_node = self.visit(node.left, scope.create_child_scope())
+        self.graph.add_path(left_node, left_expression_node)
+        right_node = self.graph.add_node(STRING)
+        right_expression_node = self.visit(node.right, scope.create_child_scope())
+        self.graph.add_path(right_node, right_expression_node)
+        return string_node
 
     
     # @visitor.when(VarDeclarationNode)

@@ -56,4 +56,11 @@ def test():
             let a = 2 in 2;
         """
     
-    assert hulk_compile_str(let_test)
+    # assert hulk_compile_str(let_test)
+
+    simples_expressions_test =\
+        """
+            let a:String = 'a' @@ 'b' in 2;
+        """
+    
+    assert hulk_compile_str(simples_expressions_test)

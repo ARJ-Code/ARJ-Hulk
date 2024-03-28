@@ -33,13 +33,13 @@ class TypeNode (ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class VectorTypeNode (TypeNode):
     def __init__(self, name: str, dimensions: LexerToken | None):
         super().__init__(name)
         self.dimensions = 1 if dimensions is None else dimensions.value
 
-
+# TODO
 class ParameterNode(ASTNode):
     def __init__(self, name, type):
         self.name:LexerToken = name
@@ -59,33 +59,33 @@ class EOFInheritsNode(EOFNode):
 class EOFTypeNode(EOFNode):
     pass
 
-
+# TODO
 class ProtocolTypeNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class ClassTypeNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class ClassTypeParameterNode(ClassTypeNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters: List[ParameterNode] = parameters
 
-
+# TODO
 class ExtensionNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class InheritanceNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class InheritanceParameterNode(InheritanceNode):
     def __init__(self, name, parameters):
         super().__init__(name)
@@ -108,25 +108,25 @@ class AtomicNode(ExpressionNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-
+# TODO
 class InstancePropertyNode(AtomicNode):
     def __init__(self, name, p_name):
         super().__init__(name)
         self.property: LexerToken = p_name
 
-
+# TODO
 class InstanceFunctionNode(ExpressionNode):
     def __init__(self, expression: ExpressionNode, expression_call: 'ExpressionCallNode'):
         self.property: ExpressionCallNode = expression_call
         self.expression: ExpressionNode = expression
 
-
+# TODO
 class ExpressionCallNode (AtomicNode):
     def __init__(self, name, parameters):
         super().__init__(name)
         self.parameters: List[ExpressionNode] = parameters
 
-
+# TODO
 class ArrayCallNode(ExpressionNode):
     def __init__(self, expression: ExpressionNode, indexer: ExpressionNode):
         self.expression: ExpressionNode = expression
@@ -139,7 +139,7 @@ class ConstantNode (AtomicNode):
         self.value: LexerToken = value
         self.type: ConstantTypes = v_type
 
-
+# Make left and right nodes Printeables
 class StringBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
         super().__init__(left, right)
@@ -157,7 +157,7 @@ class ArithmeticUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: ArithmeticOperator = operator
 
-
+# Make left and right nodes Comparables
 class BooleanBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
         super().__init__(left, right)
@@ -169,19 +169,19 @@ class BooleanUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
-
+# TODO
 class ImplicitArrayDeclarationNode (ExpressionNode):
     def __init__(self, expression, variable, iterable):
         self.expression: ExpressionNode = expression
         self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
 
-
+# TODO
 class ExplicitArrayDeclarationNode(ExpressionNode):
     def __init__(self, values: List[ExpressionNode]):
         self.values: List[ExpressionNode] = values
 
-
+# TODO
 class FunctionDeclarationNode (InstructionNode):
     def __init__(self, name, parameters, return_type, body):
         self.name: LexerToken = name
@@ -189,21 +189,21 @@ class FunctionDeclarationNode (InstructionNode):
         self.return_type: LexerToken = return_type
         self.body: ExpressionNode = body
 
-
+# TODO
 class ProtocolDeclarationNode(InstructionNode):
     def __init__(self, protocol_type, extension, body):
         self.protocol_type: ProtocolTypeNode = protocol_type
         self.extension: ExtensionNode = extension
         self.body: List[InstructionNode] = body
 
-
+# TODO
 class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
         self.class_type: ClassTypeNode = class_type
         self.inheritance: InheritanceNode = inheritance
         self.body: List[TypedInstructionNode] = body
 
-
+# TODO
 class TypedInstructionNode(ASTNode):
     def __init__(self, name: LexerToken) -> None:
         self.name: LexerToken = name
@@ -216,14 +216,14 @@ class ClassInstructionNode(TypedInstructionNode):
 class ProtocolInstructionNode(TypedInstructionNode):
     pass
 
-
+# TODO
 class ProtocolFunctionNode(ProtocolInstructionNode):
     def __init__(self, name, parameters, p_type):
         super().__init__(name)
         self.parameters: List[ParameterNode] = parameters
         self.type: TypeNode = p_type
 
-
+# TODO
 class ClassFunctionNode(ClassInstructionNode):
     def __init__(self, name, parameters, p_type, body):
         super().__init__(name)
@@ -231,26 +231,26 @@ class ClassFunctionNode(ClassInstructionNode):
         self.type: TypeNode = p_type
         self.body: ExpressionNode = body
 
-
+# TODO
 class ClassPropertyNode(ClassInstructionNode):
     def __init__(self, name, p_type, expression):
         super().__init__(name)
         self.type: TypeNode = p_type
         self.expression: ExpressionNode = expression
 
-
+# TODO
 class IsNode(ExpressionNode):
     def __init__(self, name, type_name):
         self.name: LexerToken = name
         self.type_name: TypeNode = type_name
 
-
+# TODO
 class AsNode(ExpressionNode):
     def __init__(self, name, type_name):
         self.name: LexerToken = name
         self.type_name: TypeNode = type_name
 
-
+# TODO
 class NewNode(ExpressionNode):
     def __init__(self, name):
         self.name: ExpressionCallNode = name
@@ -262,20 +262,20 @@ class DeclarationNode (ASTNode):
         self.type: TypeNode = p_type
         self.value: ExpressionNode = value
 
-
+# TODO
 class AssignmentNode (ExpressionNode):
     def __init__(self, name: LexerToken, value: ExpressionNode):
         self.name: LexerToken = name
         self.value: ExpressionNode = value
 
-
+# TODO
 class AssignmentPropertyNode(ExpressionNode):
     def __init__(self, name: LexerToken, p_name: LexerToken, value: ExpressionNode) -> None:
         self.name: LexerToken = name
         self.property: LexerToken = p_name
         self.value: ExpressionNode = value
 
-
+# TODO
 class AssignmentArrayNode(ExpressionNode):
     def __init__(self, array_call: ArrayCallNode, value: ExpressionNode) -> None:
         self.array_call: ArrayCallNode = array_call
@@ -287,7 +287,7 @@ class LetNode (ExpressionNode):
         self.assignments: List[DeclarationNode] = assignments
         self.body: ExpressionNode = body
 
-
+# TODO
 class IfNode (ExpressionNode):
     def __init__(self, condition, body, elif_clauses, else_body):
         self.condition: ExpressionNode = condition
@@ -295,26 +295,26 @@ class IfNode (ExpressionNode):
         self.elif_clauses: List[ElifNode] = elif_clauses
         self.else_body: ExpressionNode = else_body
 
-
+# TODO
 class ElifNode(ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
 
-
+# TODO
 class WhileNode (ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
 
-
+# TODO
 class ForNode (ExpressionNode):
     def __init__(self, variable: LexerToken, iterable: ExpressionNode, body):
         self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
 
-
+# TODO
 class ExpressionBlock(ExpressionNode):
     def __init__(self, instructions: List[ASTNode]) -> None:
         self.instructions: List[ASTNode] = instructions
