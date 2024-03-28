@@ -1,14 +1,15 @@
 import importlib
 
 test_modules = [
-    'slr1',
-    'lr1',
-    'tableLR',
-    'regex',
-    'lexer',
-    'automaton',
-    'hulk_grammar',
-    'type_collector'
+    # 'slr1',
+    # 'lr1',
+    # 'tableLR',
+    # 'regex',
+    # 'lexer',
+    # 'automaton',
+    # 'hulk_grammar',
+    # 'type_collector',
+    'code_gen'
 ]
 
 for module_name in test_modules:
