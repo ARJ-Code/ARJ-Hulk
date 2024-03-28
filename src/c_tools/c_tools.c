@@ -171,14 +171,17 @@ Type *system_createString(char *value)
     Type *s = system_createType();
     int *len = malloc(sizeof(int));
     int *curr = malloc(sizeof(int));
+    int *type_ind = malloc(sizeof(int));
 
     *len = strlen(value);
     *curr = 0;
+    *type_ind = 1;
 
     system_addEntry(s, "type", "String");
     system_addEntry(s, "value", value);
     system_addEntry(s, "len", len);
     system_addEntry(s, "curr", curr);
+    system_addEntry(s, "type_ind", type_ind);
 
     system_addEntry(s, "length", *system_lengthString);
 
@@ -339,9 +342,12 @@ Type *system_createNumber(double n)
 
     double *value = malloc(sizeof(double));
     *value = n;
+    double *type_ind = malloc(sizeof(double));
+    *type_ind = 2;
 
     system_addEntry(t, "type", "Number");
     system_addEntry(t, "value", value);
+    system_addEntry(t, "type_ind", type_ind);
 
     system_addEntry(t, "f_comp", *system_compNumber);
 
@@ -445,9 +451,12 @@ Type *system_createBoolean(bool n)
     Type *t = system_createType();
     bool *value = malloc(sizeof(int));
     *value = n;
+    int *type_ind = malloc(sizeof(int));
+    *type_ind = 3;
 
     system_addEntry(t, "type", "Boolean");
     system_addEntry(t, "value", value);
+    system_addEntry(t, "type_ind", type_ind);
 
     system_addEntry(t, "f_eq", *system_eqBoolean);
     system_addEntry(t, "f_toString", *system_toStringBoolean);
@@ -798,6 +807,24 @@ Type *system_log(Type *n1, Type *n2)
 Type *system_rand()
 {
     return system_createNumber(drand48());
+}
+
+int **system_graph;
+
+int system_search_type(int n, int s)
+{
+    if (n == s)
+        return 1;
+
+    int len = system_graph[n][0];
+    int r = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        r = r || system_search_type(system_graph[n][i + 1], s);
+    }
+
+    return r;
 }
 
 // FINISH C TOOLS

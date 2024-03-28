@@ -242,9 +242,9 @@ class ClassPropertyNode(ClassInstructionNode):
 
 
 class IsNode(ExpressionNode):
-    def __init__(self, name, type_name):
-        self.name: LexerToken = name
-        self.type_name: TypeNode = type_name
+    def __init__(self, expression, type_name):
+        self.expression: ExpressionNode = expression
+        self.type_name: LexerToken = type_name
 
 
 class AsNode(ExpressionNode):

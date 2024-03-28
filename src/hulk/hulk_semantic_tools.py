@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple,Dict
 from abc import ABC
 
 from compiler_tools.lexer import LexerToken
@@ -74,6 +74,7 @@ class Type(ABC):
         self.name = name
         self.attributes: List[Attribute] = []
         self.methods: List[Method] = []
+        self.protocols:List[Protocol]=[]
         self.parent: Type = None
 
     def decompact(self, token: LexerToken):
@@ -265,9 +266,9 @@ class Class(Type):
 
 class Context:
     def __init__(self):
-        self.types: {str, Type} = {}
-        self.protocols: {str, Type} = {}
-        self.methods: {str, Method} = {}
+        self.types: Dict[str, Type] = {}
+        self.protocols: Dict[str, Type] = {}
+        self.methods: Dict[str, Method] = {}
 
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
