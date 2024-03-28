@@ -9,9 +9,6 @@ BOOLEAN = Class('Boolean')
 COMPARABLE = Protocol('Comparable')
 COMPARABLE.add_method(Method('comp', NUMBER, [Attribute('a1', OBJECT)]))
 
-PRINTEABLE = Protocol('Printeable')
-PRINTEABLE.add_method(Method('toString', STRING, []))
-
 ITERABLE = Protocol('Iterable')
 ITERABLE.add_method(Method('next', BOOLEAN, []))
 ITERABLE.add_method(Method('current', OBJECT, []))

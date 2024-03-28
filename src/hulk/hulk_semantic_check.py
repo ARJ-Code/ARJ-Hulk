@@ -267,7 +267,21 @@ class SemanticChecker(object):
     def visit(self, node: IfNode, scope: Scope):
         if_node = self.graph.add_node()
         conditional_node = self.graph.add_node(BOOLEAN)
-        self.graph.add_path(conditional_node, self.visit())
+        self.graph.add_path(conditional_node, self.visit(node.condition, scope.create_child_scope()))
+        then_node = self.graph.add_node()
+        self.graph.add_path(if_node, self.graph.add_path(then_node, self.visit(node.body, scope.create_child_scope())))
+        for elif_ in node.elif_clauses:
+            elif_node = self.graph.add_node()
+            self.graph.add_path(elif_node, self.visit(elif_, scope.create_child_scope()))
+        else_node = self.graph.add_node()
+        return self.graph.add_path(if_node, self.graph.add_path(else_node, self.visit(node.else_body, scope.create_child_scope())))
+
+    @visitor.when(ElifNode)
+    def visit(self, node: ElifNode, scope: Scope):
+        elif_node = self.graph.add_node()
+        conditional_node = self.graph.add_node(BOOLEAN)
+        self.graph.add_path(conditional_node, self.visit(node.condition, scope.create_child_scope()))
+        return self.graph.add_path(elif_node, self.visit(node.body, scope.create_child_scope()))
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
@@ -280,10 +294,11 @@ class SemanticChecker(object):
 
     @visitor.when(DeclarationNode)
     def visit(self, node: DeclarationNode, scope: Scope):
+        expression_node = self.visit(node.value, scope.create_child_scope())
         var_type = self.visit(node.type, scope)
         var_node = self.graph.add_node(var_type)
         scope.define_variable(node.name, var_node)
-        self.graph.add_path(var_node, self.visit(node.value, scope.create_child_scope()))
+        self.graph.add_path(var_node, expression_node)
 
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode, scope: Scope):
@@ -343,10 +358,10 @@ class SemanticChecker(object):
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, scope: Scope):
         string_node = self.graph.add_node(STRING)
-        left_node = self.graph.add_node(STRING)
+        left_node = self.graph.add_node(OBJECT)
         left_expression_node = self.visit(node.left, scope.create_child_scope())
         self.graph.add_path(left_node, left_expression_node)
-        right_node = self.graph.add_node(STRING)
+        right_node = self.graph.add_node(OBJECT)
         right_expression_node = self.visit(node.right, scope.create_child_scope())
         self.graph.add_path(right_node, right_expression_node)
         return string_node

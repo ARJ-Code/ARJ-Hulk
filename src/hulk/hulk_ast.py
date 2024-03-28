@@ -287,7 +287,7 @@ class LetNode (ExpressionNode):
         self.assignments: List[DeclarationNode] = assignments
         self.body: ExpressionNode = body
 
-# TODO
+
 class IfNode (ExpressionNode):
     def __init__(self, condition, body, elif_clauses, else_body):
         self.condition: ExpressionNode = condition

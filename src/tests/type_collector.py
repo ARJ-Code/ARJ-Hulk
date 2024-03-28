@@ -58,9 +58,9 @@ def test():
     
     # assert hulk_compile_str(let_test)
 
-    simples_expressions_test =\
+    if_test =\
         """
-            let a = 1, b = 2, c = 3 in 3;
+            let a: Number = if (2 >= 3) 'a' elif (true) 2 else '2' in 2;
         """
     
-    assert hulk_compile_str(simples_expressions_test)
+    assert hulk_compile_str(if_test)

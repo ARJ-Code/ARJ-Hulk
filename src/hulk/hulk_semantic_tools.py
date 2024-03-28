@@ -175,7 +175,7 @@ class Type(ABC):
         elif t2.conforms_to(t1):
             return t1
         else:
-            Type.low_common_ancester(t1.parent, t2.parent)
+            return Type.low_common_ancester(t1.parent, t2.parent)
 
     def __str__(self):
         output = f'type {self.name}'
