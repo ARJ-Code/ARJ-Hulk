@@ -22,7 +22,8 @@ def new_string(v: str):
 
 
 class GeneratorContext:
-    def __init__(self):
+    def __init__(self, parent: 'GeneratorContext | None' = None):
+        self.parent: 'GeneratorContext | None' = parent
         self.dict_v: Dict[str, str] = {}
         self.curr_v: int = 0
         self.indentation: int = 0
@@ -30,6 +31,9 @@ class GeneratorContext:
         self.stack_v: List[str] = []
 
     def new_line(self, line: str):
+        if self.parent is not None:
+            self.parent.new_line(line)
+            return
         if line == '}':
             self.indentation -= 1
 
@@ -40,23 +44,44 @@ class GeneratorContext:
             self.indentation += 1
 
     def new_v(self) -> str:
+        if self.parent is not None:
+            return self.parent.new_v()
+
         v = 'v'+str(self.curr_v)
         self.curr_v += 1
         return v
 
-    def get_v(self, v: str) -> str:
-        if not v in self.dict_v:
-            self.dict_v[v] = self.new_v()
+    def define_v(self, v) -> str:
+        self.dict_v[v] = self.new_v()
 
         return self.dict_v[v]
 
+    def get_v(self, v: str) -> str | None:
+        if v in self.dict_v:
+            return self.dict_v[v]
+
+        if self.parent is not None:
+            return self.parent.get_v(v)
+
+        return None
+
     def get_code(self):
+        if self.parent is not None:
+            return self.parent.get_code()
+
         return '\n'.join(l for l in self.code)
 
     def push_v(self, v: str):
+        if self.parent is not None:
+            self.parent.push_v(v)
+            return
+
         self.stack_v.append(v)
 
     def pop_v(self) -> str:
+        if self.parent is not None:
+            return self.parent.pop_v()
+
         v = self.stack_v[-1]
         self.stack_v.pop()
 
@@ -64,6 +89,9 @@ class GeneratorContext:
 
     def top_v(self) -> str:
         return self.stack_v[-1]
+
+    def child(self) -> 'GeneratorContext':
+        return GeneratorContext(self)
 
 
 class GeneratorProgram:
@@ -321,18 +349,16 @@ class HulkCodeGenerator(object):
     @visitor.when(LetNode)
     def visit(self, node: LetNode, context: GeneratorContext):
         for a in node.assignments:
-            vn = context.get_v(a.name.value)
             vc = context.new_v()
-
             context.push_v(vc)
+
             self.visit(a.value, context)
 
+            context = context.child()
+            vn = context.define_v(a.name.value)
             context.new_line(f'{define_v(vn)} = {vc};')
 
         self.visit(node.body, context)
-
-        for a in node.assignments:
-            del context.dict_v[a.name.value]
 
     @visitor.when(IfNode)
     def visit(self, node: IfNode, context: GeneratorContext):
@@ -410,7 +436,8 @@ class HulkCodeGenerator(object):
         context.push_v(vi)
         self.visit(node.iterable, context)
 
-        v = context.get_v(node.variable.value)
+        context = context.child()
+        v = context.define_v(node.variable.value)
 
         context.new_line(f'system_reset({vi});')
         context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
@@ -478,7 +505,7 @@ class HulkCodeGenerator(object):
     def visit(self, node: FunctionDeclarationNode):
         context = self.generator_program.new_function()
 
-        declaration = f'Type *global_{node.name.value}({", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
+        declaration = f'Type *global_{node.name.value}({", ".join(f"Type *{context.define_v(p.name.value)}" for p in node.parameters)});'
         self.generator_program.new_declaration(declaration)
 
         context.new_line(declaration[:-1])
@@ -503,10 +530,10 @@ class HulkCodeGenerator(object):
         parameters = [] if not isinstance(node.class_type, ClassTypeParameterNode) else [
             p.name.value for p in node.class_type.parameters]
 
-        declaration_c = f'Type *create_{node.class_type.name.value}({", ".join(f"Type *{create_context.get_v(p)}" for p in parameters)});'
+        declaration_c = f'Type *create_{node.class_type.name.value}({", ".join(f"Type *{create_context.define_v(p)}" for p in parameters)});'
 
         ct = attributes_context.new_v()
-        declaration_a = f'void attributes_{node.class_type.name.value}(Type *{ct}{", " if len(parameters)!=0 else ""}{", ".join(f"Type *{attributes_context.get_v(p)}" for p in parameters)});'
+        declaration_a = f'void attributes_{node.class_type.name.value}(Type *{ct}{", " if len(parameters)!=0 else ""}{", ".join(f"Type *{attributes_context.define_v(p)}" for p in parameters)});'
 
         self.generator_program.new_declaration(declaration_c)
         self.generator_program.new_declaration(declaration_a)
@@ -570,9 +597,9 @@ class HulkCodeGenerator(object):
     def visit(self, node: ClassFunctionNode, t_name: str):
         context = self.generator_program.new_function()
 
-        ct = context.get_v('self')
+        ct = context.define_v('self')
 
-        declaration = f'Type *type_{t_name}_{node.name.value}(Type *{ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.get_v(p.name.value)}" for p in node.parameters)});'
+        declaration = f'Type *type_{t_name}_{node.name.value}(Type *{ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.define_v(p.name.value)}" for p in node.parameters)});'
         self.generator_program.new_declaration(declaration)
 
         context.new_line(declaration[:-1])
