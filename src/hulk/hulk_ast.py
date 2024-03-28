@@ -295,7 +295,7 @@ class IfNode (ExpressionNode):
         self.elif_clauses: List[ElifNode] = elif_clauses
         self.else_body: ExpressionNode = else_body
 
-# TODO
+
 class ElifNode(ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition

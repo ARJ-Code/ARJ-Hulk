@@ -282,6 +282,13 @@ class SemanticChecker(object):
         conditional_node = self.graph.add_node(BOOLEAN)
         self.graph.add_path(conditional_node, self.visit(node.condition, scope.create_child_scope()))
         return self.graph.add_path(elif_node, self.visit(node.body, scope.create_child_scope()))
+    
+    @visitor.when(WhileNode)
+    def visit(self, node: WhileNode, scope: Scope):
+        while_node = self.graph.add_node()
+        conditional_node = self.graph.add_node(BOOLEAN)
+        self.graph.add_path(conditional_node, self.visit(node.condition, scope.create_child_scope()))
+        return self.graph.add_path(while_node, self.visit(node.body, scope.create_child_scope()))
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):

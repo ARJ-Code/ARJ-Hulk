@@ -63,4 +63,17 @@ def test():
             let a: Number = if (2 >= 3) 'a' elif (true) 2 else '2' in 2;
         """
     
-    assert hulk_compile_str(if_test)
+    # assert hulk_compile_str(if_test)
+
+    while_test =\
+        """
+            let a = while (2 - 3 > 0) {
+                2 + 2;
+                'hola' @@ 'jky';
+                2 @ true; 
+                let b: Number = 2 in 3 + 2;
+            } in 'hello'
+        """
+    
+    assert hulk_compile_str(while_test)
+    
