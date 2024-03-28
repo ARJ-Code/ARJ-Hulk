@@ -310,8 +310,8 @@ class HulkCodeGenerator(object):
         context.new_line(
             f'{define_v(context.pop_v())} = {context.get_v(node.name.value)};')
 
-    @visitor.when(ExpressionBlock)
-    def visit(self, node: ExpressionBlock, context: GeneratorContext):
+    @visitor.when(ExpressionBlockNode)
+    def visit(self, node: ExpressionBlockNode, context: GeneratorContext):
         for n in node.instructions[:-1]:
             v = context.new_v()
             context.push_v(v)

@@ -315,9 +315,9 @@ class ForNode (ExpressionNode):
         self.body: ExpressionNode = body
 
 # TODO
-class ExpressionBlock(ExpressionNode):
+class ExpressionBlockNode(ExpressionNode):
     def __init__(self, instructions: List[ASTNode]) -> None:
-        self.instructions: List[ASTNode] = instructions
+        self.instructions: List[ExpressionNode] = instructions
 
 
 class BooleanOperator(Enum):

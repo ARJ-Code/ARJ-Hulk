@@ -255,6 +255,14 @@ class SemanticChecker(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
+    @visitor.when(ExpressionBlockNode)
+    def visit(self, node: ExpressionBlockNode, scope: Scope):
+        expression_block_node = self.graph.add_node()
+        for instruction in node.instructions[: len(node.instructions) - 1]:
+            self.visit(instruction, scope)
+        last_evaluation_node = self.visit(node.instructions[-1], scope)
+        return self.graph.add_path(expression_block_node, last_evaluation_node) 
+
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
         let_node = self.graph.add_node()
@@ -293,15 +301,13 @@ class SemanticChecker(object):
     def visit(self, node: BooleanUnaryNode, scope: Scope):
         boolean_node = self.graph.add_node(BOOLEAN)
         expression_node = self.visit(node.child, scope.create_child_scope())
-        self.graph.add_path(boolean_node, expression_node)
-        return boolean_node
+        return self.graph.add_path(boolean_node, expression_node)
     
     @visitor.when(ArithmeticUnaryNode)
     def visit(self, node: ArithmeticUnaryNode, scope: Scope):
         number_node = self.graph.add_node(NUMBER)
         expression_node = self.visit(node.child, scope.create_child_scope())
-        self.graph.add_path(number_node, expression_node)
-        return number_node
+        return self.graph.add_path(number_node, expression_node)
     
     @visitor.when(BooleanBinaryNode)
     def visit(self, node: BooleanBinaryNode, scope: Scope):
@@ -336,6 +342,9 @@ class SemanticChecker(object):
         right_expression_node = self.visit(node.right, scope.create_child_scope())
         self.graph.add_path(right_node, right_expression_node)
         return string_node
+    
+    
+
 
     
     # @visitor.when(VarDeclarationNode)
