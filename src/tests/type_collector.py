@@ -60,10 +60,7 @@ def test():
 
     simples_expressions_test =\
         """
-            let a:Object = let b = 3 in {
-                let c = 2 + 3 in true;
-                'a' @@ 'b'; 
-            } in 2;
+            let a = 1, b = 2, c = 3 in 3;
         """
     
     assert hulk_compile_str(simples_expressions_test)

@@ -259,16 +259,24 @@ class SemanticChecker(object):
     def visit(self, node: ExpressionBlockNode, scope: Scope):
         expression_block_node = self.graph.add_node()
         for instruction in node.instructions[: len(node.instructions) - 1]:
-            self.visit(instruction, scope)
-        last_evaluation_node = self.visit(node.instructions[-1], scope)
+            self.visit(instruction, scope.create_child_scope())
+        last_evaluation_node = self.visit(node.instructions[-1], scope.create_child_scope())
         return self.graph.add_path(expression_block_node, last_evaluation_node) 
+    
+    @visitor.when(IfNode)
+    def visit(self, node: IfNode, scope: Scope):
+        if_node = self.graph.add_node()
+        conditional_node = self.graph.add_node(BOOLEAN)
+        self.graph.add_path(conditional_node, self.visit())
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
         let_node = self.graph.add_node()
+        new_scope = scope.create_child_scope()
         for assignment in node.assignments:
-            self.visit(assignment, scope)
-        return self.graph.add_path(let_node, self.visit(node.body, scope.create_child_scope()))
+            self.visit(assignment, new_scope)
+            new_scope = new_scope.create_child_scope()
+        return self.graph.add_path(let_node, self.visit(node.body, new_scope))
 
     @visitor.when(DeclarationNode)
     def visit(self, node: DeclarationNode, scope: Scope):

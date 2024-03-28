@@ -314,7 +314,7 @@ class ForNode (ExpressionNode):
         self.iterable: ExpressionNode = iterable
         self.body: ExpressionNode = body
 
-# TODO
+
 class ExpressionBlockNode(ExpressionNode):
     def __init__(self, instructions: List[ASTNode]) -> None:
         self.instructions: List[ExpressionNode] = instructions
