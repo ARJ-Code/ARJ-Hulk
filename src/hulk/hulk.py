@@ -37,14 +37,16 @@ def hulk_compile_str(program: str) -> bool:
 
         scope = Scope()
 
-        semantic_checker = SemanticChecker(context)
+        semantic_checker = SemanticChecker(context, errors)
         semantic_checker.visit(ast, scope)
 
         print('Errors:', errors)
-        print('Context:')
-        print(context)
+        # print('Context:')
+        # print(context)
 
-        hulk_code_generator(ast)
+        return errors == []
+
+        # hulk_code_generator(ast)
 
     return result.ok
 

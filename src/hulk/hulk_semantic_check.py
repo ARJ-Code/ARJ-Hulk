@@ -233,8 +233,8 @@ class TypeBuilder(object):
             self.errors.append(error.text)
             
 class SemanticChecker(object):
-    def __init__(self, context: Context):
-        self.errors = []
+    def __init__(self, context: Context, errors=[]):
+        self.errors: List[str] = errors
         self.context: Context = context
         self.graph = SemanticGraph()
     
@@ -250,7 +250,10 @@ class SemanticChecker(object):
         #     self.visit(statement, scope)
         program_node = self.graph.add_node()
         self.graph.add_child(program_node, self.visit(node.expression, scope))
-        print(self.graph.correct_type_inference())
+        try: 
+            self.graph.type_inference()
+        except SemanticError as error:
+            self.errors.append(error.text)
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):

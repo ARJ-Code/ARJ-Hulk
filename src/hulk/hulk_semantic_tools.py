@@ -3,7 +3,6 @@ from typing import List, Set, Tuple
 from abc import ABC
 
 from compiler_tools.lexer import LexerToken
-from hulk.hulk_defined import ERROR
 
 class SemanticError(Exception):
     @property
@@ -152,12 +151,15 @@ class Type(ABC):
     
     @staticmethod
     def low_common_ancester(t1: 'Type', t2: 'Type') -> 'Type':
-        if t1 == ERROR or t2 == ERROR:
-            return ERROR 
+        ERROR = Type('Error')
+        if t1 is None and t2 is None:
+            return ERROR
         elif t1 is None:
             return t2
         elif t2 is None:
             return t1
+        elif t1 == ERROR or t2 == ERROR:
+            return ERROR 
         elif t1.conforms_to(t2):
             return t2
         elif t2.conforms_to(t1):
@@ -347,8 +349,8 @@ class SemanticGraph:
         self.index: int = 0
 
     def add_node(self, node_type: Type = None) -> 'SemanticNode':
-        self.index = self.index + 1
         new_node = SemanticNode(self.index, node_type)
+        self.index = self.index + 1
         self.nodes.append(new_node)
         return new_node
 
@@ -356,19 +358,23 @@ class SemanticGraph:
         parent.add_child(child)
         return parent
 
-    def correct_type_inference(self) -> bool:
+    def type_inference(self) -> bool:
+        ERROR = Type('Error')
+
         visited = [None for node in self.nodes]
+        
         def dfs(node: SemanticNode) -> Type:
             if len(node.children) == 0:
-                visited[child.index] = ERROR if node.node_type is None else None
-                return visited[child.index]
+                visited[node.index] = ERROR if node.node_type is None else node.node_type
+                return visited[node.index]
             ancient_type = None
             for child in node.children:
                 if visited[child.index] is None:
                     dfs(child)
                 ancient_type = Type.low_common_ancester(ancient_type, visited[child.index])
             if node.node_type is None:
-                visited[child.index] = ancient_type
+                visited[node.index] = ancient_type
+                node.node_type = ancient_type
                 return ancient_type
             elif ancient_type.conforms_to(node.node_type):
                 return node.node_type
@@ -376,12 +382,12 @@ class SemanticGraph:
                 return ERROR
 
 
-        nodes = sorted(self.nodes, lambda n: n.index)
+        nodes = self.nodes
+        self.nodes.sort(key=lambda n: n.index)
         for node in nodes:
             if visited[node.index] is None:
-                if dfs(node) is ERROR:
-                    return False
-        return True
+                if dfs(node) == ERROR:
+                    raise SemanticError(f'Incorrect type declaration')
 
 class SemanticNode(object):
     def __init__(self, index: int, node_type: Type = None):
