@@ -317,6 +317,14 @@ class SemanticChecker(object):
         scope.define_variable(node.name, var_node)
         self.graph.add_path(var_node, expression_node)
 
+    @visitor.when(AssignmentNode)
+    def visit(self, node: AssignmentNode, scope: Scope):
+        var_node = scope.get_defined_variable(node.name)
+        expression_node = self.visit(node.value, scope.create_child_scope())
+        self.graph.add_path(var_node, expression_node)
+        return expression_node
+
+
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode, scope: Scope):
         return self.context.get_type(node.name)

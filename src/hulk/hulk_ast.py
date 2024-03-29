@@ -139,7 +139,7 @@ class ConstantNode (AtomicNode):
         self.value: LexerToken = value
         self.type: ConstantTypes = v_type
 
-# Make left and right nodes Printeables
+
 class StringBinaryNode (BinaryNode):
     def __init__(self, left, right, operator):
         super().__init__(left, right)

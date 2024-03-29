@@ -85,5 +85,12 @@ def test():
             }
         """
     
-    assert hulk_compile_str(variable_test)
+    # assert hulk_compile_str(variable_test)
+
+    assignement_test =\
+        """
+            let a: String = 'hello' in a := 1;
+        """
+    
+    assert hulk_compile_str(assignement_test)
     
