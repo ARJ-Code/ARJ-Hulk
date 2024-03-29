@@ -364,15 +364,16 @@ class SemanticChecker(object):
         self.graph.add_path(var_node, expression_node)
         return expression_node
 
-
     @visitor.when(TypeNode)
     def visit(self, node: TypeNode, scope: Scope):
         return self.context.get_type(node.name)
     
     @visitor.when(VectorTypeNode)
     def visit(self, node: VectorTypeNode, scope: Scope):
+        type_ = self.context.get_type(node.name)
+        vector_type = self.context.add_type(vector_t(type_, node.dimensions))
         node.name.value = (f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
-        return self.context.get_type(node.name)
+        return vector_type
     
     @visitor.when(EOFTypeNode)
     def visit(self, node: EOFTypeNode, scope: Scope):
@@ -435,7 +436,14 @@ class SemanticChecker(object):
         self.graph.add_path(right_node, right_expression_node)
         return string_node
     
-    
+    @visitor.when(ExplicitArrayDeclarationNode)
+    def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
+        VECTOR = Type('Vector')
+        vector_node = self.graph.add_node(VECTOR)
+        for expression in node.values:
+            expression_node = self.visit(expression, scope.create_child_scope())
+            self.graph.add_path(vector_node, expression_node)
+        return vector_node
 
 
     

@@ -1,5 +1,6 @@
-from .hulk_semantic_tools import *
 from typing import Tuple
+
+from hulk.hulk_semantic_core import *
 
 OBJECT = Class('Object')
 STRING = Class('String')
@@ -44,7 +45,7 @@ memory: {str, Class} = {}
 
 
 def memoize_vector_t(f):
-    def helper(c: Class, dimension: int) -> Class:
+    def helper(c: Type, dimension: int) -> Type:
         if (c, dimension) not in memory:
             memory[(c, dimension)] = f(c, dimension)
         return memory[(c, dimension)]
@@ -52,11 +53,11 @@ def memoize_vector_t(f):
 
 
 @memoize_vector_t
-def vector_t(c: Class, dimension: int) -> Class:
+def vector_t(c: Type, dimension: int) -> Type:
     if dimension == 0:
         return c
     else:
-        vector = Class(
+        vector = Type(
             '['+c.name + (f', {dimension}' if dimension > 1 else '')+']')
         vector.add_attribute(Attribute('dimension', NUMBER))
         vector.add_attribute(Attribute('length', NUMBER))
@@ -70,7 +71,10 @@ def vector_t(c: Class, dimension: int) -> Class:
         vector.add_method(Method('next', BOOLEAN, []))
         vector.add_method(Method('current', vector_t(c, dimension-1), []))
         vector.add_method(Method('reset', OBJECT, []))
-        vector.define_inherits(OBJECT)
+        if (c.parent is None):
+            vector.set_parent(OBJECT)
+        else:
+            vector.set_parent(vector_t(c.parent, dimension))
         return vector
 
 
