@@ -250,10 +250,20 @@ class SemanticChecker(object):
         #     self.visit(statement, scope)
         program_node = self.graph.add_node()
         self.graph.add_path(program_node, self.visit(node.expression, scope))
-        try: 
-            self.graph.type_inference()
+        if len(self.errors) == 0:
+            try: 
+                self.graph.type_inference()
+            except SemanticError as error:
+                self.errors.append(error.text)
+
+    @visitor.when(AtomicNode)
+    def visit(self, node: AtomicNode, scope: Scope):
+        try:
+            return scope.get_defined_variable(node.name)
         except SemanticError as error:
             self.errors.append(error.text)
+            return self.graph.add_node()
+
 
     @visitor.when(ExpressionBlockNode)
     def visit(self, node: ExpressionBlockNode, scope: Scope):

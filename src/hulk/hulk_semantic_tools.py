@@ -470,12 +470,18 @@ class SemanticNode(object):
         self.node_type = node_type
 
 
+class Variable:
+    def __init__(self, name: str, node: SemanticNode) -> None:
+        self.name: str =  name
+        self.node: SemanticNode = node
+
 class Scope:
     def __init__(self, parent: 'Scope' = None) -> None:
         self.parent: Scope = parent
-        self.variables: {str, SemanticNode} = {}
+        self.variables: List[Variable] = []
+        # self.variables: {str, SemanticNode} = {}
         # self.attributes: List[Attribute] = []
-        self.methods: Set[Method] = set()
+        # self.methods: Set[Method] = set()
         # self.attribute_index = 0 if parent is None else len(parent.attributes)
 
     def decompact(self, token: LexerToken):
@@ -497,12 +503,18 @@ class Scope:
 
     def define_variable(self, id: LexerToken, node: SemanticNode) -> SemanticNode:
         row, col, name = self.decompact(id)
-        v = self.get_defined_variable(name)
-        if v is not None:
-            raise SemanticError(
-                f'Variable {name} already defined in this scope.' + self.error_location(row, col))
-        self.variables[name] = node
+        self.variables.append(Variable(name, node))
         return node
+    
+    def get_defined_variable(self, id: LexerToken) -> SemanticNode:
+        row, col, name = self.decompact(id)
+        for variable in self.variables:
+            if variable.name == id.value:
+                return variable.node
+        if self.parent is not None:
+            return self.parent.get_defined_variable(id)
+        raise SemanticError(
+            f'Variable {name} is not defined.' + self.error_location(row, col))
 
     # def define_method(self, method: Method) -> bool:
     #     m = self.get_defined_method(method.name)
@@ -520,14 +532,6 @@ class Scope:
     #     if self.parent is not None:
     #         return self.parent.get_defined_attribute(name, self.attribute_index)
     #     return None
-
-    def get_defined_variable(self, name: str) -> SemanticNode | None:
-        for variable in self.variables.keys():
-            if variable == name:
-                return self.variables[name]
-        if self.parent is not None:
-            return self.parent.get_defined_variable(name)
-        return None
 
     # def get_defined_method(self, name: str) -> Method | None:
     #     for method in self.methods:

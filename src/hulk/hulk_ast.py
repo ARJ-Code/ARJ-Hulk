@@ -301,7 +301,7 @@ class ElifNode(ExpressionNode):
         self.condition: ExpressionNode = condition
         self.body: ExpressionNode = body
 
-# TODO
+
 class WhileNode (ExpressionNode):
     def __init__(self, condition, body):
         self.condition: ExpressionNode = condition

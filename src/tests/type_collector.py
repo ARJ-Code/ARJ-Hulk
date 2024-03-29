@@ -75,5 +75,15 @@ def test():
             } in 'hello'
         """
     
-    assert hulk_compile_str(while_test)
+    # assert hulk_compile_str(while_test)
+
+    variable_test =\
+        """{
+            let a: String = let a = 2, b = 3 in a + b in 2;
+            let a = true, b = false in a | b;
+            let a = 'sacaste', b = 2 in a @@ b;
+            }
+        """
+    
+    assert hulk_compile_str(variable_test)
     
