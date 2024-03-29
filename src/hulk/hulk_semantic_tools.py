@@ -317,8 +317,11 @@ class Context:
         try:
             return self.types[name]
         except KeyError:
-            raise SemanticError(
-                f'Type "{name}" is not defined.' + self.error_location(row, col))
+            try: 
+                return self.protocols[name]
+            except KeyError:
+                raise SemanticError(
+                    f'Type "{name}" is not defined.' + self.error_location(row, col))
 
     def get_protocol(self, id: LexerToken) -> Protocol:
         row, col, name = self.decompact(id)
