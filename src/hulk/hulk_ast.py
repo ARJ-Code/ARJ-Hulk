@@ -59,12 +59,12 @@ class EOFInheritsNode(EOFNode):
 class EOFTypeNode(EOFNode):
     pass
 
-# TODO
+
 class ProtocolTypeNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-# TODO
+
 class ClassTypeNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
@@ -75,12 +75,12 @@ class ClassTypeParameterNode(ClassTypeNode):
         super().__init__(name)
         self.parameters: List[ParameterNode] = parameters
 
-# TODO
+
 class ExtensionNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name
 
-# TODO
+
 class InheritanceNode(ASTNode):
     def __init__(self, name):
         self.name: LexerToken = name

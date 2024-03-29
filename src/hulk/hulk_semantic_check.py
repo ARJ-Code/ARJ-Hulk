@@ -107,7 +107,7 @@ class TypeBuilder(object):
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode):
         def _build_attribute(param: ParameterNode):
-            p_type = self.visit(param)
+            p_type = self.visit(param).type
             return Attribute(param.name.value, p_type)
 
         try:
@@ -248,7 +248,7 @@ class SemanticChecker(object):
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode, scope: Scope):
         def add_context_functions():
-            for method in defined_methods:
+            for method in self.context.methods.values():
                 name: str = method.name
                 arguments: List[Attribute] = method.arguments
                 return_type: Type = method.return_type
@@ -256,6 +256,15 @@ class SemanticChecker(object):
                 args = [self.graph.add_node(t) for t in [a.type for a in arguments]]
                 function_node = self.graph.add_node(return_type)
                 scope.define_function(id, function_node, args)
+
+            # for method in defined_methods:
+            #     name: str = method.name
+            #     arguments: List[Attribute] = method.arguments
+            #     return_type: Type = method.return_type
+            #     id = LexerToken(0, 0, name, '')
+            #     args = [self.graph.add_node(t) for t in [a.type for a in arguments]]
+            #     function_node = self.graph.add_node(return_type)
+            #     scope.define_function(id, function_node, args)
 
         add_context_functions()
 
@@ -275,19 +284,24 @@ class SemanticChecker(object):
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode, scope: Scope):
-        return_type = self.visit(node.return_type, scope)
-        function_node = self.graph.add_node(return_type)
+        # return_type = self.visit(node.return_type, scope)
+        # function_node = self.graph.add_node(return_type)
+        function_ = scope.get_defined_function(node.name)
         child_scope = scope.create_child_scope()
-        args = [self.visit(param, child_scope) for param in node.parameters]
+        for i in range(len(function_.args)):
+            param_node: SemanticNode = function_.args[i]
+            param: ParameterNode = node.parameters[i]
+            child_scope.define_variable(param.name, param_node)
+        # args = [self.visit(param, child_scope) for param in node.parameters]
         body_node = self.visit(node.body, child_scope)
-        self.graph.add_path(function_node, body_node)
-        scope.define_function(node.name, function_node, args)
+        self.graph.add_path(function_.node, body_node)
+        # scope.define_function(node.name, function_node, args)
     
-    @visitor.when(ParameterNode)
-    def visit(self, node: ParameterNode, scope: Scope):
-        param_type = self.visit(node.type, scope)
-        param_node = self.graph.add_node(param_type)
-        return scope.define_variable(node.name, param_node)
+    # @visitor.when(ParameterNode)
+    # def visit(self, node: ParameterNode, scope: Scope, param_node: SemanticNode):
+    #     # param_type = self.visit(node.type, scope)
+    #     # param_node = self.graph.add_node(param_type)
+    #     return scope.define_variable(node.name, param_node)
 
     @visitor.when(AtomicNode)
     def visit(self, node: AtomicNode, scope: Scope):

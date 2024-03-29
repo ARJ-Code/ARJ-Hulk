@@ -97,11 +97,11 @@ def test():
 
     function_test =\
         """
-            function hello(a: Number): String => a @@ 1;
-            {
-                hello(1);
-                print('piola');
-            }
+            function hotel(): String => hello(2);
+            
+            function hello(a: Number) => print(a @@ 1);
+
+            hotel();
         """
     
     assert hulk_compile_str(function_test)
