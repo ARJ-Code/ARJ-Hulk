@@ -1,5 +1,6 @@
 from hulk.hulk import hulk_compile_str
 
+
 def test():
     type_test =\
         """
@@ -92,5 +93,16 @@ def test():
             let a: String = 'hello' in a := 1;
         """
     
-    assert hulk_compile_str(assignement_test)
+    # assert hulk_compile_str(assignement_test)
+
+    function_test =\
+        """
+            function hello(a: Number): String => a @@ 1;
+            {
+                hello(1);
+                print('piola');
+            }
+        """
+    
+    assert hulk_compile_str(function_test)
     

@@ -475,10 +475,18 @@ class Variable:
         self.name: str =  name
         self.node: SemanticNode = node
 
+
+class Function:
+    def __init__(self, name: str, node: SemanticNode, args: List[SemanticNode]) -> None:
+        self.name = name
+        self.node = node
+        self.args = args
+
 class Scope:
     def __init__(self, parent: 'Scope' = None) -> None:
         self.parent: Scope = parent
         self.variables: List[Variable] = []
+        self.functions: List[Function] = []
         # self.variables: {str, SemanticNode} = {}
         # self.attributes: List[Attribute] = []
         # self.methods: Set[Method] = set()
@@ -506,15 +514,37 @@ class Scope:
         self.variables.append(Variable(name, node))
         return node
     
-    def get_defined_variable(self, id: LexerToken) -> SemanticNode:
+    def get_defined_variable(self, id: LexerToken) -> Variable:
         row, col, name = self.decompact(id)
         for variable in self.variables:
-            if variable.name == id.value:
-                return variable.node
+            if variable.name == name:
+                return variable
         if self.parent is not None:
             return self.parent.get_defined_variable(id)
         raise SemanticError(
             f'Variable {name} is not defined.' + self.error_location(row, col))
+    
+    def define_function(self, id: LexerToken, node: SemanticNode, args: List[SemanticNode]) -> SemanticNode:
+        row, col, name = self.decompact(id)
+        self.functions.append(Function(name, node, args))
+        return node
+    
+    def get_defined_function(self, id: LexerToken) -> Function:
+        row, col, name = self.decompact(id)
+        for function_ in self.functions:
+            if function_.name == name:
+                return function_
+        if self.parent is not None:
+            return self.parent.get_defined_function(id)
+        raise SemanticError(
+            f'Function {name} is not defined.' + self.error_location(row, col))
+    
+    def check_valid_params(self, id: LexerToken, parameters) -> Function:
+        row, col, name = self.decompact(id)
+        function_ = self.get_defined_function(id)
+        if len(function_.args) != len(parameters):
+            raise SemanticError(f'Invalid arguments while calling function {name}.' + self.error_location(row, col))
+        return function_
 
     # def define_method(self, method: Method) -> bool:
     #     m = self.get_defined_method(method.name)

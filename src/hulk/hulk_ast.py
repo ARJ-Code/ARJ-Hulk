@@ -39,10 +39,10 @@ class VectorTypeNode (TypeNode):
         super().__init__(name)
         self.dimensions = 1 if dimensions is None else dimensions.value
 
-# TODO
+
 class ParameterNode(ASTNode):
     def __init__(self, name, type):
-        self.name:LexerToken = name
+        self.name: LexerToken = name
         self.type: TypeNode = type
 
 
@@ -120,7 +120,7 @@ class InstanceFunctionNode(ExpressionNode):
         self.property: ExpressionCallNode = expression_call
         self.expression: ExpressionNode = expression
 
-# TODO
+
 class ExpressionCallNode (AtomicNode):
     def __init__(self, name, parameters):
         super().__init__(name)
@@ -181,12 +181,12 @@ class ExplicitArrayDeclarationNode(ExpressionNode):
     def __init__(self, values: List[ExpressionNode]):
         self.values: List[ExpressionNode] = values
 
-# TODO
+
 class FunctionDeclarationNode (InstructionNode):
     def __init__(self, name, parameters, return_type, body):
         self.name: LexerToken = name
         self.parameters: List[ParameterNode] = parameters
-        self.return_type: LexerToken = return_type
+        self.return_type: TypeNode = return_type
         self.body: ExpressionNode = body
 
 # TODO
@@ -262,7 +262,7 @@ class DeclarationNode (ASTNode):
         self.type: TypeNode = p_type
         self.value: ExpressionNode = value
 
-# TODO
+
 class AssignmentNode (ExpressionNode):
     def __init__(self, name: LexerToken, value: ExpressionNode):
         self.name: LexerToken = name
