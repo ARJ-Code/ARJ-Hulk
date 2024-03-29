@@ -482,12 +482,31 @@ class Function:
         self.node = node
         self.args = args
 
+    def check_valid_params(self, id: LexerToken, parameters) -> 'Function':
+        row, col, name = (id.row, id.col, id.value)
+        if len(self.args) != len(parameters):
+            raise SemanticError(
+                f'Invalid amount of arguments while calling function {name}.' + f' Error at {row}:{col}')
+        return self
+
 
 class TypeSemantic:
     def __init__(self, name: str, functions: List[Function], attributes: List[Variable]) -> None:
         self.name: str = name
         self.functions: List[Function] = functions
         self.attributes: List[Variable] = attributes
+
+    def get_function(self, name: str) -> Function | None:
+        for f in self.functions:
+            if name == f.name:
+                return f
+        return None
+
+    def get_attribute(self, name: str) -> Attribute | None:
+        for a in self.attributes:
+            if name == a.name:
+                return a
+        return None
 
 
 class Scope:
@@ -542,6 +561,16 @@ class Scope:
         raise SemanticError(
             f'Function {name} is not defined.' + self.error_location(row, col))
 
+    def get_defined_type(self, id: LexerToken) -> TypeSemantic:
+        row, col, name = self.decompact(id)
+        for t in self.types:
+            if t.name == name:
+                return t
+        if self.parent is not None:
+            return self.parent.get_defined_type(id)
+        raise SemanticError(
+            f'Type {name} is not defined.' + self.error_location(row, col))
+        
     def check_valid_params(self, id: LexerToken, parameters) -> Function:
         row, col, name = self.decompact(id)
         function_ = self.get_defined_function(id)

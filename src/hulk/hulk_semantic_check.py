@@ -480,6 +480,16 @@ class SemanticChecker(object):
         self.graph.add_path(right_node, right_expression_node)
         return string_node
 
+    @visitor.when(ClassDeclarationNode)
+    def visit(self, node: ClassDeclarationNode, scope: Scope):
+        scope = scope.create_child_scope()
+        # scope.define_variable(LexerToken(0, 0, 'self', ''), self.graph.add_node(
+        #     node_type=self.context.get_type(LexerToken(node.class_type.name))))
+
+        # if isinstance(node.inheritance, InheritanceParameterNode):
+        #     parent = scope.get_defined_type(node.inheritance.name)
+
+
     # @visitor.when(VarDeclarationNode)
     # def visit(self, node: VarDeclarationNode, scope: Scope):
     #     if scope.is_var_defined(node.id, len(scope.local_vars)):
