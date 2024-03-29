@@ -90,6 +90,8 @@ class SemanticGraph:
         self.adj: List[List[int]] = []
         self.nodes: List[SemanticNode] = []
         self.index: int = 0
+        self.ERROR = Type('Error')
+        self.VECTOR = Type('Vector')
 
     def add_node(self, node_type: Type = None) -> 'SemanticNode':
         new_node = SemanticNode(self.index, node_type)
@@ -104,46 +106,35 @@ class SemanticGraph:
 
     def get_children(self, node: 'SemanticNode') -> List['SemanticNode']:
         return [self.nodes[i] for i in self.adj[node.index]]
+    
+    def dfs(self, node: 'SemanticNode') -> Type:
+        if len(self.get_children(node)) == 0:
+            node.node_type = self.ERROR if node.node_type is None else node.node_type
+            if node.node_type == self.VECTOR:
+                node.node_type = vector_t(OBJECT, 1)
+            node.visited = True
+            return node.node_type
+        children_type = None
+        for child in self.get_children(node):
+            if not child.visited:
+                self.dfs(child)
+            children_type = Type.low_common_ancester(
+                children_type, child.node_type)
+        if node.node_type is None:
+            node.node_type = children_type
+        elif node.node_type == self.VECTOR:
+            node.node_type = vector_t(children_type, 1)
+        elif not children_type.conforms_to(node.node_type):
+            node.node_type = self.ERROR
+        node.visited = True
+        return node.node_type
 
     def type_inference(self) -> bool:
-        ERROR = Type('Error')
-        VECTOR = Type('Vector')
-
-        visited = [None for node in self.nodes]
-
-        def dfs(node: SemanticNode) -> Type:
-            if len(self.get_children(node)) == 0:
-                visited[node.index] = ERROR if node.node_type is None else node.node_type
-                if node.node_type == VECTOR:
-                    node.node_type = vector_t(OBJECT, 1)
-                    visited[node.index] = node.node_type
-                return node.node_type
-            children_type = None
-            for child in self.get_children(node):
-                if visited[child.index] is None:
-                    dfs(child)
-                children_type = Type.low_common_ancester(
-                    children_type, visited[child.index])
-            if node.node_type is None:
-                visited[node.index] = children_type
-                node.node_type = children_type
-                return children_type
-            elif node.node_type == VECTOR:
-                node.node_type = vector_t(children_type, 1)
-                visited[node.index] = node.node_type
-                return node.node_type
-            elif children_type.conforms_to(node.node_type):
-                visited[node.index] = node.node_type
-                return node.node_type
-            else:
-                visited[node.index] = ERROR
-                return ERROR
-
         nodes = self.nodes
         nodes.sort(key=lambda n: n.index)
         for node in nodes:
-            if visited[node.index] is None:
-                if dfs(node) == ERROR:
+            if not node.visited:
+                if self.dfs(node) == self.ERROR:
                     raise SemanticError(f'Incorrect type declaration')
 
     def g_transp(self):
@@ -199,6 +190,7 @@ class SemanticNode(object):
     def __init__(self, index: int, node_type: Type = None):
         self.index = index
         self.node_type = node_type
+        self.visited: bool = False
 
 
 class Variable:
@@ -218,10 +210,6 @@ class Scope:
         self.parent: Scope = parent
         self.variables: List[Variable] = []
         self.functions: List[Function] = []
-        # self.variables: {str, SemanticNode} = {}
-        # self.attributes: List[Attribute] = []
-        # self.methods: Set[Method] = set()
-        # self.attribute_index = 0 if parent is None else len(parent.attributes)
 
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)

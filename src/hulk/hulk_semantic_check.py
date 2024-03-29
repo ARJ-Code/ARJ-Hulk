@@ -257,7 +257,7 @@ class SemanticChecker(object):
                 function_node = self.graph.add_node(return_type)
                 scope.define_function(id, function_node, args)
 
-        add_context_functions()
+        # add_context_functions()
 
         for statement in node.first_is:
             self.visit(statement, scope)
