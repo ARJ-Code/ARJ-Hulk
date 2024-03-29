@@ -114,7 +114,10 @@ class SemanticGraph:
         def dfs(node: SemanticNode) -> Type:
             if len(self.get_children(node)) == 0:
                 visited[node.index] = ERROR if node.node_type is None else node.node_type
-                return visited[node.index]
+                if node.node_type == VECTOR:
+                    node.node_type = vector_t(OBJECT, 1)
+                    visited[node.index] = node.node_type
+                return node.node_type
             children_type = None
             for child in self.get_children(node):
                 if visited[child.index] is None:

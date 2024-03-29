@@ -176,7 +176,7 @@ class ImplicitArrayDeclarationNode (ExpressionNode):
         self.variable: LexerToken = variable
         self.iterable: ExpressionNode = iterable
 
-# TODO
+
 class ExplicitArrayDeclarationNode(ExpressionNode):
     def __init__(self, values: List[ExpressionNode]):
         self.values: List[ExpressionNode] = values

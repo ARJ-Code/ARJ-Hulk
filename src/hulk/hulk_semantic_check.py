@@ -444,6 +444,10 @@ class SemanticChecker(object):
             expression_node = self.visit(expression, scope.create_child_scope())
             self.graph.add_path(vector_node, expression_node)
         return vector_node
+    
+    # @visitor.when(ImplicitArrayDeclarationNode)
+    # def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
+
 
 
     

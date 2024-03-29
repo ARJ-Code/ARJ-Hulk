@@ -112,7 +112,7 @@ def test():
 
     vector_test =\
         """
-            let a: [Number] = [1,2] in 2;
+            let a: [Object] = [] in 2;
         """
     
     assert hulk_compile_str(vector_test)
