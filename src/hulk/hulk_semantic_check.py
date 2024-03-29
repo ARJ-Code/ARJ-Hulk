@@ -406,10 +406,11 @@ class SemanticChecker(object):
 
     @visitor.when(VectorTypeNode)
     def visit(self, node: VectorTypeNode, scope: Scope):
-        node.name.value = (
-            f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
-        return self.context.get_type(node.name)
-
+        type_ = self.context.get_type(node.name)
+        vector_type = self.context.add_type(vector_t(type_, node.dimensions))
+        node.name.value = (f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
+        return vector_type
+    
     @visitor.when(EOFTypeNode)
     def visit(self, node: EOFTypeNode, scope: Scope):
         return None
@@ -488,6 +489,19 @@ class SemanticChecker(object):
 
         # if isinstance(node.inheritance, InheritanceParameterNode):
         #     parent = scope.get_defined_type(node.inheritance.name)
+    
+    @visitor.when(ExplicitArrayDeclarationNode)
+    def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
+        VECTOR = Type('Vector')
+        vector_node = self.graph.add_node(VECTOR)
+        for expression in node.values:
+            expression_node = self.visit(expression, scope.create_child_scope())
+            self.graph.add_path(vector_node, expression_node)
+        return vector_node
+    
+    # @visitor.when(ImplicitArrayDeclarationNode)
+    # def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
+
 
 
     # @visitor.when(VarDeclarationNode)

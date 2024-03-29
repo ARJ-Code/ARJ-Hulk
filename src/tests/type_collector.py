@@ -90,7 +90,7 @@ def test():
 
     assignement_test =\
         """
-            let a: String = 'hello' in a := 1;
+            let a: Object = 'hello' in a := 1;
         """
     
     # assert hulk_compile_str(assignement_test)
@@ -112,7 +112,7 @@ def test():
 
     vector_test =\
         """
-            let a = [1,2] in 2;
+            let a: [Object] = [1, 2] in 2;
         """
     
     assert hulk_compile_str(vector_test)
