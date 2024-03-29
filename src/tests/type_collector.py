@@ -64,7 +64,7 @@ def test():
             let a: Number = if (2 >= 3) 'a' elif (true) 2 else '2' in 2;
         """
     
-    # assert hulk_compile_str(if_test)
+    # assert not hulk_compile_str(if_test)
 
     while_test =\
         """
@@ -99,10 +99,21 @@ def test():
         """
             function hotel(): String => hello(2);
             
-            function hello(a: Number) => print(a @@ 1);
+            function hello(a: Number) {
+                a := 0;
+                print(a @@ 1);
+                'hello';
+            }
 
             hotel();
         """
     
-    assert hulk_compile_str(function_test)
+    # assert hulk_compile_str(function_test)
+
+    vector_test =\
+        """
+            let a = [1,2] in 2;
+        """
+    
+    assert hulk_compile_str(vector_test)
     

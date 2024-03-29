@@ -501,14 +501,6 @@ class Scope:
     def create_child_scope(self) -> 'Scope':
         return Scope(self)
 
-    # def define_attribute(self, attribute: Attribute) -> bool:
-    #     a = self.get_defined_attribute(attribute.name, len(self.attributes))
-    #     if a is not None:
-    #         return False
-
-    #     self.attributes.append(attribute)
-    #     return True
-
     def define_variable(self, id: LexerToken, node: SemanticNode) -> SemanticNode:
         row, col, name = self.decompact(id)
         self.variables.append(Variable(name, node))
@@ -543,30 +535,5 @@ class Scope:
         row, col, name = self.decompact(id)
         function_ = self.get_defined_function(id)
         if len(function_.args) != len(parameters):
-            raise SemanticError(f'Invalid arguments while calling function {name}.' + self.error_location(row, col))
+            raise SemanticError(f'Invalid amount of arguments while calling function {name}.' + self.error_location(row, col))
         return function_
-
-    # def define_method(self, method: Method) -> bool:
-    #     m = self.get_defined_method(method.name)
-    #     if m is not None and not m.comp(method):
-    #         return False
-
-    #     self.methods.add(method)
-    #     return True
-
-    # def get_defined_attribute(self, name: str, index: int) -> Attribute | None:
-    #     for i in range(index):
-    #         attribute: Attribute = self.attributes[i].name
-    #         if attribute.name == name:
-    #             return attribute
-    #     if self.parent is not None:
-    #         return self.parent.get_defined_attribute(name, self.attribute_index)
-    #     return None
-
-    # def get_defined_method(self, name: str) -> Method | None:
-    #     for method in self.methods:
-    #         if method.name == name:
-    #             return method
-    #     if self.parent is not None:
-    #         return self.parent.get_defined_method(name)
-    #     return None
