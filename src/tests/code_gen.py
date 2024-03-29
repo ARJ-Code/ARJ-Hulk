@@ -1,4 +1,45 @@
-from hulk.hulk import hulk_compile_str
+import subprocess
+from compiler_tools.lexer import Lexer
+from hulk.hulk_code_generator import hulk_code_generator
+from hulk.hulk_parser import hulk_parse, hulk_to_grammar
+from hulk.hulk_semantic_check import hulk_semantic_check
+from .hulk_grammar import hulk_grammar
+
+
+def hulk_compile_str(program: str) -> str:
+    hulk_lexer = Lexer()
+    hulk_lexer.load('hulk')
+
+    result = hulk_lexer.run(program)
+    tokens = result.tokens
+
+    if not result.ok:
+        print(
+            f'Lexer error:\nrow {result.error.row+1} col {result.error.col+1}')
+        return ''
+
+    result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
+
+    if not result.ok:
+        print(
+            f'Parser error:\nrow {tokens[result.error-1].row+1} col {tokens[result.error-1].col+1}')
+        return ''
+
+    ast = hulk_grammar.evaluate(result.derivation_tree, tokens)
+    result = hulk_semantic_check(ast)
+
+    if not result.ok:
+        error = '\n'.join(result.errors)
+        print(f'Semantic errors:\n{error}')
+        return ''
+
+    hulk_code_generator(ast, result.context)
+
+    result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
+    result = subprocess.run(["./cache/main"], capture_output=True, text=True)
+
+
+    return result.stdout
 
 def test():
     type_test =\
@@ -83,3 +124,46 @@ def test():
         """
 
     assert hulk_compile_str(protocol_test) == 'Jerry se movio desde la sala hacia el cuarto\nJerry se acosto en su cama\n'
+
+    iterable_test =\
+        """
+            type Positions(start, last){
+                start = start;
+                last = last;
+                current = 1;
+
+                next(): Boolean => (self.current := self.current+1) <= self.last;
+                current(): Number => self.current;
+                reset(): Number => self.current := self.start-1;
+            }
+
+            let test = new Positions(1, 4) in 
+                for (i in test) {
+                    for (i in [i + 1 || i in (new Positions(i, i + 3))]){
+                        print (i);
+                    };
+                    print(i);
+                }
+        """
+    
+    assert hulk_compile_str(iterable_test) ==   '2.000000\n' + \
+                                                '3.000000\n' + \
+                                                '4.000000\n' + \
+                                                '5.000000\n' + \
+                                                '1.000000\n' + \
+                                                '3.000000\n' + \
+                                                '4.000000\n' + \
+                                                '5.000000\n' + \
+                                                '6.000000\n' + \
+                                                '2.000000\n' + \
+                                                '4.000000\n' + \
+                                                '5.000000\n' + \
+                                                '6.000000\n' + \
+                                                '7.000000\n' + \
+                                                '3.000000\n' + \
+                                                '5.000000\n' + \
+                                                '6.000000\n' + \
+                                                '7.000000\n' + \
+                                                '8.000000\n' + \
+                                                '4.000000\n'
+                                                

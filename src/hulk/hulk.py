@@ -12,7 +12,7 @@ def hulk_build() -> bool:
     return hulk_parser_build()
 
 
-def hulk_compile_str(program: str) -> str:
+def hulk_compile_str(program: str) -> bool:
     hulk_lexer = Lexer()
     hulk_lexer.load('hulk')
 
@@ -43,8 +43,6 @@ def hulk_compile_str(program: str) -> str:
 
     result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
     result = subprocess.run(["./cache/main"], capture_output=True, text=True)
-    # print(result.stdout)
+    print(result.stdout)
 
-    return result.stdout
-
-    # return True
+    return True
