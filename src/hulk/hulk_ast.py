@@ -53,8 +53,10 @@ class EOFNode (ASTNode):
 class EOFExtensionNode(EOFNode):
     pass
 
+
 class EOFInheritsNode(EOFNode):
     pass
+
 
 class EOFTypeNode(EOFNode):
     pass
@@ -199,7 +201,7 @@ class ProtocolDeclarationNode(InstructionNode):
 # TODO
 class ClassDeclarationNode(InstructionNode):
     def __init__(self, class_type, inheritance, body):
-        self.class_type: ClassTypeNode = class_type
+        self.class_type: ClassTypeNode | ClassDeclarationNode = class_type
         self.inheritance: InheritanceNode = inheritance
         self.body: List[TypedInstructionNode] = body
 
@@ -240,9 +242,9 @@ class ClassPropertyNode(ClassInstructionNode):
 
 # TODO
 class IsNode(ExpressionNode):
-    def __init__(self, name, type_name):
-        self.name: LexerToken = name
-        self.type_name: TypeNode = type_name
+    def __init__(self, expression, type_name):
+        self.expression: ExpressionNode = expression
+        self.type_name: LexerToken = type_name
 
 # TODO
 class AsNode(ExpressionNode):

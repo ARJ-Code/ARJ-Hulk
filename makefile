@@ -2,10 +2,6 @@
 dev:
 	python3 src/main.py
 
-.PHONY: prove
-prove:
-	python3 src/prove.py
-
 .PHONY: test
 test:
 	python3 src/test.py

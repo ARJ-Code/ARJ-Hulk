@@ -1,11 +1,11 @@
-from hulk.hulk_lexer import load
+from hulk.hulk import hulk_compile_str
 
-hulk_lexer = load()
+def hulk_compile():
 
-code = input()
-r = hulk_lexer.run(code)
+    f = open('main.hulk')
+    p = f.read()
+    f.close()
 
-if r.ok:
-    print([(t.value, t.type) for t in r.tokens])
-else:
-    print(f'Error: {r.error.msg}\nrow:{r.error.row+1} col:{r.error.col+1} ')
+    hulk_compile_str(p)
+
+hulk_compile()

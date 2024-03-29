@@ -44,7 +44,7 @@ def test():
 
             function raudel(a: A) => 2;
             
-            let a: A = new A() in {
+            let a: A = new A(2,2) in {
                 a.hello();
                 print(a.qwe(2));
             }

@@ -1,5 +1,19 @@
-from hulk.hulk import hulk_compile_str
+from hulk.hulk_parser import  hulk_to_grammar, hulk_parse
+from compiler_tools.lexer import Lexer
+from hulk.hulk_grammar import hulk_grammar
 
+
+def hulk_compile_str(program: str):
+    hulk_lexer = Lexer()
+    hulk_lexer.load('hulk')
+
+    result = hulk_lexer.run(program)
+    tokens=result.tokens
+
+    result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
+    hulk_grammar.evaluate(result.derivation_tree,tokens)
+
+    return result.ok
 
 def test():
     string_test =\
