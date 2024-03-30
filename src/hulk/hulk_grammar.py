@@ -39,7 +39,7 @@ hulk_grammar.add_attributed_production('I', ['C', 'F', 'Pr'], [first, first, fir
 # expression productions
 hulk_grammar.add_attributed_production('EB', ['E', 'B'], [first, first])
 
-exp_block = AttributedRule[ASTNode, LexerToken](lambda _, s: ExpressionBlock(s[2]))
+exp_block = AttributedRule[ASTNode, LexerToken](lambda _, s: ExpressionBlockNode(s[2]))
 hulk_grammar.add_attributed_production('B', ['{ I1s }'], [exp_block])
 
 hulk_grammar.add_attributed_production('I1s', ['I1s E ;', 'E ;'], [push_second_to_first, first_list])

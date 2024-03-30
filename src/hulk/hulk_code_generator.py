@@ -3,6 +3,7 @@ import compiler_tools.visitor as visitor
 from typing import Dict, List
 from .hulk_defined import is_defined_method
 from .hulk_semantic_check import Context
+from .hulk_semantic_tools import Class
 
 
 def define_v(v: str):
@@ -132,7 +133,7 @@ class HulkCodeGenerator(object):
         adj = []
 
         context = GeneratorContext()
-        context.indentation=1
+        context.indentation = 1
 
         for k in self.semantic_context.types.keys():
             adj.append([])
@@ -147,8 +148,9 @@ class HulkCodeGenerator(object):
                 adj[self.type_to_int[k]].append(
                     self.type_to_int[v.parent.name])
 
-            for p in v.protocols:
-                adj[self.type_to_int[k]].append(self.type_to_int[p.name])
+            if isinstance(v, Class):
+                for p in v.protocols:
+                    adj[self.type_to_int[k]].append(self.type_to_int[p.name])
 
         context.new_line(f'system_graph = malloc(sizeof(int*)*{len(adj)});')
 
@@ -378,8 +380,8 @@ class HulkCodeGenerator(object):
         context.new_line(
             f'{define_v(context.pop_v())} = {context.get_v(node.name.value)};')
 
-    @visitor.when(ExpressionBlock)
-    def visit(self, node: ExpressionBlock, context: GeneratorContext):
+    @visitor.when(ExpressionBlockNode)
+    def visit(self, node: ExpressionBlockNode, context: GeneratorContext):
         for n in node.instructions[:-1]:
             v = context.new_v()
             context.push_v(v)
@@ -622,9 +624,11 @@ class HulkCodeGenerator(object):
             create_context.new_line(
                 f'system_addEntry({ct}, "f_{f.name}", *type_{t.name}_{f.name});')
 
+        t = self.semantic_context.get_type(
+            node.class_type.name)
         create_context.new_line(f'system_addEntry({ct}, "type", "{t.name}");')
 
-        q=create_context.new_v()
+        q = create_context.new_v()
         create_context.new_line(f'int *{q} =  malloc(sizeof(int));')
         create_context.new_line(f'*{q} =  {self.type_to_int[t.name]};')
 
@@ -643,16 +647,17 @@ class HulkCodeGenerator(object):
             self.visit(i, node.class_type.name.value)
 
     @visitor.when(IsNode)
-    def visit(self,node:IsNode,context:GeneratorContext):
-        v=context.new_v()
+    def visit(self, node: IsNode, context: GeneratorContext):
+        v = context.new_v()
         context.push_v(v)
 
-        self.visit(node.expression,context)
+        self.visit(node.expression, context)
 
-        ind=context.new_v()
+        ind = context.new_v()
         context.new_line(f'int *{ind} = system_findEntry({v}, "type_ind");')
 
-        context.new_line(f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[node.type_name.value]}));')
+        context.new_line(
+            f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[node.type_name.value]}));')
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode, t_name: str):

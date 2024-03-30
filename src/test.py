@@ -8,7 +8,7 @@ test_modules = [
     # 'lexer',
     # 'automaton',
     # 'hulk_grammar',
-    # 'type_collector',
+    'type_collector',
     'code_gen'
 ]
 
