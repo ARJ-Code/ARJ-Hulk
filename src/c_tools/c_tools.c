@@ -342,7 +342,7 @@ Type *system_createNumber(double n)
 
     double *value = malloc(sizeof(double));
     *value = n;
-    double *type_ind = malloc(sizeof(double));
+    int *type_ind = malloc(sizeof(double));
     *type_ind = 2;
 
     system_addEntry(t, "type", "Number");

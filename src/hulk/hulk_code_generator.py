@@ -148,9 +148,8 @@ class HulkCodeGenerator(object):
                 adj[self.type_to_int[k]].append(
                     self.type_to_int[v.parent.name])
 
-            if isinstance(v, Class):
-                for p in v.protocols:
-                    adj[self.type_to_int[k]].append(self.type_to_int[p.name])
+            for p in v.protocols:
+                adj[self.type_to_int[k]].append(self.type_to_int[p.name])
 
         context.new_line(f'system_graph = malloc(sizeof(int*)*{len(adj)});')
 
