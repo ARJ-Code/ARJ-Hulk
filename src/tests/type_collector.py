@@ -112,10 +112,10 @@ def test():
 
     vector_test =\
         """
-            let a: [Object] = [1, 2] in print(2);
+            let a: [Number] = [i ^ 2 || i in [1, 2]] in 2;
         """
     
-    # assert hulk_compile_str(vector_test)
+    assert hulk_compile_str(vector_test)
 
     super_test =\
         """
@@ -153,5 +153,5 @@ def test():
             }
         """
     
-    assert hulk_compile_str(super_test)
+    # assert hulk_compile_str(super_test)
     

@@ -171,11 +171,11 @@ class BooleanUnaryNode (UnaryNode):
         super().__init__(child)
         self.operator: BooleanOperator = operator
 
-# TODO
+
 class ImplicitArrayDeclarationNode (ExpressionNode):
-    def __init__(self, expression, variable, iterable):
+    def __init__(self, expression, item, iterable):
         self.expression: ExpressionNode = expression
-        self.variable: LexerToken = variable
+        self.item: LexerToken = item
         self.iterable: ExpressionNode = iterable
 
 
