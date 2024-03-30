@@ -162,7 +162,7 @@ def test():
         """
             function square(x: Number) => [i ^ 2 || i in range(1, x)];
 
-            for (i in square(5)) print(i);
+            for (i in square('5')) print(i);
         """
     
     assert hulk_compile_str(for_test)
