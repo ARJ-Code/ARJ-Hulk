@@ -452,44 +452,41 @@ class SemanticChecker(object):
 
     @visitor.when(BooleanUnaryNode)
     def visit(self, node: BooleanUnaryNode, scope: Scope):
-        boolean_node = self.graph.add_node(BOOLEAN)
         expression_node = self.visit(node.child, scope.create_child_scope())
-        return self.graph.add_path(expression_node, boolean_node)
+        expression_node.node_type = BOOLEAN
+        return expression_node
 
     @visitor.when(ArithmeticUnaryNode)
     def visit(self, node: ArithmeticUnaryNode, scope: Scope):
-        number_node = self.graph.add_node(NUMBER)
         expression_node = self.visit(node.child, scope.create_child_scope())
-        return self.graph.add_path(expression_node, number_node)
+        expression_node.node_type = NUMBER
+        return expression_node
 
     @visitor.when(BooleanBinaryNode)
     def visit(self, node: BooleanBinaryNode, scope: Scope):
         boolean_node = self.graph.add_node(BOOLEAN)
         is_boolean_operation = node.operator in [
             BooleanOperator.AND, BooleanOperator.OR]
-        left_node = self.graph.add_node(
-            BOOLEAN if is_boolean_operation else NUMBER)
+        left_type = BOOLEAN if is_boolean_operation else NUMBER
         left_expression_node = self.visit(
             node.left, scope.create_child_scope())
-        self.graph.add_path(left_expression_node, left_node)
-        right_node = self.graph.add_node(
-            BOOLEAN if is_boolean_operation else NUMBER)
+        left_expression_node.node_type = left_type
+        right_type = BOOLEAN if is_boolean_operation else NUMBER
         right_expression_node = self.visit(
             node.right, scope.create_child_scope())
-        self.graph.add_path(right_expression_node, right_node)
+        right_expression_node.node_type = right_type
+
         return boolean_node
 
     @visitor.when(ArithmeticBinaryNode)
     def visit(self, node: ArithmeticBinaryNode, scope: Scope):
         number_node = self.graph.add_node(NUMBER)
-        left_node = self.graph.add_node(NUMBER)
         left_expression_node = self.visit(
             node.left, scope.create_child_scope())
-        self.graph.add_path(left_expression_node, left_node)
-        right_node = self.graph.add_node(NUMBER)
+        left_expression_node.node_type = NUMBER
         right_expression_node = self.visit(
             node.right, scope.create_child_scope())
-        self.graph.add_path(right_expression_node, right_node)
+        right_expression_node.node_type = NUMBER
         return number_node
 
     @visitor.when(StringBinaryNode)
@@ -653,6 +650,39 @@ class SemanticChecker(object):
             r_type = scope.get_defined_type(LexerToken(
                 0, 0, p_type.name, '')).get_attribute(node.property.value).node
             return r_type
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
+
+    @visitor.when(AssignmentPropertyNode)
+    def visit(self, node: AssignmentPropertyNode, scope: Scope):
+        try:
+            var_node = scope.get_defined_variable(node.name)
+            v_type = self.graph.local_type_inference(
+                var_node.node)
+            p_type = scope.get_defined_type(LexerToken(
+                0, 0, v_type.name, '')).get_attribute(node.property.value).node
+            r_type = self.visit(node.value, scope)
+            self.graph.add_path(p_type, r_type)
+            return r_type
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
+
+    @visitor.when(InstanceFunctionNode)
+    def visit(self, node: InstanceFunctionNode, scope: Scope):
+        try:
+            e_node = self.visit(node.expression, scope)
+            e_type = self.graph.local_type_inference(e_node)
+            function_ = scope.get_defined_type(LexerToken(
+                0, 0, e_type.name, '')).get_function(node.property.name.value)
+            function_.check_valid_params(LexerToken(
+                0, 0, '', ''), node.property.parameters)
+
+            for fa, ca in zip(function_.args, node.property.parameters):
+                self.graph.add_path(fa, self.visit(ca, scope))
+
+            return function_.node
         except SemanticError as error:
             self.errors.append(error.text)
             return self.graph.add_node()

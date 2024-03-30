@@ -254,13 +254,14 @@ class TypeSemantic:
         for f in self.functions:
             if name == f.name:
                 return f
-        return None
+        raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
 
     def get_attribute(self, name: str) -> Variable | None:
         for a in self.attributes:
             if name == a.name:
                 return a
-        return None
+        raise SemanticError(
+            f'Attributed "{name}" is not defined in {self.name}.')
 
 
 class Scope:
