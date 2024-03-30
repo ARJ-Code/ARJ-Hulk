@@ -324,7 +324,8 @@ class SemanticChecker(object):
     @visitor.when(ExpressionCallNode)
     def visit(self, node: ExpressionCallNode, scope: Scope):
         try:
-            function_ = scope.check_valid_params(node.name, node.parameters)
+            function_ = scope.get_defined_function(
+                node.name).check_valid_params(node.name, node.parameters)
             call_node = self.graph.add_node()
             self.graph.add_path(call_node, function_.node)
             for fa, ca in zip(function_.args, node.parameters):
@@ -408,9 +409,10 @@ class SemanticChecker(object):
     def visit(self, node: VectorTypeNode, scope: Scope):
         type_ = self.context.get_type(node.name)
         vector_type = self.context.add_type(vector_t(type_, node.dimensions))
-        node.name.value = (f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
+        node.name.value = (
+            f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
         return vector_type
-    
+
     @visitor.when(EOFTypeNode)
     def visit(self, node: EOFTypeNode, scope: Scope):
         return None
@@ -484,25 +486,61 @@ class SemanticChecker(object):
     @visitor.when(ClassDeclarationNode)
     def visit(self, node: ClassDeclarationNode, scope: Scope):
         scope = scope.create_child_scope()
-        # scope.define_variable(LexerToken(0, 0, 'self', ''), self.graph.add_node(
-        #     node_type=self.context.get_type(LexerToken(node.class_type.name))))
+        init_scope = scope.create_child_scope()
 
-        # if isinstance(node.inheritance, InheritanceParameterNode):
-        #     parent = scope.get_defined_type(node.inheritance.name)
-    
+        scope.define_variable(LexerToken(
+            0, 0, 'self', ''), self.graph.add_node(self.context.get_type(LexerToken(node.class_type.name))))
+
+        t = scope.get_defined_type(
+            node.class_type)
+        init_f = t.get_function('init')
+
+        if isinstance(node.class_type, ClassTypeParameterNode):
+            for p, n in zip(node.class_type.parameters, init_f.args):
+                init_scope.define_variable(p.name, n)
+
+        try:
+            if isinstance(node.inheritance, InheritanceParameterNode):
+                parent = scope.get_defined_type(node.inheritance.name)
+                parent.get_function('init').check_valid_params(
+                    node.inheritance.parameters)
+
+                for p, n in zip(node.inheritance.parameters, parent.get_function('init').args):
+                    et = self.visit(p, init_scope)
+                    self.graph.add_path(et, n)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+        for s in node.body:
+            if isinstance(s, ClassFunctionNode):
+                function_ = t.get_function(s.name.value)
+                self.visit(s, function_, scope)
+            if isinstance(s, ClassPropertyNode):
+                et = self.visit(s.expression, init_scope)
+                self.graph.add_path(t.get_attribute(s.name.value), et)
+
+    @visitor.when(ClassFunctionNode)
+    def visit(self, node: ClassFunctionNode, function_: SemanticNode, scope: Scope):
+        child_scope = scope.create_child_scope()
+        for i in range(len(function_.args)):
+            param_node: SemanticNode = function_.args[i]
+            param: ParameterNode = node.parameters[i]
+            child_scope.define_variable(param.name, param_node)
+        body_node = self.visit(node.body, child_scope)
+        self.graph.add_path(function_.node, body_node)
+
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
         VECTOR = Type('Vector')
         vector_node = self.graph.add_node(VECTOR)
         for expression in node.values:
-            expression_node = self.visit(expression, scope.create_child_scope())
+            expression_node = self.visit(
+                expression, scope.create_child_scope())
             self.graph.add_path(vector_node, expression_node)
         return vector_node
-    
+
     # @visitor.when(ImplicitArrayDeclarationNode)
     # def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
-
-
 
     # @visitor.when(VarDeclarationNode)
     # def visit(self, node: VarDeclarationNode, scope: Scope):

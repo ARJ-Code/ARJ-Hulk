@@ -293,11 +293,3 @@ class Scope:
             return self.parent.get_defined_type(id)
         raise SemanticError(
             f'Type {name} is not defined.' + self.error_location(row, col))
-
-    def check_valid_params(self, id: LexerToken, parameters) -> Function:
-        row, col, name = self.decompact(id)
-        function_ = self.get_defined_function(id)
-        if len(function_.args) != len(parameters):
-            raise SemanticError(
-                f'Invalid amount of arguments while calling function {name}.' + self.error_location(row, col))
-        return function_
