@@ -86,13 +86,12 @@ class TypeBuilder(object):
                 s.add(p)
                 p = p.parent
 
-
     def implement_protocols(self):
         for t in self.context.types.values():
             for p in self.context.protocols.values():
                 if t.implement_protocol(p):
                     t.add_protocol(p)
-            
+
     # def check_overriding(self) -> None:
     #     for t in self.context.types.values():
     #         for method in t.methods:
@@ -551,10 +550,10 @@ class SemanticChecker(object):
 
     @visitor.when(NewNode)
     def visit(self, node: NewNode, scope: Scope):
-        t = scope.get_defined_type(node.name.name)
-        init = t.get_function('init')
-
         try:
+            t = scope.get_defined_type(node.name.name)
+            init = t.get_function('init')
+
             init.check_valid_params(node.name.name, node.name.parameters)
             for p, a in zip(node.name.parameters, init.args):
                 n = self.visit(p, scope)
@@ -563,6 +562,18 @@ class SemanticChecker(object):
             self.errors.append(error.text)
 
         return self.graph.add_node(init.node.node_type)
+
+    @visitor.when(IsNode)
+    def visit(self, node: IsNode, scope: Scope):
+        boolean = self.graph.add_node(BOOLEAN)
+
+        try:
+            scope.get_defined_type(node.type_name)
+        except SemanticError as error:
+            self.errors.append(error.text)
+
+        self.visit(node.expression, scope)
+        return boolean
 
     # @visitor.when(ImplicitArrayDeclarationNode)
     # def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):

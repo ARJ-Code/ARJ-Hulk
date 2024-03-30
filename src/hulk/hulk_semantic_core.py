@@ -245,6 +245,8 @@ class Class(Type):
             class_methods = self.all_methods()
             for mc, _ in class_methods:
                 if mc.name == mp.name and len(mc.arguments) == len(mp.arguments):
+                    if mc.return_type is None or any([a for a in mc.arguments if a.type is None]):
+                        continue
                     if mc.return_type.conforms_to(mp.return_type):
                         if all([ap.type.conforms_to(ac.type) for ap, ac in zip(mp.arguments, mc.arguments)]):
                             finded = True
