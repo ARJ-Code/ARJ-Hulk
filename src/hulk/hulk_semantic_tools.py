@@ -279,11 +279,7 @@ class Scope:
         self.variables: List[Variable] = []
         self.functions: List[Function] = []
         self.types: List[TypeSemantic] = []
-        # self.variables: {str, SemanticNode} = {}
-        # self.attributes: List[Attribute] = []
-        # self.methods: Set[Method] = set()
-        # self.attribute_index = 0 if parent is None else len(parent.attributes)
-
+    
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
 

@@ -227,9 +227,7 @@ class Class(Type):
         super().__init__(name)
         self.protocols: List[Protocol] = []
         self.params: List[Attribute] = []
-        # for param in params:
-        #     self.add_attribute(param)
-
+     
     def set_parent(self, parent: Type) -> None:
         return self.define_inherits(parent)
 
@@ -263,14 +261,6 @@ class Class(Type):
             return True
 
         return super().conforms_to(other)
-
-        # def add_parents_methods(self):
-    #     parents_methods = self.parent.all_methods()
-    #     for m1 in parents_methods:
-    #         are_override = False
-    #         for m2 in self.methods:
-    #             if m2.is_overriding(m1):
-    #                 are_override = True
 
     def __str__(self):
         output = f'type {self.name}'

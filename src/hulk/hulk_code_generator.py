@@ -4,6 +4,7 @@ from typing import Dict, List
 from .hulk_defined import is_defined_method
 from .hulk_semantic_check import Context
 
+
 def define_v(v: str):
     return f'Type *{v}'
 

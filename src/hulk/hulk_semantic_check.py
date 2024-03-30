@@ -56,35 +56,39 @@ class TypeBuilder(object):
         self.errors: List[str] = errors
 
     def check_circular_inheritance(self) -> bool:
-        visited: {str, bool} = {}
+        visited: Dict[str, bool] = {}
+
+        check = True
 
         for k in self.context.types.keys():
             visited[k] = False
         for t in self.context.types.values():
-            s = set()
+            c = t
             while t is not None and not visited[t.name]:
                 visited[t.name] = True
-                if t in s:
+                t = t.parent
+                if t is not None and t.name == c.name:
                     self.errors.append(
                         f'Circular inheritance detected in class {t.name}')
+                    check = False
                     break
-                s.add(t)
-                t = t.parent
 
         visited = {}
 
         for k in self.context.protocols.keys():
             visited[k] = False
         for p in self.context.protocols.values():
-            s = set()
+            c = p
             while p is not None and not visited[p.name]:
                 visited[p.name] = True
-                if p in s:
+                p = p.parent
+                if p is not None and c.name == p.name:
                     self.errors.append(
                         f'Circular inheritance detected in protocol {p.name}')
+                    check = False
                     break
-                s.add(p)
-                p = p.parent
+
+        return check
 
     def implement_protocols(self):
         for t in self.context.types.values():
@@ -110,8 +114,8 @@ class TypeBuilder(object):
         for statement in node.second_is:
             self.visit(statement)
 
-        self.check_circular_inheritance()
-        self.implement_protocols()
+        if self.check_circular_inheritance():
+            self.implement_protocols()
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode):
@@ -717,12 +721,13 @@ def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
 
     context = collector.context
 
-    builder = TypeBuilder(context, errors)
-    builder.visit(ast)
+    if len(errors)==0:
+        builder = TypeBuilder(context, errors)
+        builder.visit(ast)
+    if len(errors)==0:
+        scope = Scope()
 
-    scope = Scope()
-
-    semantic_checker = SemanticChecker(context, errors)
-    semantic_checker.visit(ast, scope)
+        semantic_checker = SemanticChecker(context, errors)
+        semantic_checker.visit(ast, scope)
 
     return SemanticResult(context, errors)

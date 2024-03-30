@@ -50,7 +50,7 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(type_test)
+    assert not hulk_compile_str(type_test)
 
     let_test =\
         """
