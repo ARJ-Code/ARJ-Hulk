@@ -53,7 +53,7 @@ def memoize_vector_t(f):
 
 
 @memoize_vector_t
-def vector_t(c: Type, dimension: int) -> Type:
+def vector_t(c: Class, dimension: int) -> Class:
     if dimension == 0:
         return c
     else:

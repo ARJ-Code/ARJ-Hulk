@@ -115,7 +115,7 @@ class SemanticGraph:
 
     def dfs(self, node: 'SemanticNode') -> Type:
         if len(self.get_children(node)) == 0:
-            node.node_type = self.ERROR if node.node_type is None else node.node_type
+            node.node_type = (self.ERROR if node.node_type is None else node.node_type)
             if node.node_type == self.VECTOR:
                 node.node_type = vector_t(OBJECT, 1)
             node.visited = True

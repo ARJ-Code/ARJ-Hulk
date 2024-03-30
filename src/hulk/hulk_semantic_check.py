@@ -292,8 +292,8 @@ class SemanticChecker(object):
             for p in self.context.protocols.values():
                 scope.define_type(p.name, get_functions(p.methods), [])
 
-        add_context_types()
-        add_context_functions()
+        # add_context_types()
+        # add_context_functions()
 
         for statement in node.first_is:
             self.visit(statement, scope)
@@ -553,16 +553,6 @@ class SemanticChecker(object):
         body_node = self.visit(node.body, child_scope)
         self.graph.add_path(function_.node, body_node)
 
-    @visitor.when(ExplicitArrayDeclarationNode)
-    def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
-        VECTOR = Type('Vector')
-        vector_node = self.graph.add_node(VECTOR)
-        for expression in node.values:
-            expression_node = self.visit(
-                expression, scope.create_child_scope())
-            self.graph.add_path(vector_node, expression_node)
-        return vector_node
-
     @visitor.when(NewNode)
     def visit(self, node: NewNode, scope: Scope):
         try:
@@ -589,6 +579,16 @@ class SemanticChecker(object):
 
         self.visit(node.expression, scope)
         return boolean
+    
+    @visitor.when(ExplicitArrayDeclarationNode)
+    def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
+        VECTOR = Type('Vector')
+        vector_node = self.graph.add_node(VECTOR)
+        for expression in node.values:
+            expression_node = self.visit(
+                expression, scope.create_child_scope())
+            self.graph.add_path(vector_node, expression_node)
+        return vector_node
 
     @visitor.when(ImplicitArrayDeclarationNode)
     def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
@@ -604,7 +604,6 @@ class SemanticChecker(object):
             child_scope = scope.create_child_scope()
             child_scope.define_variable(node.item, item_node)
             expression_node = self.visit(node.expression, child_scope)
-            self.graph.add_path(item_node, expression_node)
             return self.graph.add_path(vector_node, expression_node)
         except SemanticError as error:
             self.errors.append(error.text)
@@ -626,20 +625,19 @@ class SemanticChecker(object):
 
     @visitor.when(AssignmentArrayNode)
     def visit(self, node: AssignmentArrayNode, scope: Scope):
-        index_node = self.graph.add_node(NUMBER)
         index_expression_node = self.visit(
             node.array_call.indexer, scope.create_child_scope())
-        self.graph.add_path(index_expression_node, index_node)
+        index_expression_node.node_type = NUMBER
         indexable_set_expression_node = self.visit(
             node.array_call.expression, scope.create_child_scope())
         set_expression_node = self.visit(
             node.value, scope.create_child_scope())
         setable_type = self.graph.local_type_inference(
             indexable_set_expression_node)
-        set_type = scope.get_type(LexerToken(
+        set_type = self.context.get_type(LexerToken(
             0, 0, setable_type.name, '')).get_method('set').arguments[1].type
         set_node = self.graph.add_node(set_type)
-        return self.graph.add_path(set_expression_node, set_node)
+        return self.graph.add_path(set_node, set_expression_node)
 
     @visitor.when(InstancePropertyNode)
     def visit(self, node: InstancePropertyNode, scope: Scope):
