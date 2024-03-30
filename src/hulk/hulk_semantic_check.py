@@ -283,8 +283,8 @@ class SemanticChecker(object):
             for p in self.context.protocols.values():
                 scope.define_type(p.name, get_functions(p.methods), [])
 
-        # add_context_types()
-        # add_context_functions()
+        add_context_types()
+        add_context_functions()
 
         for statement in node.first_is:
             self.visit(statement, scope)
@@ -553,6 +553,32 @@ class SemanticChecker(object):
         except SemanticError as error:
             self.errors.append(error.text)
             return self.graph.add_node()
+
+    @visitor.when(ArrayCallNode)
+    def visit(self, node: ArrayCallNode, scope: Scope):
+        index_node = self.graph.add_node(NUMBER)
+        index_expression_node = self.visit(node.indexer, scope.create_child_scope())
+        self.graph.add_path(index_expression_node, index_node)
+        indexable_get_node = self.graph.add_node(INDEXABLE_GET)
+        indexable_get_expression_node = self.visit(node.expression, scope.create_child_scope())
+        self.graph.add_path(indexable_get_expression_node, indexable_get_node)
+        getable_type = self.graph.local_type_inference(indexable_get_expression_node)
+        get_type = self.context.get_type(LexerToken(0, 0, getable_type.name, '')).get_method('get').return_type
+        return self.graph.add_node(get_type)
+    
+    @visitor.when(AssignmentArrayNode)
+    def visit(self, node: AssignmentArrayNode, scope: Scope):
+        index_node = self.graph.add_node(NUMBER)
+        index_expression_node = self.visit(node.array_call.indexer, scope.create_child_scope())
+        self.graph.add_path(index_expression_node, index_node)
+        indexable_set_node = self.graph.add_node(INDEXABLE_SET)
+        indexable_set_expression_node = self.visit(node.array_call.expression, scope.create_child_scope())
+        self.graph.add_path(indexable_set_expression_node, indexable_set_node)
+        set_expression_node = self.visit(node.value, scope.create_child_scope())
+        setable_type = self.graph.local_type_inference(indexable_set_expression_node)
+        set_type = self.context.get_type(LexerToken(0, 0, setable_type.name, '')).get_method('set').arguments[1].type
+        set_node = self.graph.add_node(set_type)
+        return self.graph.add_path(set_expression_node, set_node)
 
 def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
     errors = []

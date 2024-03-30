@@ -112,7 +112,7 @@ def test():
 
     vector_test =\
         """
-            let a: [Number] = [i ^ 2 || i in [1, 2]] in 2;
+            let a = '[i ^ 2 || i in [1, 2]]' in a[2];
         """
     
     assert hulk_compile_str(vector_test)
