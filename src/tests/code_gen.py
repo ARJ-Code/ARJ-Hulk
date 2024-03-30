@@ -96,12 +96,12 @@ def test():
 
                 name() => self.name;
                 age() => self.age;
-                move(origin, destination){
+                move(origin:String, destination:String):String{
                     let from = "se movio desde", to = "hacia" in {
                         from @@ origin @@ to @@ destination;
                     }; 
                 }
-                lay_down(place) {
+                lay_down(place:String):String {
                     let at = "se acosto en" in {
                         at @@ place;
                     };

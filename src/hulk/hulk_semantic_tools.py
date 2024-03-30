@@ -108,6 +108,8 @@ class SemanticGraph:
 
     def add_path(self, parent: 'SemanticNode', child: 'SemanticNode') -> 'SemanticNode':
         self.adj[parent.index].append(child.index)
+        if parent.visited:
+            parent.visited = False
         return parent
 
     def get_children(self, node: 'SemanticNode') -> List['SemanticNode']:
@@ -115,7 +117,8 @@ class SemanticGraph:
 
     def dfs(self, node: 'SemanticNode') -> Type:
         if len(self.get_children(node)) == 0:
-            node.node_type = (self.ERROR if node.node_type is None else node.node_type)
+            node.node_type = (
+                self.ERROR if node.node_type is None else node.node_type)
             if node.node_type == self.VECTOR:
                 node.node_type = vector_t(OBJECT, 1)
             node.visited = True
@@ -249,11 +252,17 @@ class TypeSemantic:
         self.name: str = name
         self.functions: List[Function] = functions
         self.attributes: List[Variable] = attributes
+        self.parent: 'TypeSemantic |None' = None
+
+    def set_parent(self, parent: 'TypeSemantic'):
+        self.parent = parent
 
     def get_function(self, name: str) -> Function | None:
         for f in self.functions:
             if name == f.name:
                 return f
+        if self.parent is not None:
+            return self.parent.get_function(name)
         raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
 
     def get_attribute(self, name: str) -> Variable | None:

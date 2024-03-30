@@ -146,8 +146,7 @@ class TypeBuilder(object):
     @visitor.when(ProtocolFunctionNode)
     def visit(self, node: ProtocolFunctionNode) -> Attribute:
         def _build_attribute(param: ParameterNode):
-            p_type = self.visit(param)
-            return Attribute(param.name.value, p_type)
+            return self.visit(param)
 
         try:
             parameters: List[Attribute] = [
@@ -272,13 +271,14 @@ class SemanticChecker(object):
                 scope.define_function(name, function_node, args)
 
         def add_context_types():
-            def get_functions(methods):
+            def get_functions(methods: List[Method]):
                 functions = []
                 for method in methods:
                     arguments: List[Attribute] = method.arguments
                     return_type: Type = method.return_type
                     args = [self.graph.add_node(t)
                             for t in [a.type for a in arguments]]
+
                     function_node = self.graph.add_node(return_type)
                     functions.append(
                         Function(method.name, function_node, args))
@@ -292,8 +292,18 @@ class SemanticChecker(object):
             for p in self.context.protocols.values():
                 scope.define_type(p.name, get_functions(p.methods), [])
 
-        # add_context_types()
-        # add_context_functions()
+            for t in self.context.types.values():
+                if t.parent is not None:
+                    scope.get_defined_type(LexerToken(0, 0, t.name, '')).set_parent(
+                        scope.get_defined_type(LexerToken(0, 0, t.parent.name, '')))
+
+            for p in self.context.protocols.values():
+                if p.parent is not None:
+                    scope.get_defined_type(LexerToken(0, 0, p.name, '')).set_parent(
+                        scope.get_defined_type(LexerToken(0, 0, p.parent.name, '')))
+
+        add_context_types()
+        add_context_functions()
 
         for statement in node.first_is:
             self.visit(statement, scope)
@@ -354,18 +364,22 @@ class SemanticChecker(object):
 
     @visitor.when(ForNode)
     def visit(self, node: ForNode, scope: Scope):
-        for_node = self.graph.add_node()
-        iterable_expression_node = self.visit(
-            node.iterable, scope.create_child_scope())
-        iterable_type = iterable_type = self.graph.local_type_inference(
-            iterable_expression_node)
-        current_type = self.context.get_type(LexerToken(
-            0, 0, iterable_type.name, '')).get_method('current').return_type
-        variable_node = self.graph.add_node(current_type)
-        child_scope = scope.create_child_scope()
-        child_scope.define_variable(node.variable, variable_node)
-        expression_node = self.visit(node.body, child_scope)
-        return self.graph.add_path(for_node, expression_node)
+        try:
+            for_node = self.graph.add_node()
+            iterable_expression_node = self.visit(
+                node.iterable, scope.create_child_scope())
+            iterable_type = iterable_type = self.graph.local_type_inference(
+                iterable_expression_node)
+            current_type = self.context.get_type(LexerToken(
+                0, 0, iterable_type.name, '')).get_method('current').return_type
+            variable_node = self.graph.add_node(current_type)
+            child_scope = scope.create_child_scope()
+            child_scope.define_variable(node.variable, variable_node)
+            expression_node = self.visit(node.body, child_scope)
+            return self.graph.add_path(for_node, expression_node)
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
 
     @visitor.when(IfNode)
     def visit(self, node: IfNode, scope: Scope):
@@ -579,7 +593,7 @@ class SemanticChecker(object):
 
         self.visit(node.expression, scope)
         return boolean
-    
+
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
         VECTOR = Type('Vector')
@@ -611,33 +625,41 @@ class SemanticChecker(object):
 
     @visitor.when(ArrayCallNode)
     def visit(self, node: ArrayCallNode, scope: Scope):
-        index_node = self.graph.add_node(NUMBER)
-        index_expression_node = self.visit(
-            node.indexer, scope.create_child_scope())
-        self.graph.add_path(index_expression_node, index_node)
-        indexable_get_expression_node = self.visit(
-            node.expression, scope.create_child_scope())
-        getable_type = self.graph.local_type_inference(
-            indexable_get_expression_node)
-        get_type = self.context.get_type(LexerToken(
-            0, 0, getable_type.name, '')).get_method('get').return_type
-        return self.graph.add_node(get_type)
+        try:
+            index_node = self.graph.add_node(NUMBER)
+            index_expression_node = self.visit(
+                node.indexer, scope.create_child_scope())
+            self.graph.add_path(index_expression_node, index_node)
+            indexable_get_expression_node = self.visit(
+                node.expression, scope.create_child_scope())
+            getable_type = self.graph.local_type_inference(
+                indexable_get_expression_node)
+            get_type = self.context.get_type(LexerToken(
+                0, 0, getable_type.name, '')).get_method('get').return_type
+            return self.graph.add_node(get_type)
+        except SemanticError as error:
+            self.graph.add_node(error.text)
+            return self.graph.add_node()
 
     @visitor.when(AssignmentArrayNode)
     def visit(self, node: AssignmentArrayNode, scope: Scope):
-        index_expression_node = self.visit(
-            node.array_call.indexer, scope.create_child_scope())
-        index_expression_node.node_type = NUMBER
-        indexable_set_expression_node = self.visit(
-            node.array_call.expression, scope.create_child_scope())
-        set_expression_node = self.visit(
-            node.value, scope.create_child_scope())
-        setable_type = self.graph.local_type_inference(
-            indexable_set_expression_node)
-        set_type = self.context.get_type(LexerToken(
-            0, 0, setable_type.name, '')).get_method('set').arguments[1].type
-        set_node = self.graph.add_node(set_type)
-        return self.graph.add_path(set_node, set_expression_node)
+        try:
+            index_expression_node = self.visit(
+                node.array_call.indexer, scope.create_child_scope())
+            index_expression_node.node_type = NUMBER
+            indexable_set_expression_node = self.visit(
+                node.array_call.expression, scope.create_child_scope())
+            set_expression_node = self.visit(
+                node.value, scope.create_child_scope())
+            setable_type = self.graph.local_type_inference(
+                indexable_set_expression_node)
+            set_type = self.context.get_type(LexerToken(
+                0, 0, setable_type.name, '')).get_method('set').arguments[1].type
+            set_node = self.graph.add_node(set_type)
+            return self.graph.add_path(set_node, set_expression_node)
+        except SemanticError as error:
+            self.errors.append(error)
+            return self.graph.add_node()
 
     @visitor.when(InstancePropertyNode)
     def visit(self, node: InstancePropertyNode, scope: Scope):
@@ -678,7 +700,8 @@ class SemanticChecker(object):
                 0, 0, '', ''), node.property.parameters)
 
             for fa, ca in zip(function_.args, node.property.parameters):
-                self.graph.add_path(fa, self.visit(ca, scope))
+                self.graph.add_path(fa, self.visit(
+                    ca, scope.create_child_scope()))
 
             return function_.node
         except SemanticError as error:
