@@ -1,3 +1,5 @@
+from typing import List, Set, Tuple, Dict
+
 from compiler_tools.lexer import LexerToken
 from hulk.hulk_defined import *
 from collections import OrderedDict
@@ -466,12 +468,43 @@ class Function:
         self.node = node
         self.args = args
 
+    def check_valid_params(self, id: LexerToken, parameters) -> 'Function':
+        row, col, name = (id.row, id.col, id.value)
+        if len(self.args) != len(parameters):
+            raise SemanticError(
+                f'Invalid amount of arguments while calling function {name}.' + f' Error at {row}:{col}')
+        return self
+
+
+class TypeSemantic:
+    def __init__(self, name: str, functions: List[Function], attributes: List[Variable]) -> None:
+        self.name: str = name
+        self.functions: List[Function] = functions
+        self.attributes: List[Variable] = attributes
+
+    def get_function(self, name: str) -> Function | None:
+        for f in self.functions:
+            if name == f.name:
+                return f
+        return None
+
+    def get_attribute(self, name: str) ->Variable | None:
+        for a in self.attributes:
+            if name == a.name:
+                return a
+        return None
+
 
 class Scope:
     def __init__(self, parent: 'Scope' = None) -> None:
         self.parent: Scope = parent
         self.variables: List[Variable] = []
         self.functions: List[Function] = []
+        self.types: List[TypeSemantic] = []
+        # self.variables: {str, SemanticNode} = {}
+        # self.attributes: List[Attribute] = []
+        # self.methods: Set[Method] = set()
+        # self.attribute_index = 0 if parent is None else len(parent.attributes)
 
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
@@ -497,10 +530,12 @@ class Scope:
         raise SemanticError(
             f'Variable {name} is not defined.' + self.error_location(row, col))
 
-    def define_function(self, id: LexerToken, node: SemanticNode, args: List[SemanticNode]) -> SemanticNode:
-        row, col, name = self.decompact(id)
+    def define_function(self, name: str, node: SemanticNode, args: List[SemanticNode]) -> SemanticNode:
         self.functions.append(Function(name, node, args))
         return node
+
+    def define_type(self, name: str, functions: List[Function], attributes: List[Variable]):
+        self.types.append(TypeSemantic(name, functions, attributes))
 
     def get_defined_function(self, id: LexerToken) -> Function:
         row, col, name = self.decompact(id)
@@ -519,6 +554,16 @@ class Scope:
             raise SemanticError(
                 f'Invalid amount of arguments while calling function {name}.' + self.error_location(row, col))
         return function_
+    
+    def get_defined_type(self, id: LexerToken) -> TypeSemantic:
+        row, col, name = self.decompact(id)
+        for t in self.types:
+            if t.name == name:
+                return t
+        if self.parent is not None:
+            return self.parent.get_defined_type(id)
+        raise SemanticError(
+            f'Type {name} is not defined.' + self.error_location(row, col))
 
 
 class SemanticResult:
@@ -526,3 +571,4 @@ class SemanticResult:
         self.ok = len(errors) == 0
         self.context = context
         self.errors = errors
+   
