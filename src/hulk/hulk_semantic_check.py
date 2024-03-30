@@ -343,6 +343,20 @@ class SemanticChecker(object):
             node.instructions[-1], scope.create_child_scope())
         return self.graph.add_path(expression_block_node, last_evaluation_node)
 
+    @visitor.when(ForNode)
+    def visit(self, node: ForNode, scope: Scope):
+        for_node = self.graph.add_node()
+        iterable_node = self.graph.add_node(ITERABLE)
+        iterable_expression_node = self.visit(node.iterable, scope.create_child_scope())
+        self.graph.add_path(iterable_expression_node, iterable_node)
+        iterable_type = iterable_type = self.graph.local_type_inference(iterable_expression_node)
+        current_type = self.context.get_type(LexerToken(0, 0, iterable_type.name, '')).get_method('current').return_type
+        variable_node = self.graph.add_node(current_type)
+        child_scope = scope.create_child_scope()
+        child_scope.define_variable(node.variable, variable_node)
+        expression_node = self.visit(node.body, child_scope)
+        return self.graph.add_path(for_node, expression_node)
+
     @visitor.when(IfNode)
     def visit(self, node: IfNode, scope: Scope):
         if_node = self.graph.add_node()

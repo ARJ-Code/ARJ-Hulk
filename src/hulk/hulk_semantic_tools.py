@@ -131,7 +131,10 @@ class SemanticGraph:
         elif node.node_type == self.VECTOR:
             node.node_type = vector_t(children_type, 1)
             try:
-                self.context.add_type(node.node_type)
+                type_ = node.node_type
+                while type_ != OBJECT:
+                    self.context.add_type(type_)
+                    type_ = type_.parent
             except SemanticError:
                 pass
         elif not children_type.conforms_to(node.node_type):
