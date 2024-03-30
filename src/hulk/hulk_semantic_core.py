@@ -96,7 +96,7 @@ class Type(ABC):
                 raise SemanticError(
                     f'Attribute "{name}" is not defined in {self.name}.' + self.error_location(row, col))
             try:
-                return self.parent.get_attribute(name)
+                return self.parent.get_attribute(id)
             except SemanticError:
                 raise SemanticError(
                     f'Attribute "{name}" is not defined in {self.name}.' + self.error_location(row, col))

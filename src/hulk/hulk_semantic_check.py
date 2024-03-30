@@ -580,9 +580,11 @@ class SemanticChecker(object):
         try:
             VECTOR = Type('Vector')
             vector_node = self.graph.add_node(VECTOR)
-            iterable_node = self.visit(node.iterable, scope.create_child_scope())
+            iterable_node = self.visit(
+                node.iterable, scope.create_child_scope())
             iterable_type = self.graph.local_type_inference(iterable_node)
-            current_type = self.context.get_type(LexerToken(0, 0, iterable_type.name, '')).get_method('current').return_type
+            current_type = self.context.get_type(LexerToken(
+                0, 0, iterable_type.name, '')).get_method('current').return_type
             item_node = self.graph.add_node(current_type)
             child_scope = scope.create_child_scope()
             child_scope.define_variable(node.item, item_node)
@@ -596,28 +598,51 @@ class SemanticChecker(object):
     @visitor.when(ArrayCallNode)
     def visit(self, node: ArrayCallNode, scope: Scope):
         index_node = self.graph.add_node(NUMBER)
-        index_expression_node = self.visit(node.indexer, scope.create_child_scope())
+        index_expression_node = self.visit(
+            node.indexer, scope.create_child_scope())
         self.graph.add_path(index_expression_node, index_node)
         indexable_get_node = self.graph.add_node(INDEXABLE_GET)
-        indexable_get_expression_node = self.visit(node.expression, scope.create_child_scope())
+        indexable_get_expression_node = self.visit(
+            node.expression, scope.create_child_scope())
         self.graph.add_path(indexable_get_expression_node, indexable_get_node)
-        getable_type = self.graph.local_type_inference(indexable_get_expression_node)
-        get_type = self.context.get_type(LexerToken(0, 0, getable_type.name, '')).get_method('get').return_type
+        getable_type = self.graph.local_type_inference(
+            indexable_get_expression_node)
+        get_type = self.context.get_type(LexerToken(
+            0, 0, getable_type.name, '')).get_method('get').return_type
         return self.graph.add_node(get_type)
-    
+
     @visitor.when(AssignmentArrayNode)
     def visit(self, node: AssignmentArrayNode, scope: Scope):
         index_node = self.graph.add_node(NUMBER)
-        index_expression_node = self.visit(node.array_call.indexer, scope.create_child_scope())
+        index_expression_node = self.visit(
+            node.array_call.indexer, scope.create_child_scope())
         self.graph.add_path(index_expression_node, index_node)
         indexable_set_node = self.graph.add_node(INDEXABLE_SET)
-        indexable_set_expression_node = self.visit(node.array_call.expression, scope.create_child_scope())
+        indexable_set_expression_node = self.visit(
+            node.array_call.expression, scope.create_child_scope())
         self.graph.add_path(indexable_set_expression_node, indexable_set_node)
-        set_expression_node = self.visit(node.value, scope.create_child_scope())
-        setable_type = self.graph.local_type_inference(indexable_set_expression_node)
-        set_type = self.context.get_type(LexerToken(0, 0, setable_type.name, '')).get_method('set').arguments[1].type
+        set_expression_node = self.visit(
+            node.value, scope.create_child_scope())
+        setable_type = self.graph.local_type_inference(
+            indexable_set_expression_node)
+        set_type = scope.get_type(LexerToken(
+            0, 0, setable_type.name, '')).get_method('set').arguments[1].type
         set_node = self.graph.add_node(set_type)
         return self.graph.add_path(set_expression_node, set_node)
+
+    @visitor.when(InstancePropertyNode)
+    def visit(self, node: InstancePropertyNode, scope: Scope):
+        try:
+            var_node = scope.get_defined_variable(node.name)
+            p_type = self.graph.local_type_inference(
+                var_node.node)
+            r_type = scope.get_defined_type(LexerToken(
+                0, 0, p_type.name, '')).get_attribute(node.property.value).node
+            return r_type
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
+
 
 def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
     errors = []
