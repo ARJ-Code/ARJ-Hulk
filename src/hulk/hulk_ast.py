@@ -128,7 +128,7 @@ class ExpressionCallNode (AtomicNode):
         super().__init__(name)
         self.parameters: List[ExpressionNode] = parameters
 
-# TODO
+
 class ArrayCallNode(ExpressionNode):
     def __init__(self, expression: ExpressionNode, indexer: ExpressionNode):
         self.expression: ExpressionNode = expression

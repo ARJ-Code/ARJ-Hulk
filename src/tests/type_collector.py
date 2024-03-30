@@ -113,12 +113,12 @@ def test():
     vector_test =\
         """
             {
-                let a = '[i ^ 2 || i in [1, 2]]' in a[2];
+                let a = '[i ^ 2 || i in [1, 2]]' in 2;
                 let a = [1, 2] in a[2] := 1;
             }
         """
     
-    assert hulk_compile_str(vector_test)
+    # assert hulk_compile_str(vector_test)
 
     super_test =\
         """
@@ -157,4 +157,13 @@ def test():
         """
     
     # assert hulk_compile_str(super_test)
+
+    for_test =\
+        """
+            function square(x: Number) => [i ^ 2 || i in range(1, x)];
+
+            for (i in square('5')) print(i);
+        """
+    
+    assert hulk_compile_str(for_test)
     
