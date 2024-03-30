@@ -57,20 +57,28 @@ def vector_t(c: Type, dimension: int) -> Type:
     if dimension == 0:
         return c
     else:
-        vector = Type(
+        vector = Class(
             '['+c.name + (f', {dimension}' if dimension > 1 else '')+']')
         vector.add_attribute(Attribute('dimension', NUMBER))
         vector.add_attribute(Attribute('length', NUMBER))
         vector.add_attribute(Attribute('capacity', NUMBER))
-        vector.add_method(Method('add', vector_t(c, dimension-1), [Attribute('a1', vector_t(c, dimension-1))]))
-        vector.add_method(Method('remove', vector_t(c, dimension-1), [Attribute('a1', NUMBER)]))
-        vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', vector_t(c, dimension-1))]))
-        vector.add_method(Method('get', vector_t(c, dimension-1), [Attribute('a1', NUMBER)]))
+        vector.add_method(Method('add', vector_t(c, dimension-1),
+                          [Attribute('a1', vector_t(c, dimension-1))]))
+        vector.add_method(Method('remove', vector_t(
+            c, dimension-1), [Attribute('a1', NUMBER)]))
+        vector.add_method(Method('contains', BOOLEAN, [
+                          Attribute('a1', vector_t(c, dimension-1))]))
+        vector.add_method(Method('get', vector_t(
+            c, dimension-1), [Attribute('a1', NUMBER)]))
         vector.add_method(
             Method('set', OBJECT, [Attribute('a1', NUMBER), Attribute('a2', vector_t(c, dimension-1))]))
         vector.add_method(Method('next', BOOLEAN, []))
         vector.add_method(Method('current', vector_t(c, dimension-1), []))
         vector.add_method(Method('reset', OBJECT, []))
+        vector.add_protocol(INDEXABLE_GET)
+        vector.add_protocol(INDEXABLE_SET)
+        vector.add_protocol(ITERABLE)
+        
         if (c.parent is None):
             vector.set_parent(OBJECT)
         else:

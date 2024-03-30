@@ -39,10 +39,10 @@ def hulk_compile_str(program: str) -> bool:
         print(f'Semantic errors:\n{error}')
         return False
 
-    # hulk_code_generator(ast, result.context)
+    hulk_code_generator(ast, result.context)
 
-    # result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
-    # result = subprocess.run(["./cache/main"], capture_output=True, text=True)
-    # print(result.stdout)
+    result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
+    result = subprocess.run(["./cache/main"], capture_output=True, text=True)
+    print(result.stdout)
 
     return True

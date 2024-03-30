@@ -133,7 +133,8 @@ class SemanticGraph:
         if node.node_type is None:
             node.node_type = get_child_type()
         elif node.node_type == self.VECTOR:
-            node.node_type = vector_t(get_child_type(), 1)
+            q = get_child_type()
+            node.node_type = vector_t(q, 1)
             try:
                 type_ = node.node_type
                 while type_ != OBJECT:

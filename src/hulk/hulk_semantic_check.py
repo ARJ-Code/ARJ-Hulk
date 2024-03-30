@@ -355,11 +355,12 @@ class SemanticChecker(object):
     @visitor.when(ForNode)
     def visit(self, node: ForNode, scope: Scope):
         for_node = self.graph.add_node()
-        iterable_node = self.graph.add_node(ITERABLE)
-        iterable_expression_node = self.visit(node.iterable, scope.create_child_scope())
-        self.graph.add_path(iterable_expression_node, iterable_node)
-        iterable_type = iterable_type = self.graph.local_type_inference(iterable_expression_node)
-        current_type = self.context.get_type(LexerToken(0, 0, iterable_type.name, '')).get_method('current').return_type
+        iterable_expression_node = self.visit(
+            node.iterable, scope.create_child_scope())
+        iterable_type = iterable_type = self.graph.local_type_inference(
+            iterable_expression_node)
+        current_type = self.context.get_type(LexerToken(
+            0, 0, iterable_type.name, '')).get_method('current').return_type
         variable_node = self.graph.add_node(current_type)
         child_scope = scope.create_child_scope()
         child_scope.define_variable(node.variable, variable_node)
@@ -494,10 +495,13 @@ class SemanticChecker(object):
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, scope: Scope):
         string_node = self.graph.add_node(STRING)
-        self.visit(
+        obj = self.graph.add_node(OBJECT)
+        left_expression_node = self.visit(
             node.left, scope.create_child_scope())
-        self.visit(
+        right_expression_node = self.visit(
             node.right, scope.create_child_scope())
+        self.graph.add_path(obj, left_expression_node)
+        self.graph.add_path(obj, right_expression_node)
         return string_node
 
     @visitor.when(ClassDeclarationNode)
@@ -615,10 +619,8 @@ class SemanticChecker(object):
         index_expression_node = self.visit(
             node.indexer, scope.create_child_scope())
         self.graph.add_path(index_expression_node, index_node)
-        indexable_get_node = self.graph.add_node(INDEXABLE_GET)
         indexable_get_expression_node = self.visit(
             node.expression, scope.create_child_scope())
-        self.graph.add_path(indexable_get_expression_node, indexable_get_node)
         getable_type = self.graph.local_type_inference(
             indexable_get_expression_node)
         get_type = self.context.get_type(LexerToken(
@@ -631,10 +633,8 @@ class SemanticChecker(object):
         index_expression_node = self.visit(
             node.array_call.indexer, scope.create_child_scope())
         self.graph.add_path(index_expression_node, index_node)
-        indexable_set_node = self.graph.add_node(INDEXABLE_SET)
         indexable_set_expression_node = self.visit(
             node.array_call.expression, scope.create_child_scope())
-        self.graph.add_path(indexable_set_expression_node, indexable_set_node)
         set_expression_node = self.visit(
             node.value, scope.create_child_scope())
         setable_type = self.graph.local_type_inference(

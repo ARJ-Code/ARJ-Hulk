@@ -3,8 +3,6 @@ import compiler_tools.visitor as visitor
 from typing import Dict, List
 from .hulk_defined import is_defined_method
 from .hulk_semantic_check import Context
-from .hulk_semantic_tools import Class
-
 
 def define_v(v: str):
     return f'Type *{v}'
@@ -228,7 +226,7 @@ class HulkCodeGenerator(object):
         context.push_v(vi)
         self.visit(node.iterable, context)
 
-        v = context.get_v(node.variable.value)
+        v = context.get_v(node.item.value)
 
         context.new_line(f'system_reset({vi});')
         context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
