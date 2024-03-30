@@ -21,14 +21,14 @@ def hulk_compile_str(program: str) -> bool:
 
     if not result.ok:
         print(
-            f'Lexer error:\nrow {result.error.row+1} col {result.error.col+1}')
+            f'Lexer error:\n{result.error.row+1}:{result.error.col+1}')
         return False
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
 
     if not result.ok:
         print(
-            f'Parser error:\nrow {tokens[result.error-1].row+1} col {tokens[result.error-1].col+1}')
+            f'Parser error:\n{tokens[result.error-1].row+1}:{tokens[result.error-1].col+1}')
         return False
 
     ast = hulk_grammar.evaluate(result.derivation_tree, tokens)

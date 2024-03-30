@@ -55,7 +55,7 @@ class TypeBuilder(object):
         self.current_type: Type = None
         self.errors: List[str] = errors
 
-    def check_circular_inheritance(self) -> None:
+    def check_circular_inheritance(self) -> bool:
         visited: {str, bool} = {}
 
         for k in self.context.types.keys():

@@ -17,7 +17,7 @@ def hulk_lexer_build() -> bool:
                             for t in SPECIAL_TOKENS]
     reserved_words_regex = [(t.upper(), Regex(t)) for t in RESERVED_WORDS]
 
-    num_regex = Regex('0|([1-9][0-9]*)((\.|e\+|e\-|e)[0-9]+)?')
+    num_regex = Regex('(0|([1-9][0-9]*))((\.|e\+|e\-|e)[0-9]+)?')
 
     string_regex = Regex(
         '"(\\\\[tnr"\']|[^"\\\\])*"|\'(\\\\[tnr\'"]|[^\'\\\\])*\'')

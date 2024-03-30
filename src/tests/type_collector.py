@@ -57,14 +57,14 @@ def test():
             let a: Number = 2 in 2;
         """
     
-    # assert hulk_compile_str(let_test)
+    assert hulk_compile_str(let_test)
 
     if_test =\
         """
             let a: Number = if (2 >= 3) 'a' elif (true) 2 else '2' in 2;
         """
     
-    # assert not hulk_compile_str(if_test)
+    assert not hulk_compile_str(if_test)
 
     while_test =\
         """
@@ -76,7 +76,7 @@ def test():
             } in 'hello'
         """
     
-    # assert hulk_compile_str(while_test)
+    assert hulk_compile_str(while_test)
 
     variable_test =\
         """{
@@ -86,14 +86,14 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(variable_test)
+    assert hulk_compile_str(variable_test)
 
     assignement_test =\
         """
             let a: Object = 'hello' in a := 1;
         """
     
-    # assert hulk_compile_str(assignement_test)
+    assert hulk_compile_str(assignement_test)
 
     function_test =\
         """
@@ -108,7 +108,7 @@ def test():
             hotel();
         """
     
-    # assert hulk_compile_str(function_test)
+    assert hulk_compile_str(function_test)
 
     vector_test =\
         """
@@ -156,7 +156,7 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(super_test)
+    assert hulk_compile_str(super_test)
 
     for_test =\
         """
@@ -167,5 +167,5 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(for_test)
+    assert hulk_compile_str(for_test)
     

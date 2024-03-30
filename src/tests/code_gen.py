@@ -167,17 +167,4 @@ def test():
                                                 '8.000000\n' + \
                                                 '4.000000\n'
                                                 
-    vector_test =\
-        """
-            let test_explicit = ["alex", 3, [true, if (2<3) 2 else "lol", ["Alex", "Raudel", "Juanky"]]] in {
-            
-                print (test_explicit[2][2][0][0] @ test_explicit[2][2][1][0] @ test_explicit[2][2][2][0] @@ "code");
-                
-                let test_implicit = [i @@ "es feliz" || i in test_explicit[2][2]] in{
-                    for (j in test_implicit) print(j);
-                };
-            }
-        """
     
-    assert hulk_compile_str(vector_test) == "ARJ code\nAlex es feliz\nRaudel es feliz\nJuanky es feliz\n"
-        

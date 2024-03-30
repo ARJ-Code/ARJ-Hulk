@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from hulk.hulk_semantic_core import *
 
 OBJECT = Class('Object')
