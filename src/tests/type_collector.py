@@ -114,7 +114,7 @@ def test():
         """
             {
                 let a = [i ^ 2 || i in [1, 2]], b: Number = a[2] in 2;
-                /* let a = [1, 2] in a[2] := 1; */
+                let a = ['hola', 'alex'] in a[2] := '1';
             }
         """
     
