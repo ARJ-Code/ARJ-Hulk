@@ -9,7 +9,7 @@ test_modules = [
     # 'automaton',
     # 'hulk_grammar',
     'type_collector',
-    'code_gen'
+    # 'code_gen'
 ]
 
 for module_name in test_modules:

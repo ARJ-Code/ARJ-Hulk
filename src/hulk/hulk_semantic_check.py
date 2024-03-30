@@ -253,7 +253,7 @@ class SemanticChecker(object):
     def __init__(self, context: Context, errors=[]):
         self.errors: List[str] = errors
         self.context: Context = context
-        self.graph = SemanticGraph()
+        self.graph = SemanticGraph(context)
 
     @visitor.on('node')
     def visit(self, node, scope):
@@ -575,53 +575,49 @@ class SemanticChecker(object):
         self.visit(node.expression, scope)
         return boolean
 
-    # @visitor.when(ImplicitArrayDeclarationNode)
-    # def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
+    @visitor.when(ImplicitArrayDeclarationNode)
+    def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
+        try:
+            VECTOR = Type('Vector')
+            vector_node = self.graph.add_node(VECTOR)
+            iterable_node = self.visit(node.iterable, scope.create_child_scope())
+            iterable_type = self.graph.local_type_inference(iterable_node)
+            current_type = self.context.get_type(LexerToken(0, 0, iterable_type.name, '')).get_method('current').return_type
+            item_node = self.graph.add_node(current_type)
+            child_scope = scope.create_child_scope()
+            child_scope.define_variable(node.item, item_node)
+            expression_node = self.visit(node.expression, child_scope)
+            self.graph.add_path(item_node, expression_node)
+            return self.graph.add_path(vector_node, expression_node)
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
 
-    # @visitor.when(VarDeclarationNode)
-    # def visit(self, node: VarDeclarationNode, scope: Scope):
-    #     if scope.is_var_defined(node.id, len(scope.local_vars)):
-    #         self.errors.append(f'Variable {node.id} already defined')
-    #     else:
-    #         scope.define_variable(node.id)
-    #         self.visit(node.expr, scope)
-
-    # @visitor.when(FuncDeclarationNode)
-    # def visit(self, node: FuncDeclarationNode, scope: Scope):
-    #     if scope.is_func_defined(node.id, len(scope.local_funcs)):
-    #         self.errors.append(f'Function {node.id}/{len(node.params)} already defined')
-    #     else:
-    #         scope.define_function(node.id, node.params)
-    #         child_scope = scope.create_child_scope()
-    #         for param in node.params:
-    #             child_scope.define_variable(param)
-    #         self.visit(node.body, child_scope)
-
-    # @visitor.when(PrintNode)
-    # def visit(self, node: PrintNode, scope: Scope):
-    #     self.visit(node.expr, scope)
-
-    # @visitor.when(ConstantNumNode)
-    # def visit(self, node: ConstantNumNode, scope: Scope):
-    #     pass
-
-    # @visitor.when(VariableNode)
-    # def visit(self, node: VariableNode, scope: Scope):
-    #     if not scope.is_var_defined(node.lex, len(scope.local_vars)):
-    #         self.errors.append(f'Variable {node.lex} not defined')
-
-    # @visitor.when(CallNode)
-    # def visit(self, node: CallNode, scope: Scope):
-    #     if not scope.is_func_defined(node.lex, len(scope.local_funcs)):
-    #         self.errors.append(f'Function {node.lex}/{len(node.args)} not defined')
-    #     for arg in node.args:
-    #             self.visit(arg, scope)
-
-    # @visitor.when(BinaryNode)
-    # def visit(self, node: BinaryNode, scope: Scope):
-    #     self.visit(node.left, scope)
-    #     self.visit(node.right, scope)
-
+    @visitor.when(ArrayCallNode)
+    def visit(self, node: ArrayCallNode, scope: Scope):
+        index_node = self.graph.add_node(NUMBER)
+        index_expression_node = self.visit(node.indexer, scope.create_child_scope())
+        self.graph.add_path(index_expression_node, index_node)
+        indexable_get_node = self.graph.add_node(INDEXABLE_GET)
+        indexable_get_expression_node = self.visit(node.expression, scope.create_child_scope())
+        self.graph.add_path(indexable_get_expression_node, indexable_get_node)
+        getable_type = self.graph.local_type_inference(indexable_get_expression_node)
+        get_type = self.context.get_type(LexerToken(0, 0, getable_type.name, '')).get_method('get').return_type
+        return self.graph.add_node(get_type)
+    
+    @visitor.when(AssignmentArrayNode)
+    def visit(self, node: AssignmentArrayNode, scope: Scope):
+        index_node = self.graph.add_node(NUMBER)
+        index_expression_node = self.visit(node.array_call.indexer, scope.create_child_scope())
+        self.graph.add_path(index_expression_node, index_node)
+        indexable_set_node = self.graph.add_node(INDEXABLE_SET)
+        indexable_set_expression_node = self.visit(node.array_call.expression, scope.create_child_scope())
+        self.graph.add_path(indexable_set_expression_node, indexable_set_node)
+        set_expression_node = self.visit(node.value, scope.create_child_scope())
+        setable_type = self.graph.local_type_inference(indexable_set_expression_node)
+        set_type = self.context.get_type(LexerToken(0, 0, setable_type.name, '')).get_method('set').arguments[1].type
+        set_node = self.graph.add_node(set_type)
+        return self.graph.add_path(set_expression_node, set_node)
 
 def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
     errors = []

@@ -54,7 +54,7 @@ class Context:
         self.methods[method.name] = method
         return method
 
-    def get_type(self, id: LexerToken) -> Class:
+    def get_type(self, id: LexerToken) -> Type:
         row, col, name = self.decompact(id)
         try:
             return self.types[name]
@@ -91,7 +91,8 @@ class Context:
 
 
 class SemanticGraph:
-    def __init__(self):
+    def __init__(self, context: Context):
+        self.context: Context = context
         self.adj: List[List[int]] = []
         self.nodes: List[SemanticNode] = []
         self.index: int = 0
@@ -133,6 +134,10 @@ class SemanticGraph:
             node.node_type = get_child_type()
         elif node.node_type == self.VECTOR:
             node.node_type = vector_t(get_child_type(), 1)
+            try:
+                self.context.add_type(node.node_type)
+            except SemanticError:
+                pass
         else:
             for child in self.get_children(node):
                 if not child.visited:
@@ -143,6 +148,13 @@ class SemanticGraph:
 
         node.visited = True
         return node.node_type
+
+    def local_type_inference(self, node: 'SemanticNode') -> Type:
+        node_type = self.dfs(node)
+        if node_type == self.ERROR:
+            raise SemanticError(f'Incorrect type declaration')
+        else:
+            return node_type
 
     def type_inference(self) -> bool:
         nodes = self.nodes
