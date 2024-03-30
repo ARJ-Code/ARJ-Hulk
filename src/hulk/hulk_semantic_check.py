@@ -48,7 +48,6 @@ class TypeCollector(object):
         except SemanticError as error:
             self.errors.append(error.text)
 
-
 class TypeBuilder(object):
     def __init__(self, context, errors=[]):
         self.context: Context = context
@@ -240,7 +239,6 @@ class TypeBuilder(object):
             return vector_type
         except SemanticError as error:
             self.errors.append(error.text)
-
 
 class SemanticChecker(object):
     def __init__(self, context: Context, errors=[]):
@@ -599,7 +597,7 @@ def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
 
     scope = Scope()
 
-    semantic_checker = SemanticChecker(context)
+    semantic_checker = SemanticChecker(context, errors)
     semantic_checker.visit(ast, scope)
 
     return SemanticResult(context, errors)

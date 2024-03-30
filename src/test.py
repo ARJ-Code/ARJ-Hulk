@@ -8,8 +8,8 @@ test_modules = [
     # 'lexer',
     # 'automaton',
     # 'hulk_grammar',
-    # 'type_collector',
-    'code_gen'
+    'type_collector',
+    # 'code_gen'
 ]
 
 for module_name in test_modules:

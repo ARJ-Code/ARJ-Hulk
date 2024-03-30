@@ -54,7 +54,7 @@ def test():
 
     let_test =\
         """
-            let a = 2 in 2;
+            let a: Number = 2 in 2;
         """
     
     # assert hulk_compile_str(let_test)
@@ -80,7 +80,7 @@ def test():
 
     variable_test =\
         """{
-            let a: String = let a = 2, b = 3 in a + b in 2;
+            let a: Number = let a = 2, b = 3 in a + b in 2;
             let a = true, b = false in a | b;
             let a = 'sacaste', b = 2 in a @@ b;
             }
@@ -112,7 +112,7 @@ def test():
 
     vector_test =\
         """
-            let a: [Object] = [1, 2] in 2;
+            let a: [Object] = [1, 2] in print(2);
         """
     
     assert hulk_compile_str(vector_test)
