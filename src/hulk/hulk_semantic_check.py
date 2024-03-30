@@ -86,6 +86,13 @@ class TypeBuilder(object):
                 s.add(p)
                 p = p.parent
 
+
+    def implement_protocols(self):
+        for t in self.context.types.values():
+            for p in self.context.protocols.values():
+                if t.implement_protocol(p):
+                    t.add_protocol(p)
+            
     # def check_overriding(self) -> None:
     #     for t in self.context.types.values():
     #         for method in t.methods:
@@ -105,6 +112,7 @@ class TypeBuilder(object):
             self.visit(statement)
 
         self.check_circular_inheritance()
+        self.implement_protocols()
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode):

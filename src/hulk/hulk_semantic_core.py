@@ -169,7 +169,7 @@ class Type(ABC):
         elif t2 is None:
             return t1
         elif t1 == ERROR or t2 == ERROR:
-            return ERROR 
+            return ERROR
         elif t1.conforms_to(t2):
             return t2
         elif t2.conforms_to(t1):
@@ -243,7 +243,7 @@ class Class(Type):
         for mp in protocol.methods:
             finded = False
             class_methods = self.all_methods()
-            for mc in class_methods:
+            for mc, _ in class_methods:
                 if mc.name == mp.name and len(mc.arguments) == len(mp.arguments):
                     if mc.return_type.conforms_to(mp.return_type):
                         if all([ap.type.conforms_to(ac.type) for ap, ac in zip(mp.arguments, mc.arguments)]):
@@ -256,7 +256,13 @@ class Class(Type):
     def add_protocol(self, protocol: Protocol) -> None:
         self.protocols.append(protocol)
 
-    # def add_parents_methods(self):
+    def conforms_to(self, other: 'Type') -> bool:
+        if other in self.protocols:
+            return True
+
+        return super().conforms_to(other)
+
+        # def add_parents_methods(self):
     #     parents_methods = self.parent.all_methods()
     #     for m1 in parents_methods:
     #         are_override = False

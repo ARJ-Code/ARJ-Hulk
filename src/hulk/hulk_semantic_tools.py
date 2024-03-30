@@ -8,7 +8,7 @@ from compiler_tools.lexer import LexerToken
 
 class Context:
     def __init__(self):
-        self.types: Dict[str, Type] = {}
+        self.types: Dict[str, Class] = {}
         self.protocols: Dict[str, Type] = {}
         self.methods: Dict[str, Method] = {}
 
@@ -59,7 +59,7 @@ class Context:
         try:
             return self.types[name]
         except KeyError:
-            try: 
+            try:
                 return self.protocols[name]
             except KeyError:
                 raise SemanticError(
@@ -119,18 +119,28 @@ class SemanticGraph:
                 node.node_type = vector_t(OBJECT, 1)
             node.visited = True
             return node.node_type
-        children_type = None
-        for child in self.get_children(node):
-            if not child.visited:
-                self.dfs(child)
-            children_type = Type.low_common_ancester(
-                children_type, child.node_type)
+
+        def get_child_type():
+            children_type = None
+            for child in self.get_children(node):
+                if not child.visited:
+                    self.dfs(child)
+                children_type = Type.low_common_ancester(
+                    children_type, child.node_type)
+            return children_type
+
         if node.node_type is None:
-            node.node_type = children_type
+            node.node_type = get_child_type()
         elif node.node_type == self.VECTOR:
-            node.node_type = vector_t(children_type, 1)
-        elif not children_type.conforms_to(node.node_type):
-            node.node_type = self.ERROR
+            node.node_type = vector_t(get_child_type(), 1)
+        else:
+            for child in self.get_children(node):
+                if not child.visited:
+                    self.dfs(child)
+                if child.node_type == self.ERROR or not child.node_type.conforms_to(node.node_type):
+                    node.node_type = self.ERROR
+                    break
+
         node.visited = True
         return node.node_type
 
@@ -230,7 +240,7 @@ class TypeSemantic:
                 return f
         return None
 
-    def get_attribute(self, name: str) ->Variable | None:
+    def get_attribute(self, name: str) -> Variable | None:
         for a in self.attributes:
             if name == a.name:
                 return a
@@ -296,7 +306,7 @@ class Scope:
             raise SemanticError(
                 f'Invalid amount of arguments while calling function {name}.' + self.error_location(row, col))
         return function_
-    
+
     def get_defined_type(self, id: LexerToken) -> TypeSemantic:
         row, col, name = self.decompact(id)
         for t in self.types:
@@ -313,4 +323,3 @@ class SemanticResult:
         self.ok = len(errors) == 0
         self.context = context
         self.errors = errors
-   
