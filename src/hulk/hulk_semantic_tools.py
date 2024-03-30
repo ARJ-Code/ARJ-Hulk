@@ -225,7 +225,7 @@ class TypeSemantic:
                 return f
         return None
 
-    def get_attribute(self, name: str) -> Attribute | None:
+    def get_attribute(self, name: str) ->Variable | None:
         for a in self.attributes:
             if name == a.name:
                 return a

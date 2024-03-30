@@ -488,11 +488,11 @@ class SemanticChecker(object):
         scope = scope.create_child_scope()
         init_scope = scope.create_child_scope()
 
-        scope.define_variable(LexerToken(
-            0, 0, 'self', ''), self.graph.add_node(self.context.get_type(LexerToken(node.class_type.name))))
+        scope.define_variable(LexerToken(0, 0, 'self', ''), self.graph.add_node(
+            self.context.get_type(node.class_type.name)))
 
         t = scope.get_defined_type(
-            node.class_type)
+            node.class_type.name)
         init_f = t.get_function('init')
 
         if isinstance(node.class_type, ClassTypeParameterNode):
@@ -517,7 +517,7 @@ class SemanticChecker(object):
                 self.visit(s, function_, scope)
             if isinstance(s, ClassPropertyNode):
                 et = self.visit(s.expression, init_scope)
-                self.graph.add_path(t.get_attribute(s.name.value), et)
+                self.graph.add_path(t.get_attribute(s.name.value).node, et)
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode, function_: SemanticNode, scope: Scope):
