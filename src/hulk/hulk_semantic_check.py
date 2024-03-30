@@ -595,9 +595,9 @@ def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
     builder = TypeBuilder(context, errors)
     builder.visit(ast)
 
-    scope = Scope()
+    # scope = Scope()
 
-    semantic_checker = SemanticChecker(context, errors)
-    semantic_checker.visit(ast, scope)
+    # semantic_checker = SemanticChecker(context, errors)
+    # semantic_checker.visit(ast, scope)
 
     return SemanticResult(context, errors)

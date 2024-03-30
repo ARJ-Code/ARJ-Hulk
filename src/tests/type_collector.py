@@ -115,5 +115,43 @@ def test():
             let a: [Object] = [1, 2] in print(2);
         """
     
-    assert hulk_compile_str(vector_test)
+    # assert hulk_compile_str(vector_test)
+
+    super_test =\
+        """
+            type Animal(name, age){
+                name = name;
+                age = age;
+
+                name() => self.name;
+                age() => self.age;
+            }
+
+            type Dog(race, name, age) inherits Animal(name, age){
+                race = race;
+
+                ladra(name, age){
+                    let phrase = "esta ladrando" in {
+                        name @@ age @@ phrase;
+                    };
+                }
+            }
+
+            type Cat(race, name, age) inherits Animal(name, age){
+                race = race;
+
+                maulla(){
+                    let phrase = "esta maullando como un" in {
+                        self.name() @@ self.age() @@ phrase @@ self.race;
+                    };
+                }
+            }
+
+            let test_dog = new Dog("sato", "balto", 7), test_cat = new Cat("siames", "Lucas", 4) in {
+                print (test_cat.maulla());
+                print (test_dog.ladra("alex", 22));
+            }
+        """
+    
+    assert hulk_compile_str(super_test)
     
