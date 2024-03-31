@@ -655,7 +655,7 @@ class HulkCodeGenerator(object):
         context.new_line(f'int *{ind} = system_findEntry({v}, "type_ind");')
 
         context.new_line(
-            f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[node.type_name.value]}));')
+            f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[node.type_name.name.value]}));')
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode, t_name: str):
