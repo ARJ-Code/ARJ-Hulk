@@ -315,7 +315,7 @@ class SemanticChecker(object):
             self.visit(statement, scope)
 
         program_node = self.graph.add_node()
-        self.graph.add_path(program_node, self.visit(node.expression, scope))
+        self.graph.add_path(program_node, self.visit(node.expression, scope.create_child_scope()))
 
         if len(self.errors) == 0:
             try:
@@ -422,7 +422,7 @@ class SemanticChecker(object):
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
         let_node = self.graph.add_node()
-        new_scope = scope.create_child_scope()
+        new_scope = scope
         for assignment in node.assignments:
             self.visit(assignment, new_scope)
             new_scope = new_scope.create_child_scope()
