@@ -168,4 +168,19 @@ def test():
         """
     
     assert hulk_compile_str(for_test)
+
+    incorrect_extends=\
+        """
+            protocol A {
+              q():String;
+            }
+
+            protocol B extends A{
+              q():String;
+            }
+
+            2;
+        """
+    
+    assert not hulk_compile_str(incorrect_extends)
     

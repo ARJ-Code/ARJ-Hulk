@@ -90,6 +90,18 @@ class TypeBuilder(object):
 
         return check
 
+    def check_extends(self):
+        check = True
+        for p in self.context.protocols.values():
+            parent = p.parent
+
+            if parent is None:
+                continue
+            if any(m for m in p.methods if m in parent.methods):
+                check = False
+                self.errors.append(f'Incorrect extends in protocol {p.name}')
+        return check
+
     def implement_protocols(self):
         for t in self.context.types.values():
             for p in self.context.protocols.values():
@@ -115,6 +127,7 @@ class TypeBuilder(object):
             self.visit(statement)
 
         if self.check_circular_inheritance():
+            self.check_extends()
             self.implement_protocols()
 
     @visitor.when(FunctionDeclarationNode)
