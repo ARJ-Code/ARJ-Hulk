@@ -127,6 +127,7 @@
 ### Chequeo semántico
 
 ### Generación de Código
+Para nuestra generación de código modelamos los objetos en el lenguaje de programación C como una lista de diccionarios. Para ello contamos con una interfaz que consta de 2 métodos, añadir una propiedad, el cual recibe un "key" que indica el nombre de la propiedad y un puntero a "void"(aqui se declaran tanto propiedades como funciones, ya que el puntero puede apuntar a cualquier cosa) y pedir las propiedades. De esta manera modelamos todos los objetos, incluyendo los predefinidos(string, bool y number). Todos los tipos heredan de object, el cual tiene los metodos equals y toString para poder saber si 2 objetos son iguales y poder printear cualquier objeto.
 
 
 
