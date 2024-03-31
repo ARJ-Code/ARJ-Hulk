@@ -149,7 +149,15 @@ class Type(ABC):
     def all_methods(self, clean=True) -> List[Tuple[Method, 'Type']]:
         plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
         for method in self.methods:
-            plain[method.name] = (method, self)
+            if method.name == 'init':
+                plain[method.name] = (method, self)
+            else:
+                try:
+                    m, _ = plain[method.name]
+                    if not m.is_overriding(method):
+                        raise SemanticError(f'Function "{method.name} is wrongly overriding')
+                except KeyError:
+                    plain[method.name] = (method, self)
         return plain.values() if clean else plain
 
     def conforms_to(self, other: 'Type') -> bool:

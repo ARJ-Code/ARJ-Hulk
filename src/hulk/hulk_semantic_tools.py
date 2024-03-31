@@ -350,22 +350,20 @@ class Scope:
         raise SemanticError(
             f'Type {name} is not defined.' + self.error_location(row, col))
     
-    def calculte_overriding(self, context: Context):
+    def method_type_inferfence(self, context: Context):
+        def is_vector(name: str):
+            return name[0] == '[' and name[len(name) - 1] == ']'
+        
         for type_ in context.types.values():
-            method_list: List[Method] = []
-            copy_type = type_
-            while copy_type is not None:
-                for method in copy_type.methods:
-                    function_ = self.get_defined_type(LexerToken(0, 0, copy_type.name, '')).get_function(method.name)
+            if not is_vector(type_.name):
+                method_list = type_.methods
+                new_method_list: List[Method] = []
+                for method in method_list:
+                    function_ = self.get_defined_type(LexerToken(0, 0, type_.name, '')).get_function(method.name)
                     method = Method(function_.name, function_.node.node_type, 
-                                    [Attribute(f'{function_.name}_{i}', a.node_type) for i, a in enumerate(function_.args)])
-                    for added_method in method_list:
-                        if added_method == method:
-                            if not added_method.is_overriding(method):
-                                raise SemanticError(f'Function {added_method.name} is wrongly iverriding')
-                    method_list.append(method)
-                copy_type = copy_type.parent
-            context.get_type(LexerToken(0, 0, type_.name, '')).methods = method_list
+                                        [Attribute(f'{function_.name}_{i}', a.node_type) for i, a in enumerate(function_.args)])
+                    new_method_list.append(method)
+                context.get_type(LexerToken(0, 0, type_.name, '')).methods = new_method_list
 
 
 class SemanticResult:

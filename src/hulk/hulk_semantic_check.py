@@ -256,7 +256,7 @@ class SemanticChecker(object):
     def __init__(self, context: Context, errors=[]):
         self.errors: List[str] = errors
         self.context: Context = context
-        self.graph = SemanticGraph(context)
+        self.graph = SemanticGraph(self.context)
 
     @visitor.on('node')
     def visit(self, node, scope):
@@ -320,7 +320,8 @@ class SemanticChecker(object):
         if len(self.errors) == 0:
             try:
                 self.graph.type_inference()
-                scope.calculte_overriding(self.context)
+                scope.method_type_inferfence(self.context)
+                a = 1
             except SemanticError as error:
                 self.errors.append(error.text)
 
