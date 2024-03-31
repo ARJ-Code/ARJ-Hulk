@@ -630,6 +630,8 @@ class SemanticChecker(object):
             expression_node = self.visit(
                 expression, scope.create_child_scope())
             self.graph.add_path(vector_node, expression_node)
+        self.graph.local_type_inference(vector_node)
+        node.type_ = OBJECT if len(node.values) == 0 else node.values[0].type
         return vector_node
 
     @visitor.when(ImplicitArrayDeclarationNode)
@@ -646,6 +648,9 @@ class SemanticChecker(object):
             child_scope = scope.create_child_scope()
             child_scope.define_variable(node.item, item_node)
             expression_node = self.visit(node.expression, child_scope)
+            expression_type = self.graph.local_type_inference(expression_node)
+            node.type_ = expression_type
+            # vector_node.node_type = node.type_
             return self.graph.add_path(vector_node, expression_node)
         except SemanticError as error:
             self.errors.append(error.text)
