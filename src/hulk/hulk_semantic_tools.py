@@ -254,7 +254,7 @@ class Function:
         row, col, name = (id.row, id.col, id.value)
         if len(self.args) != len(parameters):
             raise SemanticError(
-                f'Invalid amount of arguments while calling function {name}.' + f' Error at {row}:{col}')
+                f'Invalid amount of arguments while calling function "{name}".')
         return self
 
 
@@ -337,7 +337,7 @@ class Scope:
         function_ = self.get_defined_function(id)
         if len(function_.args) != len(parameters):
             raise SemanticError(
-                f'Invalid amount of arguments while calling function {name}.' + self.error_location(row, col))
+                f'Invalid amount of arguments while calling function "{name}".' + self.error_location(row, col))
         return function_
 
     def get_defined_type(self, id: LexerToken) -> TypeSemantic:

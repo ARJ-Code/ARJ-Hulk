@@ -321,7 +321,9 @@ class SemanticChecker(object):
             try:
                 self.graph.type_inference()
                 scope.method_type_inferfence(self.context)
-                a = 1
+                for t in self.context.types.values():
+                    if t.name[0] != '[':
+                        t.check_overriding()
             except SemanticError as error:
                 self.errors.append(error.text)
 
@@ -717,7 +719,7 @@ class SemanticChecker(object):
             function_ = scope.get_defined_type(LexerToken(
                 0, 0, e_type.name, '')).get_function(node.property.name.value)
             function_.check_valid_params(LexerToken(
-                0, 0, '', ''), node.property.parameters)
+                0, 0, node.property.name.value, ''), node.property.parameters)
 
             for fa, ca in zip(function_.args, node.property.parameters):
                 self.graph.add_path(fa, self.visit(
