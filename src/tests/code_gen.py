@@ -187,7 +187,7 @@ def test():
             let s = new Student('Alex', 23) in s.hello();
         """
     
-    assert hulk_compile_str(override_test) == 'Hi Alex , you have 23.000000 years old'
+    assert hulk_compile_str(override_test) == 'Hi Alex , you have 23.000000 years old\n'
 
     is_test =\
         """
@@ -211,5 +211,5 @@ def test():
                 );
         """
     
-    assert hulk_compile_str(is_test) == 'No, it\'s Superman!'
+    assert hulk_compile_str(is_test) == 'No, it\'s Superman!\n'
     

@@ -41,8 +41,13 @@ def hulk_compile_str(program: str) -> bool:
 
     hulk_code_generator(ast, result.context)
 
-    result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
-    result = subprocess.run(["./cache/main"], capture_output=True, text=True)
-    print(result.stdout)
+    try:
+        result = subprocess.run(
+            ["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
+        result = subprocess.run(
+            ["./cache/main"], capture_output=True, text=True, check=True)
+        print(result.stdout)
+    except:
+        print('Runtime error')
 
     return True

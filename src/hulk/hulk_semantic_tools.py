@@ -121,11 +121,6 @@ class SemanticGraph:
                 self.ERROR if node.node_type is None else node.node_type)
             if node.node_type == self.VECTOR:
                 node.node_type = vector_t(OBJECT)
-                try:
-                    self.context.add_type(node.node_type)
-                except SemanticError:
-                    pass
-               
             node.visited = True
             return node.node_type
 
@@ -146,13 +141,6 @@ class SemanticGraph:
                 node.node_type = self.ERROR
             else:
                 node.node_type = vector_t(q)
-                try:
-                    type_ = node.node_type
-                    while type_ != OBJECT:
-                        self.context.add_type(type_)
-                        type_ = type_.parent
-                except SemanticError:
-                    pass
         else:
             for child in self.get_children(node):
                 if not child.visited:

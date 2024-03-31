@@ -102,6 +102,15 @@ class TypeBuilder(object):
                 self.errors.append(f'Incorrect extends in protocol {p.name}')
         return check
 
+    def collect_vectors(self):
+        vs = set([])
+        for t in self.context.types.values():
+            vs.add(vector_t(t))
+        for p in self.context.protocols.values():
+            vs.add(vector_t(p))
+        for v in vs:
+            self.context.add_type(v)
+
     def implement_protocols(self):
         for t in self.context.types.values():
             for p in self.context.protocols.values():
@@ -125,6 +134,7 @@ class TypeBuilder(object):
         if self.check_circular_inheritance():
             self.check_extends()
             self.implement_protocols()
+            self.collect_vectors()
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode):
@@ -200,7 +210,8 @@ class TypeBuilder(object):
         try:
             inheritance_type = self.context.get_type(node.name)
             if inheritance_type in [NUMBER, STRING, BOOLEAN]:
-                raise SemanticError(f'You cant inherit from {inheritance_type}')
+                raise SemanticError(
+                    f'You cant inherit from {inheritance_type}')
             return inheritance_type
         except SemanticError as error:
             self.errors.append(error.text)
@@ -698,7 +709,7 @@ class SemanticChecker(object):
             set_node = self.graph.add_node(set_type)
             return self.graph.add_path(set_node, set_expression_node)
         except SemanticError as error:
-            self.errors.append(error)
+            self.errors.append(error.text)
             return self.graph.add_node()
 
     @visitor.when(InstancePropertyNode)

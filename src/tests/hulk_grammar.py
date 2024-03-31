@@ -219,7 +219,7 @@ def test():
                     let b = a in a := b + 1;
 
         let a = ['h', 'e', 'l', 'l', 'o'] in {
-            let b: [Number, 2] = [[1, 2], [3, 4]] in print('hello');
+            let b: [Number] = [[1, 2], [3, 4]] in print('hello');
             print(count(a));
         }
     """

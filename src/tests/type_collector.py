@@ -15,7 +15,7 @@ def test():
             }
 
             protocol D {
-                hello(a: A, b: [A, 2]): A;
+                hello(a: A, b: [A]): A;
             }
 
             protocol C extends D {
@@ -156,7 +156,7 @@ def test():
             }
         """
     
-    # assert hulk_compile_str(super_test)
+    assert hulk_compile_str(super_test)
 
     for_test =\
         """
@@ -182,5 +182,5 @@ def test():
             2;
         """
     
-    # assert not hulk_compile_str(incorrect_extends)
+    assert not hulk_compile_str(incorrect_extends)
     
