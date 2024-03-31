@@ -150,10 +150,8 @@ hulk_grammar.add_attributed_production('T', [': Type', ''], [second, eof_type])
 nt = AttributedRule[ASTNode, LexerToken](lambda h, s: TypeNode(s[1]))
 vt = AttributedRule[ASTNode, LexerToken](
     lambda h, s: VectorTypeNode(s[2], None))
-vtd = AttributedRule[ASTNode, LexerToken](
-    lambda h, s: VectorTypeNode(s[2], s[4]))
 hulk_grammar.add_attributed_production(
-    'Type', ['id', '[ id ]', '[ id , num ]'], [nt, vt, vtd])
+    'Type', ['id', '[ id ]'], [nt, vt])
 
 
 # declarations productions
