@@ -39,49 +39,28 @@ NUMBER.define_inherits(OBJECT)
 
 BOOLEAN.define_inherits(OBJECT)
 
-memory: {str, Class} = {}
-
-
-def memoize_vector_t(f):
-    def helper(c: Type, dimension: int) -> Type:
-        if (c, dimension) not in memory:
-            memory[(c, dimension)] = f(c, dimension)
-        return memory[(c, dimension)]
-    return helper
-
-
-@memoize_vector_t
-def vector_t(c: Class, dimension: int) -> Class:
-    if dimension == 0:
-        return c
+def vector_t(c: Class) -> Class:
+    vector = Class(f'[{c.name}]')
+    vector.add_attribute(Attribute('dimension', NUMBER))
+    vector.add_attribute(Attribute('length', NUMBER))
+    vector.add_attribute(Attribute('capacity', NUMBER))
+    vector.add_method(Method('add', c, [Attribute('a1', c)]))
+    vector.add_method(Method('remove', c, [Attribute('a1', NUMBER)]))
+    vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', c)]))
+    vector.add_method(Method('get', c, [Attribute('a1', NUMBER)]))
+    vector.add_method(Method('set', OBJECT, [Attribute('a1', NUMBER), Attribute('a2', c)]))
+    vector.add_method(Method('next', BOOLEAN, []))
+    vector.add_method(Method('current', c, []))
+    vector.add_method(Method('reset', OBJECT, []))
+    vector.add_protocol(INDEXABLE_GET)
+    vector.add_protocol(INDEXABLE_SET)
+    vector.add_protocol(ITERABLE)
+    
+    if (c.parent is None):
+        vector.set_parent(OBJECT)
     else:
-        vector = Class(
-            '['+c.name + (f', {dimension}' if dimension > 1 else '')+']')
-        vector.add_attribute(Attribute('dimension', NUMBER))
-        vector.add_attribute(Attribute('length', NUMBER))
-        vector.add_attribute(Attribute('capacity', NUMBER))
-        vector.add_method(Method('add', vector_t(c, dimension-1),
-                          [Attribute('a1', vector_t(c, dimension-1))]))
-        vector.add_method(Method('remove', vector_t(
-            c, dimension-1), [Attribute('a1', NUMBER)]))
-        vector.add_method(Method('contains', BOOLEAN, [
-                          Attribute('a1', vector_t(c, dimension-1))]))
-        vector.add_method(Method('get', vector_t(
-            c, dimension-1), [Attribute('a1', NUMBER)]))
-        vector.add_method(
-            Method('set', OBJECT, [Attribute('a1', NUMBER), Attribute('a2', vector_t(c, dimension-1))]))
-        vector.add_method(Method('next', BOOLEAN, []))
-        vector.add_method(Method('current', vector_t(c, dimension-1), []))
-        vector.add_method(Method('reset', OBJECT, []))
-        vector.add_protocol(INDEXABLE_GET)
-        vector.add_protocol(INDEXABLE_SET)
-        vector.add_protocol(ITERABLE)
-        
-        if (c.parent is None):
-            vector.set_parent(OBJECT)
-        else:
-            vector.set_parent(vector_t(c.parent, dimension))
-        return vector
+        vector.set_parent(vector_t(c.parent))
+    return vector
 
 
 m_print = Method('print', OBJECT, [Attribute('a1', OBJECT)])

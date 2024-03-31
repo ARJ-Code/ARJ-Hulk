@@ -108,10 +108,6 @@ class TypeBuilder(object):
                 if t.implement_protocol(p):
                     t.add_protocol(p)
 
-    # def check_overriding(self) -> None:
-    #     for t in self.context.types.values():
-    #         for method in t.methods:
-
     @visitor.on('node')
     def visit(self, node):
         pass
@@ -257,9 +253,7 @@ class TypeBuilder(object):
     def visit(self, node: VectorTypeNode):
         try:
             typex = self.context.get_type(node.name)
-            vector_type = typex
-            for i in range(int(node.dimensions)):
-                vector_type = self.context.add_type(vector_t(typex, i+1))
+            vector_type = self.context.add_type(vector_t(typex))
             return vector_type
         except SemanticError as error:
             self.errors.append(error.text)
@@ -465,9 +459,8 @@ class SemanticChecker(object):
     @visitor.when(VectorTypeNode)
     def visit(self, node: VectorTypeNode, scope: Scope):
         type_ = self.context.get_type(node.name)
-        vector_type = self.context.add_type(vector_t(type_, node.dimensions))
-        node.name.value = (
-            f'[{node.name.value}' + (f', {node.dimensions}' if node.dimensions > 1 else '')) + ']'
+        vector_type = self.context.add_type(vector_t(type_))
+        node.name.value = (f'[{node.name.value}]')
         return vector_type
 
     @visitor.when(EOFTypeNode)
