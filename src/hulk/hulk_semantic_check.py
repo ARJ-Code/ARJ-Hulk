@@ -337,7 +337,7 @@ class SemanticChecker(object):
 
         program_node = self.graph.add_node()
         self.graph.add_path(program_node, self.visit(
-            node.expression, scope.create_child_scope()))
+            node.expression, scope))
 
         if len(self.errors) == 0:
             try:
@@ -387,9 +387,9 @@ class SemanticChecker(object):
     def visit(self, node: ExpressionBlockNode, scope: Scope):
         expression_block_node = self.graph.add_node()
         for instruction in node.instructions[: len(node.instructions) - 1]:
-            self.visit(instruction, scope.create_child_scope())
+            self.visit(instruction, scope)
         last_evaluation_node = self.visit(
-            node.instructions[-1], scope.create_child_scope())
+            node.instructions[-1], scope)
         return self.graph.add_path(expression_block_node, last_evaluation_node)
 
     @visitor.when(ForNode)
@@ -397,7 +397,7 @@ class SemanticChecker(object):
         try:
             for_node = self.graph.add_node()
             iterable_expression_node = self.visit(
-                node.iterable, scope.create_child_scope())
+                node.iterable, scope)
             iterable_type = iterable_type = self.graph.local_type_inference(
                 iterable_expression_node)
             current_type = self.context.get_type(LexerToken(
@@ -416,37 +416,37 @@ class SemanticChecker(object):
         if_node = self.graph.add_node()
         conditional_node = self.graph.add_node(BOOLEAN)
         self.graph.add_path(self.visit(
-            node.condition, scope.create_child_scope()), conditional_node)
+            node.condition, scope), conditional_node)
         then_node = self.graph.add_node()
         self.graph.add_path(if_node, self.graph.add_path(
-            then_node, self.visit(node.body, scope.create_child_scope())))
+            then_node, self.visit(node.body, scope)))
         for elif_ in node.elif_clauses:
             elif_node = self.graph.add_node()
             self.graph.add_path(elif_node, self.visit(
-                elif_, scope.create_child_scope()))
+                elif_, scope))
         else_node = self.graph.add_node()
-        return self.graph.add_path(if_node, self.graph.add_path(else_node, self.visit(node.else_body, scope.create_child_scope())))
+        return self.graph.add_path(if_node, self.graph.add_path(else_node, self.visit(node.else_body, scope)))
 
     @visitor.when(ElifNode)
     def visit(self, node: ElifNode, scope: Scope):
         elif_node = self.graph.add_node()
         conditional_node = self.graph.add_node(BOOLEAN)
         self.graph.add_path(self.visit(
-            node.condition, scope.create_child_scope()), conditional_node,)
-        return self.graph.add_path(elif_node, self.visit(node.body, scope.create_child_scope()))
+            node.condition, scope), conditional_node,)
+        return self.graph.add_path(elif_node, self.visit(node.body, scope))
 
     @visitor.when(WhileNode)
     def visit(self, node: WhileNode, scope: Scope):
         while_node = self.graph.add_node()
         conditional_node = self.graph.add_node(BOOLEAN)
         self.graph.add_path(self.visit(
-            node.condition, scope.create_child_scope()), conditional_node)
-        return self.graph.add_path(while_node, self.visit(node.body, scope.create_child_scope()))
+            node.condition, scope), conditional_node)
+        return self.graph.add_path(while_node, self.visit(node.body, scope))
 
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
         let_node = self.graph.add_node()
-        new_scope = scope
+        new_scope = scope.create_child_scope()
         for assignment in node.assignments:
             self.visit(assignment, new_scope)
             new_scope = new_scope.create_child_scope()
@@ -454,7 +454,7 @@ class SemanticChecker(object):
 
     @visitor.when(DeclarationNode)
     def visit(self, node: DeclarationNode, scope: Scope):
-        expression_node = self.visit(node.value, scope.create_child_scope())
+        expression_node = self.visit(node.value, scope)
         var_type = self.visit(node.type, scope)
         var_node = self.graph.add_node(var_type)
         scope.define_variable(node.name, var_node)
@@ -463,7 +463,7 @@ class SemanticChecker(object):
     @visitor.when(AssignmentNode)
     def visit(self, node: AssignmentNode, scope: Scope):
         var_node = scope.get_defined_variable(node.name).node
-        expression_node = self.visit(node.value, scope.create_child_scope())
+        expression_node = self.visit(node.value, scope)
         self.graph.add_path(var_node, expression_node)
         return expression_node
 
@@ -495,13 +495,13 @@ class SemanticChecker(object):
 
     @visitor.when(BooleanUnaryNode)
     def visit(self, node: BooleanUnaryNode, scope: Scope):
-        expression_node = self.visit(node.child, scope.create_child_scope())
+        expression_node = self.visit(node.child, scope)
         expression_node.node_type = BOOLEAN
         return expression_node
 
     @visitor.when(ArithmeticUnaryNode)
     def visit(self, node: ArithmeticUnaryNode, scope: Scope):
-        expression_node = self.visit(node.child, scope.create_child_scope())
+        expression_node = self.visit(node.child, scope)
         expression_node.node_type = NUMBER
         return expression_node
 
@@ -512,11 +512,11 @@ class SemanticChecker(object):
             BooleanOperator.AND, BooleanOperator.OR]
         left_type = BOOLEAN if is_boolean_operation else NUMBER
         left_expression_node = self.visit(
-            node.left, scope.create_child_scope())
+            node.left, scope)
         left_expression_node.node_type = left_type
         right_type = BOOLEAN if is_boolean_operation else NUMBER
         right_expression_node = self.visit(
-            node.right, scope.create_child_scope())
+            node.right, scope)
         right_expression_node.node_type = right_type
 
         return boolean_node
@@ -525,10 +525,10 @@ class SemanticChecker(object):
     def visit(self, node: ArithmeticBinaryNode, scope: Scope):
         number_node = self.graph.add_node(NUMBER)
         left_expression_node = self.visit(
-            node.left, scope.create_child_scope())
+            node.left, scope)
         left_expression_node.node_type = NUMBER
         right_expression_node = self.visit(
-            node.right, scope.create_child_scope())
+            node.right, scope)
         right_expression_node.node_type = NUMBER
         return number_node
 
@@ -537,9 +537,9 @@ class SemanticChecker(object):
         string_node = self.graph.add_node(STRING)
         obj = self.graph.add_node(OBJECT)
         left_expression_node = self.visit(
-            node.left, scope.create_child_scope())
+            node.left, scope)
         right_expression_node = self.visit(
-            node.right, scope.create_child_scope())
+            node.right, scope)
         self.graph.add_path(obj, left_expression_node)
         self.graph.add_path(obj, right_expression_node)
         return string_node
@@ -646,7 +646,7 @@ class SemanticChecker(object):
             vector_node = self.graph.add_node(VECTOR)
             for expression in node.values:
                 expression_node = self.visit(
-                    expression, scope.create_child_scope())
+                    expression, scope)
                 self.graph.add_path(vector_node, expression_node)
             node.type_ = self.graph.local_type_inference(vector_node)
             return vector_node
@@ -660,7 +660,7 @@ class SemanticChecker(object):
             VECTOR = Type('Vector')
             vector_node = self.graph.add_node(VECTOR)
             iterable_node = self.visit(
-                node.iterable, scope.create_child_scope())
+                node.iterable, scope)
             iterable_type = self.graph.local_type_inference(iterable_node)
             current_type = self.context.get_type(LexerToken(
                 0, 0, iterable_type.name, '')).get_method('current').return_type
@@ -679,10 +679,10 @@ class SemanticChecker(object):
         try:
             index_node = self.graph.add_node(NUMBER)
             index_expression_node = self.visit(
-                node.indexer, scope.create_child_scope())
+                node.indexer, scope)
             self.graph.add_path(index_expression_node, index_node)
             indexable_get_expression_node = self.visit(
-                node.expression, scope.create_child_scope())
+                node.expression, scope)
             getable_type = self.graph.local_type_inference(
                 indexable_get_expression_node)
             get_type = self.context.get_type(LexerToken(
@@ -696,12 +696,12 @@ class SemanticChecker(object):
     def visit(self, node: AssignmentArrayNode, scope: Scope):
         try:
             index_expression_node = self.visit(
-                node.array_call.indexer, scope.create_child_scope())
+                node.array_call.indexer, scope)
             index_expression_node.node_type = NUMBER
             indexable_set_expression_node = self.visit(
-                node.array_call.expression, scope.create_child_scope())
+                node.array_call.expression, scope)
             set_expression_node = self.visit(
-                node.value, scope.create_child_scope())
+                node.value, scope)
             setable_type = self.graph.local_type_inference(
                 indexable_set_expression_node)
             set_type = self.context.get_type(LexerToken(
@@ -752,7 +752,7 @@ class SemanticChecker(object):
 
             for fa, ca in zip(function_.args, node.property.parameters):
                 self.graph.add_path(fa, self.visit(
-                    ca, scope.create_child_scope()))
+                    ca, scope))
 
             return function_.node
         except SemanticError as error:
