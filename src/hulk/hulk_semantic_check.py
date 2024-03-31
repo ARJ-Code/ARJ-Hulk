@@ -320,6 +320,7 @@ class SemanticChecker(object):
         if len(self.errors) == 0:
             try:
                 self.graph.type_inference()
+                scope.calculte_overriding(self.context)
             except SemanticError as error:
                 self.errors.append(error.text)
 
