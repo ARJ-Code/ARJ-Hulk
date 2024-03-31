@@ -198,7 +198,10 @@ class TypeBuilder(object):
     @visitor.when(InheritanceNode)
     def visit(self, node: InheritanceNode):
         try:
-            return self.context.get_type(node.name)
+            inheritance_type = self.context.get_type(node.name)
+            if inheritance_type in [NUMBER, STRING, BOOLEAN]:
+                raise SemanticError(f'You cant inherit from {inheritance_type}')
+            return inheritance_type
         except SemanticError as error:
             self.errors.append(error.text)
 

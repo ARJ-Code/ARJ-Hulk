@@ -166,5 +166,50 @@ def test():
                                                 '7.000000\n' + \
                                                 '8.000000\n' + \
                                                 '4.000000\n'
-                                                
+    
+    override_test =\
+        """
+            type Person(name) {
+                name = name;
+
+                hello() => print('Hello' @@ self.name @@ '!!!');
+            }
+
+            type Student(name: String, age: Number) inherits Person(name) {
+                name = name;
+                age = age;
+
+                hello() => print('Hi' @@ self.name @@ self.print_age());
+
+                print_age() => ', you have' @@ self.age @@ 'years old';
+            }
+
+            let s = new Student('Alex', 23) in s.hello();
+        """
+    
+    assert hulk_compile_str(override_test) == 'Hi Alex , you have 23.000000 years old'
+
+    is_test =\
+        """
+            type Bird {
+                // ...
+            }
+
+            type Plane {
+                // ...
+            }
+
+            type Superman {
+                // ...
+            }
+
+            let x = new Superman() in
+                print(
+                    if (x is Bird) "It's bird!"
+                    elif (x is Plane) "It's a plane!"
+                    else "No, it's Superman!"
+                );
+        """
+    
+    assert hulk_compile_str(is_test) == 'No, it\'s Superman!'
     
