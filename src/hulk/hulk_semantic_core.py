@@ -151,6 +151,21 @@ class Type(ABC):
         for method in self.methods:
             plain[method.name] = (method, self)
         return plain.values() if clean else plain
+    
+    def check_overriding(self, clean=True):
+        plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
+        for method in self.methods:
+            if method.name == 'init':
+                plain[method.name] = (method, self)
+            else:
+                try:
+                    m, _ = plain[method.name]
+                    if not method.is_overriding(m):
+                        raise SemanticError(f'Function "{method.name}" is wrongly overriding')
+                    else:
+                        plain[method.name] = (method, self)
+                except KeyError:
+                    plain[method.name] = (method, self)
 
     def conforms_to(self, other: 'Type') -> bool:
         if self == other:

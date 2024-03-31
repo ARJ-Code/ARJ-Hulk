@@ -269,7 +269,7 @@ class SemanticChecker(object):
     def __init__(self, context: Context, errors=[]):
         self.errors: List[str] = errors
         self.context: Context = context
-        self.graph = SemanticGraph(context)
+        self.graph = SemanticGraph(self.context)
 
     @visitor.on('node')
     def visit(self, node, scope):
@@ -328,11 +328,15 @@ class SemanticChecker(object):
             self.visit(statement, scope)
 
         program_node = self.graph.add_node()
-        self.graph.add_path(program_node, self.visit(node.expression, scope))
+        self.graph.add_path(program_node, self.visit(node.expression, scope.create_child_scope()))
 
         if len(self.errors) == 0:
             try:
                 self.graph.type_inference()
+                scope.method_type_inferfence(self.context)
+                for t in self.context.types.values():
+                    if t.name[0] != '[':
+                        t.check_overriding()
             except SemanticError as error:
                 self.errors.append(error.text)
 
@@ -433,7 +437,7 @@ class SemanticChecker(object):
     @visitor.when(LetNode)
     def visit(self, node: LetNode, scope: Scope):
         let_node = self.graph.add_node()
-        new_scope = scope.create_child_scope()
+        new_scope = scope
         for assignment in node.assignments:
             self.visit(assignment, new_scope)
             new_scope = new_scope.create_child_scope()
@@ -728,7 +732,7 @@ class SemanticChecker(object):
             function_ = scope.get_defined_type(LexerToken(
                 0, 0, e_type.name, '')).get_function(node.property.name.value)
             function_.check_valid_params(LexerToken(
-                0, 0, '', ''), node.property.parameters)
+                0, 0, node.property.name.value, ''), node.property.parameters)
 
             for fa, ca in zip(function_.args, node.property.parameters):
                 self.graph.add_path(fa, self.visit(
