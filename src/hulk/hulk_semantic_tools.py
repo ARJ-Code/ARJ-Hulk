@@ -164,6 +164,17 @@ class SemanticGraph:
             return node_type
 
     def type_inference(self) -> bool:
+        types: {int, Type} = {}
+        cc_list = self.tarjans()
+        for i in range(len(self.nodes)):
+            node_type: Type = self.nodes[i].node_type
+            cc = cc_list[i]
+            try:
+                if types[cc] != node_type:
+                    raise SemanticError(f'Incorrect type declaration')
+            except KeyError:
+                types[cc] = node_type
+
         nodes = self.nodes
         nodes.sort(key=lambda n: n.index)
         for node in nodes:
@@ -173,7 +184,7 @@ class SemanticGraph:
 
     def g_transp(self):
         new_ajd = [[] for _ in range(len(self.adj))]
-        for i in range(self.adj):
+        for i in range(len(self.adj)):
             for j in self.adj[i]:
                 new_ajd[j].append(i)
         return new_ajd
