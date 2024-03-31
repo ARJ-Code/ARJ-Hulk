@@ -591,12 +591,26 @@ class SemanticChecker(object):
         boolean = self.graph.add_node(BOOLEAN)
 
         try:
-            scope.get_defined_type(node.type_name)
+            scope.get_defined_type(node.type_name.name)
         except SemanticError as error:
             self.errors.append(error.text)
 
         self.visit(node.expression, scope)
         return boolean
+
+    @visitor.when(AsNode)
+    def visit(self, node: AsNode, scope: Scope):
+        try:
+            t = self.context.get_type(node.type_name.name)if isinstance(
+                node.type_name, VectorTypeNode) else self.context.get_type(node.type_name.name)
+
+            exp = self.visit(node.expression, scope)
+            self.graph.local_type_inference(exp)
+            exp.node_type = t
+            return self.graph.add_node(t)
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
 
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
@@ -721,10 +735,10 @@ def hulk_semantic_check(ast: ASTNode) -> SemanticResult:
 
     context = collector.context
 
-    if len(errors)==0:
+    if len(errors) == 0:
         builder = TypeBuilder(context, errors)
         builder.visit(ast)
-    if len(errors)==0:
+    if len(errors) == 0:
         scope = Scope()
 
         semantic_checker = SemanticChecker(context, errors)
