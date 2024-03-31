@@ -120,7 +120,12 @@ class SemanticGraph:
             node.node_type = (
                 self.ERROR if node.node_type is None else node.node_type)
             if node.node_type == self.VECTOR:
-                node.node_type = vector_t(OBJECT, 1)
+                node.node_type = vector_t(OBJECT)
+                try:
+                    self.context.add_type(node.node_type)
+                except SemanticError:
+                    pass
+               
             node.visited = True
             return node.node_type
 
@@ -137,14 +142,17 @@ class SemanticGraph:
             node.node_type = get_child_type()
         elif node.node_type == self.VECTOR:
             q = get_child_type()
-            node.node_type = vector_t(q)
-            try:
-                type_ = node.node_type
-                while type_ != OBJECT:
-                    self.context.add_type(type_)
-                    type_ = type_.parent
-            except SemanticError:
-                pass
+            if q.name[0] == '[':
+                node.node_type = self.ERROR
+            else:
+                node.node_type = vector_t(q)
+                try:
+                    type_ = node.node_type
+                    while type_ != OBJECT:
+                        self.context.add_type(type_)
+                        type_ = type_.parent
+                except SemanticError:
+                    pass
         else:
             for child in self.get_children(node):
                 if not child.visited:
@@ -157,6 +165,8 @@ class SemanticGraph:
         return node.node_type
 
     def local_type_inference(self, node: 'SemanticNode') -> Type:
+        if node.visited:
+            return node.node_type
         node_type = self.dfs(node)
         if node_type == self.ERROR:
             raise SemanticError(f'Incorrect type declaration')
@@ -290,7 +300,7 @@ class Scope:
         self.variables: List[Variable] = []
         self.functions: List[Function] = []
         self.types: List[TypeSemantic] = []
-    
+
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
 
@@ -349,21 +359,23 @@ class Scope:
             return self.parent.get_defined_type(id)
         raise SemanticError(
             f'Type {name} is not defined.' + self.error_location(row, col))
-    
+
     def method_type_inferfence(self, context: Context):
         def is_vector(name: str):
             return name[0] == '[' and name[len(name) - 1] == ']'
-        
+
         for type_ in context.types.values():
             if not is_vector(type_.name):
                 method_list = type_.methods
                 new_method_list: List[Method] = []
                 for method in method_list:
-                    function_ = self.get_defined_type(LexerToken(0, 0, type_.name, '')).get_function(method.name)
-                    method = Method(function_.name, function_.node.node_type, 
-                                        [Attribute(f'{function_.name}_{i}', a.node_type) for i, a in enumerate(function_.args)])
+                    function_ = self.get_defined_type(LexerToken(
+                        0, 0, type_.name, '')).get_function(method.name)
+                    method = Method(function_.name, function_.node.node_type,
+                                    [Attribute(f'{function_.name}_{i}', a.node_type) for i, a in enumerate(function_.args)])
                     new_method_list.append(method)
-                context.get_type(LexerToken(0, 0, type_.name, '')).methods = new_method_list
+                context.get_type(LexerToken(0, 0, type_.name, '')
+                                 ).methods = new_method_list
 
 
 class SemanticResult:

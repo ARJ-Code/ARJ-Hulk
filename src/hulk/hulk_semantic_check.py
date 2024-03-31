@@ -325,7 +325,8 @@ class SemanticChecker(object):
             self.visit(statement, scope)
 
         program_node = self.graph.add_node()
-        self.graph.add_path(program_node, self.visit(node.expression, scope.create_child_scope()))
+        self.graph.add_path(program_node, self.visit(
+            node.expression, scope.create_child_scope()))
 
         if len(self.errors) == 0:
             try:
@@ -604,7 +605,9 @@ class SemanticChecker(object):
         boolean = self.graph.add_node(BOOLEAN)
 
         try:
-            scope.get_defined_type(node.type_name.name)
+            self.context.get_type(LexerToken(node.type_name.name.row, node.type_name.name.col, f'[{node.type_name.name.value}]', ''))if isinstance(
+                node.type_name, VectorTypeNode) else self.context.get_type(node.type_name.name)
+
         except SemanticError as error:
             self.errors.append(error.text)
 
@@ -614,7 +617,7 @@ class SemanticChecker(object):
     @visitor.when(AsNode)
     def visit(self, node: AsNode, scope: Scope):
         try:
-            t = self.context.get_type(node.type_name.name)if isinstance(
+            t = self.context.get_type(LexerToken(node.type_name.name.row, node.type_name.name.col, f'[{node.type_name.name.value}]', ''))if isinstance(
                 node.type_name, VectorTypeNode) else self.context.get_type(node.type_name.name)
 
             exp = self.visit(node.expression, scope)
@@ -627,15 +630,18 @@ class SemanticChecker(object):
 
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
-        VECTOR = Type('Vector')
-        vector_node = self.graph.add_node(VECTOR)
-        for expression in node.values:
-            expression_node = self.visit(
-                expression, scope.create_child_scope())
-            self.graph.add_path(vector_node, expression_node)
-        self.graph.local_type_inference(vector_node)
-        node.type_ = OBJECT if len(node.values) == 0 else node.values[0].type
-        return vector_node
+        try:
+            VECTOR = Type('Vector')
+            vector_node = self.graph.add_node(VECTOR)
+            for expression in node.values:
+                expression_node = self.visit(
+                    expression, scope.create_child_scope())
+                self.graph.add_path(vector_node, expression_node)
+            node.type_ = self.graph.local_type_inference(vector_node)
+            return vector_node
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
 
     @visitor.when(ImplicitArrayDeclarationNode)
     def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
@@ -651,9 +657,7 @@ class SemanticChecker(object):
             child_scope = scope.create_child_scope()
             child_scope.define_variable(node.item, item_node)
             expression_node = self.visit(node.expression, child_scope)
-            expression_type = self.graph.local_type_inference(expression_node)
-            node.type_ = expression_type
-            # vector_node.node_type = node.type_
+            node.type_ = self.graph.local_type_inference(expression_node)
             return self.graph.add_path(vector_node, expression_node)
         except SemanticError as error:
             self.errors.append(error.text)
