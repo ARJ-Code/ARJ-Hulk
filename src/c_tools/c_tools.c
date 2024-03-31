@@ -503,7 +503,7 @@ Type *system_notBoolean(Type *n)
 
 // List
 
-Type *system_createList()
+Type *system_createList(int t)
 {
     Type *l = system_createType();
     Type **array = malloc(sizeof(Type *) * 32);
@@ -511,9 +511,11 @@ Type *system_createList()
     int *cap = malloc(sizeof(int));
     int *len = malloc(sizeof(int));
     int *curr = malloc(sizeof(int));
+    int *type_ind = malloc(sizeof(int));
     *cap = 32;
     *len = 0;
     *curr = 0;
+    *type_ind = t;
 
     system_addEntry(l, "type", "List");
 
@@ -521,6 +523,7 @@ Type *system_createList()
     system_addEntry(l, "capacity", cap);
     system_addEntry(l, "len", len);
     system_addEntry(l, "curr", curr);
+    system_addEntry(l, "type_ind", type_ind);
 
     system_addEntry(l, "f_length", *system_lengthList);
     system_addEntry(l, "f_add", *system_addList);

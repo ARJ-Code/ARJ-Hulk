@@ -209,7 +209,10 @@ class HulkCodeGenerator(object):
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, context: GeneratorContext):
         vec = context.pop_v()
-        context.new_line(f'{define_v(vec)} = system_createList();')
+        t = node.type_.name
+
+        context.new_line(
+            f'{define_v(vec)} = system_createList({self.type_to_int[t]});')
 
         for e in node.values:
             v = context.new_v()
@@ -221,7 +224,10 @@ class HulkCodeGenerator(object):
     @visitor.when(ImplicitArrayDeclarationNode)
     def visit(self, node: ImplicitArrayDeclarationNode, context: GeneratorContext):
         vec = context.pop_v()
-        context.new_line(f'{define_v(vec)} = system_createList();')
+        t = f'[{node.type_.name}]'
+    
+        context.new_line(
+            f'{define_v(vec)} = system_createList({self.type_to_int[t]});')
 
         vi = context.new_v()
         context.push_v(vi)
@@ -654,8 +660,11 @@ class HulkCodeGenerator(object):
         ind = context.new_v()
         context.new_line(f'int *{ind} = system_findEntry({v}, "type_ind");')
 
+        t = f'[{node.type_name.name.value}]' if isinstance(
+            node.type_name, VectorTypeNode) else node.type_name.name.value
+
         context.new_line(
-            f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[node.type_name.name.value]}));')
+            f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[t]}));')
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode, t_name: str):
