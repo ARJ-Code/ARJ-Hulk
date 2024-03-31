@@ -225,7 +225,7 @@ class HulkCodeGenerator(object):
     def visit(self, node: ImplicitArrayDeclarationNode, context: GeneratorContext):
         vec = context.pop_v()
         t = f'[{node.type_.name}]'
-    
+
         context.new_line(
             f'{define_v(vec)} = system_createList({self.type_to_int[t]});')
 
@@ -665,6 +665,10 @@ class HulkCodeGenerator(object):
 
         context.new_line(
             f'{define_v(context.pop_v())} = system_createBoolean(system_search_type(*{ind}, {self.type_to_int[t]}));')
+
+    @visitor.when(AsNode)
+    def visit(self, node: AsNode, context: GeneratorContext):
+        self.visit(node.expression, context)
 
     @visitor.when(ClassFunctionNode)
     def visit(self, node: ClassFunctionNode, t_name: str):

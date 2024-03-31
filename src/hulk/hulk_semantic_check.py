@@ -627,14 +627,18 @@ class SemanticChecker(object):
 
     @visitor.when(ExplicitArrayDeclarationNode)
     def visit(self, node: ExplicitArrayDeclarationNode, scope: Scope):
-        VECTOR = Type('Vector')
-        vector_node = self.graph.add_node(VECTOR)
-        for expression in node.values:
-            expression_node = self.visit(
-                expression, scope.create_child_scope())
-            self.graph.add_path(vector_node, expression_node)
-        node.type_ = self.graph.local_type_inference(vector_node)
-        return vector_node
+        try:
+            VECTOR = Type('Vector')
+            vector_node = self.graph.add_node(VECTOR)
+            for expression in node.values:
+                expression_node = self.visit(
+                    expression, scope.create_child_scope())
+                self.graph.add_path(vector_node, expression_node)
+            node.type_ = self.graph.local_type_inference(vector_node)
+            return vector_node
+        except SemanticError as error:
+            self.errors.append(error.text)
+            return self.graph.add_node()
 
     @visitor.when(ImplicitArrayDeclarationNode)
     def visit(self, node: ImplicitArrayDeclarationNode, scope: Scope):
