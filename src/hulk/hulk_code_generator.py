@@ -486,7 +486,6 @@ class HulkCodeGenerator(object):
         context = context.child()
         v = context.define_v(node.variable.value)
 
-        context.new_line(f'system_reset({vi});')
         context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
         context.new_line('{')
 
@@ -499,6 +498,9 @@ class HulkCodeGenerator(object):
         context.new_line(f'{vr} = {body};')
 
         context.new_line('}')
+
+        context.new_line(f'system_reset({vi});')
+      
 
     @visitor.when(ArrayCallNode)
     def visit(self, node: ArrayCallNode, context: GeneratorContext):

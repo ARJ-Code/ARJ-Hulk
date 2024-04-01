@@ -130,7 +130,7 @@ def test():
             type Positions(start, last){
                 start = start;
                 last = last;
-                current = 1;
+                current = start-1;
 
                 next(): Boolean => (self.current := self.current+1) <= self.last;
                 current(): Number => self.current;
