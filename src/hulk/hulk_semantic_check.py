@@ -580,15 +580,22 @@ class SemanticChecker(object):
 
         for s in node.body:
             if isinstance(s, ClassFunctionNode):
-                function_ = t.get_function(s.name.value)
-                self.visit(s, function_, scope)
+                self.visit(s, t, scope)
             if isinstance(s, ClassPropertyNode):
                 et = self.visit(s.expression, init_scope)
                 self.graph.add_path(t.get_attribute(s.name.value).node, et)
 
     @visitor.when(ClassFunctionNode)
-    def visit(self, node: ClassFunctionNode, function_: SemanticNode, scope: Scope):
+    def visit(self, node: ClassFunctionNode, t: TypeSemantic, scope: Scope):
+        function_ = t.get_function(node.name.value)
+        base_type = self.context.get_type(LexerToken(0, 0, t.name, '')
+                                          ).low_common_ancestor_with_method(node.name.value)
+        base_func = scope.get_defined_type(LexerToken(
+            0, 0, base_type.name, '')).get_function(node.name.value)
+       
         child_scope = scope.create_child_scope()
+        child_scope.define_function('base', base_func.node, base_func.args)
+
         for i in range(len(function_.args)):
             param_node: SemanticNode = function_.args[i]
             param: ParameterNode = node.parameters[i]

@@ -116,6 +116,8 @@ class SemanticGraph:
         return [self.nodes[i] for i in self.adj[node.index]]
 
     def dfs(self, node: 'SemanticNode') -> Type:
+        node.visited = True
+
         if len(self.get_children(node)) == 0:
             node.node_type = (
                 self.ERROR if node.node_type is None else node.node_type)
@@ -129,7 +131,7 @@ class SemanticGraph:
             for child in self.get_children(node):
                 if not child.visited:
                     self.dfs(child)
-                children_type = Type.low_common_ancester(
+                children_type = Type.low_common_ancestor(
                     children_type, child.node_type)
             return children_type
 
@@ -149,7 +151,6 @@ class SemanticGraph:
                     node.node_type = self.ERROR
                     break
 
-        node.visited = True
         return node.node_type
 
     def local_type_inference(self, node: 'SemanticNode') -> Type:
@@ -162,7 +163,7 @@ class SemanticGraph:
             return node_type
 
     def type_inference(self) -> bool:
-        types: {int, Type} = {}
+        types: Dict[int, Type] = {}
         cc_list = self.tarjans()
         for i in range(len(self.nodes)):
             node_type: Type = self.nodes[i].node_type
@@ -170,7 +171,7 @@ class SemanticGraph:
             try:
                 if types[cc] != node_type:
                     raise SemanticError(f'Incorrect type declaration')
-            except KeyError:
+            except:
                 types[cc] = node_type
 
         nodes = self.nodes

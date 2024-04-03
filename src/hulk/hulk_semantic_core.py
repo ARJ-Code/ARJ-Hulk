@@ -151,7 +151,7 @@ class Type(ABC):
         for method in self.methods:
             plain[method.name] = (method, self)
         return plain.values() if clean else plain
-    
+
     def check_overriding(self, clean=True):
         plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
         for method in self.methods:
@@ -161,7 +161,8 @@ class Type(ABC):
                 try:
                     m, _ = plain[method.name]
                     if not method.is_overriding(m):
-                        raise SemanticError(f'Function "{method.name}" is wrongly overriding')
+                        raise SemanticError(
+                            f'Function "{method.name}" is wrongly overriding')
                     else:
                         plain[method.name] = (method, self)
                 except KeyError:
@@ -175,7 +176,7 @@ class Type(ABC):
         return False
 
     @staticmethod
-    def low_common_ancester(t1: 'Type', t2: 'Type') -> 'Type':
+    def low_common_ancestor(t1: 'Type', t2: 'Type') -> 'Type':
         ERROR = Type('Error')
         if t1 is None and t2 is None:
             return ERROR
@@ -190,7 +191,17 @@ class Type(ABC):
         elif t2.conforms_to(t1):
             return t1
         else:
-            return Type.low_common_ancester(t1.parent, t2.parent)
+            return Type.low_common_ancestor(t1.parent, t2.parent)
+
+    def low_common_ancestor_with_method(self, name: str) -> 'Type':
+        t = self.parent
+
+        while t is not None:
+            if any(m for m in t.methods if m.name == name):
+                return t
+            t = t.parent
+
+        return self
 
     def __str__(self):
         output = f'type {self.name}'
@@ -242,7 +253,7 @@ class Class(Type):
         super().__init__(name)
         self.protocols: List[Protocol] = []
         self.params: List[Attribute] = []
-     
+
     def set_parent(self, parent: Type) -> None:
         return self.define_inherits(parent)
 
