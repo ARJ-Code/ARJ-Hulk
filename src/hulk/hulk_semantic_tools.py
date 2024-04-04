@@ -267,13 +267,16 @@ class TypeSemantic:
     def set_parent(self, parent: 'TypeSemantic'):
         self.parent = parent
 
-    def get_function(self, name: str) -> Function | None:
+    def get_function(self, name: str, t: 'TypeSemantic' = None) -> Function | None:
         for f in self.functions:
             if name == f.name:
                 return f
+
         if self.parent is not None:
-            return self.parent.get_function(name)
-        raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
+            return self.parent.get_function(name, self if t is None else t)
+
+        raise SemanticError(
+            f'Method "{name}" is not defined in {self.name if t is None else t.name}.')
 
     def get_attribute(self, name: str) -> Variable | None:
         for a in self.attributes:
