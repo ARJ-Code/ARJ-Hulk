@@ -252,7 +252,6 @@ class HulkCodeGenerator(object):
 
         context.new_line('}')
         context.new_line(f'system_reset({vi});')
-       
 
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, context: GeneratorContext):
