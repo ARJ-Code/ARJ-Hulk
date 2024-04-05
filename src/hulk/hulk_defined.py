@@ -78,10 +78,13 @@ m_log = Method('log', NUMBER, [Attribute(
 m_rand = Method('rand', NUMBER, [])
 m_range = Method('range', RANGE, [Attribute(
     'a1', NUMBER), Attribute('a2', NUMBER)])
+m_parse = Method('parse', NUMBER, [Attribute('a1', STRING)])
+m_input = Method('input', STRING, [])
 
 defined_class = [OBJECT, STRING, NUMBER, BOOLEAN, RANGE]
 defined_protocols = [COMPARABLE, ITERABLE, INDEXABLE_GET, INDEXABLE_SET]
-defined_methods = [m_print, m_sin, m_cos, m_tan, m_exp, m_log, m_rand, m_range]
+defined_methods = [m_print, m_sin, m_cos, m_tan,
+                   m_exp, m_log, m_rand, m_range, m_parse, m_input]
 
 
 def is_defined_method(f: str) -> bool:

@@ -29,6 +29,10 @@ class GeneratorContext:
         self.indentation: int = 0
         self.code: List[str] = []
         self.stack_v: List[str] = []
+        self.base: str = ''
+
+    def define_base(self, name: str):
+        self.base = name
 
     def new_line(self, line: str):
         if self.parent is not None:
@@ -235,7 +239,6 @@ class HulkCodeGenerator(object):
 
         v = context.get_v(node.item.value)
 
-        context.new_line(f'system_reset({vi});')
         context.new_line(f'while(system_typeToBoolean(system_next({vi})))')
         context.new_line('{')
 
@@ -248,6 +251,7 @@ class HulkCodeGenerator(object):
         context.new_line(f'system_addList({vec}, {exp});')
 
         context.new_line('}')
+        context.new_line(f'system_reset({vi});')
 
     @visitor.when(StringBinaryNode)
     def visit(self, node: StringBinaryNode, context: GeneratorContext):
@@ -364,6 +368,11 @@ class HulkCodeGenerator(object):
         params = ', '.join(v)
 
         fc = 'system' if is_defined_method(node.name.value) else 'global'
+
+        if context.base != '' and node.name.value == 'base':
+            context.new_line(
+                f'{define_v(context.pop_v())} = {context.base}({context.get_v("self")}{"" if len(params)==0 else ", "}{params});')
+            return
 
         context.new_line(
             f'{define_v(context.pop_v())} = {fc}_{node.name.value}({params});')
@@ -500,7 +509,6 @@ class HulkCodeGenerator(object):
         context.new_line('}')
 
         context.new_line(f'system_reset({vi});')
-      
 
     @visitor.when(ArrayCallNode)
     def visit(self, node: ArrayCallNode, context: GeneratorContext):
@@ -678,6 +686,11 @@ class HulkCodeGenerator(object):
 
         ct = context.define_v('self')
 
+        base_type = self.semantic_context.get_type(LexerToken(
+            0, 0, t_name, '')).low_common_ancestor_with_method(node.name.value).name
+
+        context.define_base(f'type_{base_type}_{node.name.value}')
+
         declaration = f'Type *type_{t_name}_{node.name.value}(Type *{ct}{", " if len(node.parameters)!=0 else ""}{", ".join(f"Type *{context.define_v(p.name.value)}" for p in node.parameters)});'
         self.generator_program.new_declaration(declaration)
 
@@ -688,6 +701,8 @@ class HulkCodeGenerator(object):
         context.push_v(vr)
 
         self.visit(node.body, context)
+
+        context.define_base('')
 
         context.new_line(f'return {vr};')
         context.new_line('}')

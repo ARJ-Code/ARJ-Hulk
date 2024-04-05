@@ -117,6 +117,7 @@ class SemanticGraph:
 
     def dfs(self, node: 'SemanticNode') -> Type:
         node.visited = True
+
         if len(self.get_children(node)) == 0:
             node.node_type = (
                 self.ERROR if node.node_type is None else node.node_type)
@@ -130,7 +131,7 @@ class SemanticGraph:
             for child in self.get_children(node):
                 if not child.visited:
                     self.dfs(child)
-                children_type = Type.low_common_ancester(
+                children_type = Type.low_common_ancestor(
                     children_type, child.node_type)
             return children_type
 
@@ -172,7 +173,7 @@ class SemanticGraph:
             try:
                 if types[cc] != node_type:
                     raise SemanticError(f'Incorrect type declaration')
-            except KeyError:
+            except:
                 types[cc] = node_type
 
 
@@ -269,13 +270,16 @@ class TypeSemantic:
     def set_parent(self, parent: 'TypeSemantic'):
         self.parent = parent
 
-    def get_function(self, name: str) -> Function | None:
+    def get_function(self, name: str, t: 'TypeSemantic' = None) -> Function | None:
         for f in self.functions:
             if name == f.name:
                 return f
+
         if self.parent is not None:
-            return self.parent.get_function(name)
-        raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
+            return self.parent.get_function(name, self if t is None else t)
+
+        raise SemanticError(
+            f'Method "{name}" is not defined in {self.name if t is None else t.name}.')
 
     def get_attribute(self, name: str) -> Variable | None:
         for a in self.attributes:

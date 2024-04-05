@@ -355,13 +355,6 @@ Type *system_createNumber(double n)
     system_addEntry(t, "f_toString", *system_toStringNumber);
 }
 
-Type *system_parseNumber(Type *string)
-{
-    char *value = system_findEntry(string, "value");
-
-    return system_createNumber(strtod(value, NULL));
-}
-
 Type *system_eqNumber(Type *n1, Type *n2)
 {
     return system_createBoolean(system_typeToDouble(n1) == system_typeToDouble(n2));
@@ -587,6 +580,17 @@ Type *system_setList(Type *list, Type *p_index, Type *item)
 
 Type *system_containsList(Type *list, Type *item)
 {
+    Type **array = (Type **)system_findEntry(list, "array");
+    int *len = (int *)system_findEntry(list, "len");
+
+    for (int i = 0; i < *len; i++)
+    {
+        Type *(*eq)(Type *, Type *) = system_findEntry(array[i], "f_eq");
+
+        if (system_typeToBoolean(eq(array[i], item)))
+            return system_createBoolean(1);
+    }
+
     return system_createBoolean(0);
 }
 
@@ -727,6 +731,7 @@ Type *system_print(Type *t)
 
     char *value = system_findEntry(s, "value");
     printf("%s\n", value);
+    fflush(stdout);
 
     return t;
 }
@@ -810,6 +815,23 @@ Type *system_log(Type *n1, Type *n2)
 Type *system_rand()
 {
     return system_createNumber(drand48());
+}
+
+Type *system_parse(Type *string)
+{
+    char *value = system_findEntry(string, "value");
+
+    return system_createNumber(strtod(value, NULL));
+}
+
+Type *system_input()
+{
+    char *string = malloc(1024);
+
+    fgets(string, 1024, stdin);
+    string[strlen(string) - 1] = '\0';
+
+    return system_createString(string);
 }
 
 int **system_graph;
