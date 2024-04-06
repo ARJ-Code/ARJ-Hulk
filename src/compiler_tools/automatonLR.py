@@ -99,24 +99,22 @@ class AutomatonLR(ABC, Generic[T]):
                     q.put(node_goto)
 
     def _build_closure(self, items: Set[T]):
-        change = True
+        q = Queue()
 
-        while change:
-            aux = []
+        for item in items:
+            q.put(item)
 
-            for item in items:
-                for item_c in item.get_eof_transitions():
-                    item_c = self.items[item_c]
+        while not q.empty():
+            item = q.get()
 
-                    if item_c in items:
-                        continue
+            for item_c in item.get_eof_transitions():
+                item_c = self.items[item_c]
 
-                    aux.append(item_c)
+                if item_c in items:
+                    continue
 
-            for item in aux:
-                items.add(item)
-
-            change = len(aux) != 0
+                items.add(item_c)
+                q.put(item_c)
 
     def _build_goto(self, items: Set[T], token: GrammarToken) -> Set[T]:
         goto = set()
@@ -165,7 +163,7 @@ class AutomatonLR(ABC, Generic[T]):
             else:
                 result = result and node_action.add_no_terminal_action(
                     t, i)
-                
+
             if not result:
                 break
 

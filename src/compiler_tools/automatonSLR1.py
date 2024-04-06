@@ -1,8 +1,9 @@
 from compiler_tools.automatonLR import Node
-from .grammar import GrammarProduction,  Grammar, EOF
+from .grammar import GrammarProduction, GrammarToken, Grammar, EOF
 from .tableLR import NodeAction, Action
 from .automatonLR import AutomatonLR
 from .itemLR import ItemLR
+from typing import Dict, List
 
 
 class AutomatonSLR1(AutomatonLR[ItemLR]):
@@ -19,19 +20,36 @@ class AutomatonSLR1(AutomatonLR[ItemLR]):
         return item
 
     def _build_items(self):
+        head_to_item: Dict[GrammarToken, List[GrammarToken]] = {}
+        production_to_item: Dict[GrammarProduction, List[ItemLR]] = {}
+
+        for t in self.grammar.non_terminals:
+            head_to_item[t] = []
+
+        for p in self.grammar.productions:
+            production_to_item[p] = []
+
         for production in self.grammar .productions:
             for i in range(len(production.body) + 1):
-                self._get_item(production, i)
+                item = self._get_item(production, i)
+
+                head_to_item[production.head].append(item)
+                production_to_item[production].append(item)
 
         for x in self.items:
-            for y in self.items:
-                if x.index == len(x.production.body):
-                    continue
+            if x.index == len(x.production.body) or x.production.body[x.index].is_terminal:
+                continue
 
-                if y.production.head == x.production.body[x.index] and y.index == 0:
+            for y in head_to_item[x.production.body[x.index]]:
+                if y.index == 0:
                     x.add_eof_transition(y)
 
-                if y.production == x.production and y.index == x.index + 1:
+        for x in self.items:
+            if x.index == len(x.production.body):
+                continue
+
+            for y in production_to_item[x.production]:
+                if y.index == x.index + 1:
                     x.add_transition(x.production.body[x.index], y)
 
     def _get_item_main(self) -> ItemLR:
