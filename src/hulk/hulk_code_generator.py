@@ -295,6 +295,9 @@ class HulkCodeGenerator(object):
         if node.operator == ArithmeticOperator.POW:
             context.new_line(
                 f'{define_v(context.pop_v())} = system_powNumber({lv}, {rv});')
+        if node.operator == ArithmeticOperator.MOD:
+            context.new_line(
+                f'{define_v(context.pop_v())} = system_modNumber({lv}, {rv});')
 
     @visitor.when(ArithmeticUnaryNode)
     def visit(self, node: ArithmeticUnaryNode, context: GeneratorContext):

@@ -429,12 +429,15 @@ Type *system_powNumber(Type *n1, Type *n2)
     double nn1 = system_typeToDouble(n1);
     double nn2 = system_typeToDouble(n2);
 
-    double pow = 1;
+    return system_createNumber(pow(nn1, nn2));
+}
 
-    for (int i = 0; i < nn2; i++)
-        pow *= nn1;
+Type *system_modNumber(Type *n1, Type *n2)
+{
+    double nn1 = system_typeToDouble(n1);
+    double nn2 = system_typeToDouble(n2);
 
-    return system_createNumber(pow);
+    return system_createNumber(fmod(nn1, nn2));
 }
 
 // Boolean
