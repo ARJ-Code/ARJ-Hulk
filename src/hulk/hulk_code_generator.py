@@ -3,6 +3,7 @@ import compiler_tools.visitor as visitor
 from typing import Dict, List
 from .hulk_defined import is_defined_method
 from .hulk_semantic_check import Context
+import math
 
 
 def define_v(v: str):
@@ -393,8 +394,16 @@ class HulkCodeGenerator(object):
 
     @visitor.when(AtomicNode)
     def visit(self, node: AtomicNode, context: GeneratorContext):
+        value = ''
+        if node.name.value == 'PI':
+            value = f'system_createNumber({math.pi})'
+        elif node.name.value == 'E':
+            value = f'system_createNumber({math.e})'
+        else:
+            value = context.get_v(node.name.value)
+
         context.new_line(
-            f'{define_v(context.pop_v())} = {context.get_v(node.name.value)};')
+            f'{define_v(context.pop_v())} = {value};')
 
     @visitor.when(ExpressionBlockNode)
     def visit(self, node: ExpressionBlockNode, context: GeneratorContext):

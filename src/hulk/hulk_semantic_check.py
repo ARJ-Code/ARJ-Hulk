@@ -285,6 +285,12 @@ class SemanticChecker(object):
 
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode, scope: Scope):
+        pi_n = self.graph.add_node(NUMBER)
+        e_n = self.graph.add_node(NUMBER)
+
+        scope.define_variable(LexerToken(0, 0, 'PI', ''), pi_n)
+        scope.define_variable(LexerToken(0, 0, 'E', ''), e_n)
+
         def add_context_functions():
             for method in self.context.methods.values():
                 name: str = method.name
@@ -592,7 +598,7 @@ class SemanticChecker(object):
                                           ).low_common_ancestor_with_method(node.name.value)
         base_func = scope.get_defined_type(LexerToken(
             0, 0, base_type.name, '')).get_function(node.name.value)
-       
+
         child_scope = scope.create_child_scope()
         child_scope.define_function('base', base_func.node, base_func.args)
 

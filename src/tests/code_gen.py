@@ -38,8 +38,8 @@ def hulk_compile_str(program: str) -> str:
     result = subprocess.run(["gcc", "-o", "cache/main", "cache/main.c", "-lm"])
     result = subprocess.run(["./cache/main"], capture_output=True, text=True)
 
-
     return result.stdout
+
 
 def test():
     type_test =\
@@ -78,7 +78,8 @@ def test():
             }
         """
 
-    assert hulk_compile_str(type_test) == 'Lucas 4.000000 esta maullando como un siames\nalex 22.000000 esta ladrando\n'
+    assert hulk_compile_str(
+        type_test) == 'Lucas 4.000000 esta maullando como un siames\nalex 22.000000 esta ladrando\n'
 
     protocol_test =\
         """
@@ -123,7 +124,8 @@ def test():
             
         """
 
-    assert hulk_compile_str(protocol_test) == 'Jerry se movio desde la sala hacia el cuarto\nJerry se acosto en su cama\n'
+    assert hulk_compile_str(
+        protocol_test) == 'Jerry se movio desde la sala hacia el cuarto\nJerry se acosto en su cama\n'
 
     iterable_test =\
         """
@@ -145,28 +147,28 @@ def test():
                     print(i);
                 }
         """
-    
-    assert hulk_compile_str(iterable_test) ==   '2.000000\n' + \
-                                                '3.000000\n' + \
-                                                '4.000000\n' + \
-                                                '5.000000\n' + \
-                                                '1.000000\n' + \
-                                                '3.000000\n' + \
-                                                '4.000000\n' + \
-                                                '5.000000\n' + \
-                                                '6.000000\n' + \
-                                                '2.000000\n' + \
-                                                '4.000000\n' + \
-                                                '5.000000\n' + \
-                                                '6.000000\n' + \
-                                                '7.000000\n' + \
-                                                '3.000000\n' + \
-                                                '5.000000\n' + \
-                                                '6.000000\n' + \
-                                                '7.000000\n' + \
-                                                '8.000000\n' + \
-                                                '4.000000\n'
-    
+
+    assert hulk_compile_str(iterable_test) == '2.000000\n' + \
+        '3.000000\n' + \
+        '4.000000\n' + \
+        '5.000000\n' + \
+        '1.000000\n' + \
+        '3.000000\n' + \
+        '4.000000\n' + \
+        '5.000000\n' + \
+        '6.000000\n' + \
+        '2.000000\n' + \
+        '4.000000\n' + \
+        '5.000000\n' + \
+        '6.000000\n' + \
+        '7.000000\n' + \
+        '3.000000\n' + \
+        '5.000000\n' + \
+        '6.000000\n' + \
+        '7.000000\n' + \
+        '8.000000\n' + \
+        '4.000000\n'
+
     override_test =\
         """
             type Person(name) {
@@ -186,8 +188,9 @@ def test():
 
             let s = new Student('Alex', 23) in s.hello();
         """
-    
-    assert hulk_compile_str(override_test) == 'Hi Alex , you have 23.000000 years old\n'
+
+    assert hulk_compile_str(
+        override_test) == 'Hi Alex , you have 23.000000 years old\n'
 
     is_test =\
         """
@@ -210,6 +213,5 @@ def test():
                     else "No, it's Superman!"
                 );
         """
-    
+
     assert hulk_compile_str(is_test) == 'No, it\'s Superman!\n'
-    
