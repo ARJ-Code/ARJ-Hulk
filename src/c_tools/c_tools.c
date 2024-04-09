@@ -193,7 +193,7 @@ Type *system_createString(char *value)
     system_addEntry(s, "f_next", *system_nextString);
     system_addEntry(s, "f_reset", *system_resetString);
 
-    system_addEntry(s, "subString", *system_subString);
+    system_addEntry(s, "f_subString", *system_subString);
 
     system_addEntry(s, "f_eq", *system_eqString);
     system_addEntry(s, "f_toString", *system_toStringString);
@@ -342,7 +342,7 @@ Type *system_createNumber(double n)
 
     double *value = malloc(sizeof(double));
     *value = n;
-    int *type_ind = malloc(sizeof(double));
+    int *type_ind = malloc(sizeof(int));
     *type_ind = 2;
 
     system_addEntry(t, "type", "Number");
