@@ -420,9 +420,13 @@ class SemanticChecker(object):
     @visitor.when(IfNode)
     def visit(self, node: IfNode, scope: Scope):
         if_node = self.graph.add_node()
-        conditional_node = self.graph.add_node(BOOLEAN)
-        self.graph.add_path(self.visit(
-            node.condition, scope), conditional_node)
+        expression_node = self.visit(node.condition, scope)
+        try:
+            if expression_node.node_type is not None and expression_node.node_type != BOOLEAN:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
+        expression_node.node_type = BOOLEAN
         then_node = self.graph.add_node()
         self.graph.add_path(if_node, self.graph.add_path(
             then_node, self.visit(node.body, scope)))
@@ -436,17 +440,25 @@ class SemanticChecker(object):
     @visitor.when(ElifNode)
     def visit(self, node: ElifNode, scope: Scope):
         elif_node = self.graph.add_node()
-        conditional_node = self.graph.add_node(BOOLEAN)
-        self.graph.add_path(self.visit(
-            node.condition, scope), conditional_node,)
+        expression_node = self.visit(node.condition, scope)
+        try:
+            if expression_node.node_type is not None and expression_node.node_type != BOOLEAN:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
+        expression_node.node_type = BOOLEAN
         return self.graph.add_path(elif_node, self.visit(node.body, scope))
 
     @visitor.when(WhileNode)
     def visit(self, node: WhileNode, scope: Scope):
         while_node = self.graph.add_node()
-        conditional_node = self.graph.add_node(BOOLEAN)
-        self.graph.add_path(self.visit(
-            node.condition, scope), conditional_node)
+        expression_node = self.visit(node.condition, scope)
+        try:
+            if expression_node.node_type is not None and expression_node.node_type != BOOLEAN:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
+        expression_node.node_type = BOOLEAN
         return self.graph.add_path(while_node, self.visit(node.body, scope))
 
     @visitor.when(LetNode)
@@ -502,12 +514,22 @@ class SemanticChecker(object):
     @visitor.when(BooleanUnaryNode)
     def visit(self, node: BooleanUnaryNode, scope: Scope):
         expression_node = self.visit(node.child, scope)
+        try:
+            if expression_node.node_type is not None and expression_node.node_type != BOOLEAN:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         expression_node.node_type = BOOLEAN
         return expression_node
 
     @visitor.when(ArithmeticUnaryNode)
     def visit(self, node: ArithmeticUnaryNode, scope: Scope):
         expression_node = self.visit(node.child, scope)
+        try:
+            if expression_node.node_type is not None and expression_node.node_type != NUMBER:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         expression_node.node_type = NUMBER
         return expression_node
 
@@ -519,10 +541,20 @@ class SemanticChecker(object):
         left_type = BOOLEAN if is_boolean_operation else NUMBER
         left_expression_node = self.visit(
             node.left, scope)
+        try:
+            if left_expression_node.node_type is not None and left_expression_node.node_type != left_type:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         left_expression_node.node_type = left_type
         right_type = BOOLEAN if is_boolean_operation else NUMBER
         right_expression_node = self.visit(
             node.right, scope)
+        try:
+            if right_expression_node.node_type is not None and right_expression_node.node_type != right_type:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         right_expression_node.node_type = right_type
 
         return boolean_node
@@ -532,9 +564,19 @@ class SemanticChecker(object):
         number_node = self.graph.add_node(NUMBER)
         left_expression_node = self.visit(
             node.left, scope)
+        try:
+            if left_expression_node.node_type is not None and left_expression_node.node_type != NUMBER:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         left_expression_node.node_type = NUMBER
         right_expression_node = self.visit(
             node.right, scope)
+        try:
+            if right_expression_node.node_type is not None and right_expression_node.node_type != NUMBER:
+                raise SemanticError('Incorrect type declaration')
+        except SemanticError as error:
+                self.errors.append(error.text)
         right_expression_node.node_type = NUMBER
         return number_node
 
