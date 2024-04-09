@@ -183,7 +183,7 @@ Type *system_createString(char *value)
     system_addEntry(s, "curr", curr);
     system_addEntry(s, "type_ind", type_ind);
 
-    system_addEntry(s, "length", *system_lengthString);
+    system_addEntry(s, "f_length", *system_lengthString);
 
     system_addEntry(s, "f_get", *system_getString);
 

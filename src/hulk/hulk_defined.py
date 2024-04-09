@@ -24,7 +24,7 @@ OBJECT.add_method(Method('toString', STRING, []))
 OBJECT.add_method(
     Method('eq', BOOLEAN, [Attribute('a1', OBJECT)]))
 
-STRING.add_attribute(Attribute('length', NUMBER))
+STRING.add_method(Method('length', NUMBER, []))
 STRING.add_method(Method('comp', NUMBER, [Attribute('a1', OBJECT)]))
 STRING.add_method(Method('get', STRING, [Attribute('a1', NUMBER)]))
 STRING.add_method(Method('subString', STRING, [
@@ -47,7 +47,7 @@ RANGE.add_method(Method('reset', OBJECT, []))
 
 def vector_t(c: Class) -> Class:
     vector = Class(f'[{c.name}]')
-    vector.add_attribute(Attribute('length', NUMBER))
+    vector.add_method(Method('length', NUMBER, []))
     vector.add_method(Method('add', c, [Attribute('a1', c)]))
     vector.add_method(Method('remove', c, [Attribute('a1', NUMBER)]))
     vector.add_method(Method('contains', BOOLEAN, [Attribute('a1', c)]))
