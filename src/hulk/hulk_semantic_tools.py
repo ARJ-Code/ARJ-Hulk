@@ -176,7 +176,6 @@ class SemanticGraph:
             except:
                 types[cc] = node_type
 
-
         nodes = self.nodes
         nodes.sort(key=lambda n: n.index)
         for node in nodes:

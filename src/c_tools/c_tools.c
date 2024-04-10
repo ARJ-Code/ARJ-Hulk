@@ -807,6 +807,14 @@ Type *system_tan(Type *n)
     return system_createNumber(tan(*nn1));
 }
 
+Type *system_sqrt(Type *n)
+{
+    double *nn1 = system_findEntry(n, "value");
+
+    return system_createNumber(sqrt(*nn1));
+}
+
+
 Type *system_log(Type *n1, Type *n2)
 {
     double *nn1 = system_findEntry(n1, "value");

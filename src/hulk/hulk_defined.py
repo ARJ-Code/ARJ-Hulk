@@ -73,6 +73,7 @@ m_sin = Method('sin', NUMBER, [Attribute('a1', NUMBER)])
 m_cos = Method('cos', NUMBER, [Attribute('a1', NUMBER)])
 m_tan = Method('tan', NUMBER, [Attribute('a1', NUMBER)])
 m_exp = Method('exp', NUMBER, [Attribute('a1', NUMBER)])
+m_sqrt = Method('sqrt', NUMBER, [Attribute('a1', NUMBER)])
 m_log = Method('log', NUMBER, [Attribute(
     'a1', NUMBER), Attribute('a2', NUMBER)])
 m_rand = Method('rand', NUMBER, [])
@@ -84,7 +85,7 @@ m_input = Method('input', STRING, [])
 defined_class = [OBJECT, STRING, NUMBER, BOOLEAN, RANGE]
 defined_protocols = [COMPARABLE, ITERABLE, INDEXABLE_GET, INDEXABLE_SET]
 defined_methods = [m_print, m_sin, m_cos, m_tan,
-                   m_exp, m_log, m_rand, m_range, m_parse, m_input]
+                   m_exp, m_log, m_rand, m_range, m_parse, m_input, m_sqrt]
 
 
 def is_defined_method(f: str) -> bool:
