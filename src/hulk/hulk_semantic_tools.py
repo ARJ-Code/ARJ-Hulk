@@ -119,9 +119,7 @@ class SemanticGraph:
         node.visited = True
 
         if len(self.get_children(node)) == 0:
-            node.node_type = (
-                self.ERROR if node.node_type is None else node.node_type)
-            if node.node_type == self.VECTOR:
+            if node.node_type is not None and node.node_type == self.VECTOR:
                 node.node_type = vector_t(OBJECT)
             node.visited = True
             return node.node_type
@@ -147,6 +145,9 @@ class SemanticGraph:
             for child in self.get_children(node):
                 if not child.visited:
                     self.dfs(child)
+                if child.node_type is None:
+                    child.node_type = node.node_type
+                    continue
                 if child.node_type == self.ERROR or not child.node_type.conforms_to(node.node_type):
                     node.node_type = self.ERROR
                     break
@@ -157,7 +158,7 @@ class SemanticGraph:
         if node.visited:
             return node.node_type
         node_type = self.dfs(node)
-        if node_type == self.ERROR:
+        if node_type is None or node_type == self.ERROR:
             raise SemanticError(f'Incorrect type declaration')
         else:
             return node_type
@@ -180,7 +181,8 @@ class SemanticGraph:
         nodes.sort(key=lambda n: n.index)
         for node in nodes:
             if not node.visited:
-                if self.dfs(node) == self.ERROR:
+                node_type = self.dfs(node)
+                if node_type is None or node_type == self.ERROR:
                     raise SemanticError(f'Incorrect type declaration')
 
     def g_transp(self):
