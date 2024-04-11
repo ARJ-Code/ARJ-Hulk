@@ -20,7 +20,7 @@ program_node1 = AttributedRule[ASTNode, LexerToken](
 program_node2 = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ProgramNode(s[1], s[2], s[3]))
 hulk_grammar.add_attributed_production(
-    'P1', ['I2s EB ; I2s', 'I2s EB I2s'], [program_node1, program_node2])
+    'P1', ['I2s ES ; I2s', 'I2s EB I2s'], [program_node1, program_node2])
 
 
 push_second_to_first = AttributedRule[ASTNode, LexerToken](
@@ -41,17 +41,23 @@ hulk_grammar.add_attributed_production(
 
 
 # expression productions
-hulk_grammar.add_attributed_production('EB', ['E', 'B'], [first, first])
+hulk_grammar.add_attributed_production(
+    'EB', ['B', 'ElB', 'EifB', 'EfB', 'EwB'], [first, first, first, first, first])
 
 exp_block = AttributedRule[ASTNode, LexerToken](
     lambda _, s: ExpressionBlockNode(s[2]))
 hulk_grammar.add_attributed_production('B', ['{ I1s }'], [exp_block])
 
-hulk_grammar.add_attributed_production('I1s', ['I1s E ;', 'E ;'], [
+hulk_grammar.add_attributed_production(
+    'I1', ['E ;', 'EB'], [first, first])
+
+hulk_grammar.add_attributed_production('I1s', ['I1s I1', 'I1'], [
                                        push_second_to_first, first_list])
 
+hulk_grammar.add_attributed_production('E', ['ES', 'EB'], [first, first])
+
 hulk_grammar.add_attributed_production(
-    'E', ['Es', 'El', 'Eif', 'Ew', 'Ef', 'Eas', 'Ear'], [first, first, first, first, first, first, first])
+    'ES', ['Es', 'El', 'Eif', 'Ew', 'Ef', 'Eas', 'Ear'], [first, first, first, first, first, first, first])
 
 
 # string expression productions
@@ -184,7 +190,8 @@ hulk_grammar.add_attributed_production(
 
 # let productions
 let_n = AttributedRule[ASTNode, LexerToken](lambda h, s: LetNode(s[2], s[4]))
-hulk_grammar.add_attributed_production('El', ['let As in EB'], [let_n])
+hulk_grammar.add_attributed_production('El', ['let As in ES'], [let_n])
+hulk_grammar.add_attributed_production('ElB', ['let As in EB'], [let_n])
 
 hulk_grammar.add_attributed_production(
     'As', ['Sl , As', 'Sl'], [push_first_to_3th, first_list])
@@ -194,26 +201,39 @@ hulk_grammar.add_attributed_production(
 if_n = AttributedRule[ASTNode, LexerToken](
     lambda h, s: IfNode(s[3], s[5], s[6], s[8]))
 hulk_grammar.add_attributed_production(
-    'Eif', ['if ( Eb ) EB Eelifs else EB'], [if_n])
+    'Eif', ['if ( Eb ) ES Eelifs else ES'], [if_n])
+
+hulk_grammar.add_attributed_production('EifB1', ['EB', 'ES ;'], [first, first])
+
+hulk_grammar.add_attributed_production(
+    'EifB', ['if ( Eb ) EifB1 EelifBs else EifB1'], [if_n])
 
 hulk_grammar.add_attributed_production(
     'Eelifs', ['Eelifs Eelif', ''], [push_second_to_first, empty_list])
 
+hulk_grammar.add_attributed_production(
+    'EelifBs', ['EelifBs EelifB', ''], [push_second_to_first, empty_list])
+
 elif_n = AttributedRule[ASTNode, LexerToken](lambda h, s: ElifNode(s[3], s[5]))
-hulk_grammar.add_attributed_production('Eelif', ['elif ( Eb ) EB'], [elif_n])
+hulk_grammar.add_attributed_production('Eelif', ['elif ( Eb ) ES'], [elif_n])
+
+hulk_grammar.add_attributed_production(
+    'EelifB', ['elif ( Eb ) EifB1'], [elif_n])
 
 
 # while productions
 while_n = AttributedRule[ASTNode, LexerToken](
     lambda h, s: WhileNode(s[3], s[5]))
-hulk_grammar.add_attributed_production('Ew', ['while ( Eb ) EB'], [while_n])
+hulk_grammar.add_attributed_production('Ew', ['while ( Eb ) ES'], [while_n])
 
+hulk_grammar.add_attributed_production('EwB', ['while ( Eb ) EB'], [while_n])
 
 # for productions
 for_n = AttributedRule[ASTNode, LexerToken](
     lambda h, s: ForNode(s[3], s[5], s[7]))
-hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) EB'], [for_n])
+hulk_grammar.add_attributed_production('Ef', ['for ( id in E ) ES'], [for_n])
 
+hulk_grammar.add_attributed_production('EfB', ['for ( id in E ) EB'], [for_n])
 
 # function call productions
 exp_c = AttributedRule[ASTNode, LexerToken](

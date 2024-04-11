@@ -73,7 +73,7 @@ def test():
                 'hola' @@ 'jky';
                 2 @ true; 
                 let b: Number = 2 in 3 + 2;
-            } in 'hello'
+            } in 'hello';
         """
     
     assert hulk_compile_str(while_test)
