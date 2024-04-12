@@ -6,6 +6,10 @@ from typing import List, Dict
 from compiler_tools.lexer import LexerToken
 
 
+def error_location(row, col) -> str:
+    return f' Error at {row}:{col}'
+
+
 class Context:
     def __init__(self):
         self.types: Dict[str, Class] = {}
@@ -15,14 +19,11 @@ class Context:
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
 
-    def error_location(self, row, col) -> str:
-        return f' Error at {row}:{col}'
-
     def create_type(self, id: LexerToken) -> Class:
         row, col, name = self.decompact(id)
         if name in self.types:
             raise SemanticError(
-                f'Type with the same name ({name}) already in context.' + self.error_location(row, col))
+                f'Type with the same name ({name}) already in context.' + error_location(row, col))
         typex = self.types[name] = Class(name)
         return typex
 
@@ -30,7 +31,7 @@ class Context:
         row, col, name = self.decompact(id)
         if name in self.protocols:
             raise SemanticError(
-                f'Protocol with the same name ({name}) already in context.' + self.error_location(row, col))
+                f'Protocol with the same name ({name}) already in context.' + error_location(row, col))
         protocol = self.protocols[name] = Protocol(name)
         return protocol
 
@@ -38,7 +39,7 @@ class Context:
         row, col, name = self.decompact(id)
         if name in self.methods:
             raise SemanticError(
-                f'Method with the same name ({name}) already in context.' + self.error_location(row, col))
+                f'Method with the same name ({name}) already in context.' + error_location(row, col))
         method = self.methods[name] = Method(name, return_type, parameters)
         return method
 
@@ -63,7 +64,7 @@ class Context:
                 return self.protocols[name]
             except KeyError:
                 raise SemanticError(
-                    f'Type "{name}" is not defined.' + self.error_location(row, col))
+                    f'Type "{name}" is not defined.' + error_location(row, col))
 
     def get_protocol(self, id: LexerToken) -> Protocol:
         row, col, name = self.decompact(id)
@@ -71,7 +72,7 @@ class Context:
             return self.protocols[name]
         except KeyError:
             raise SemanticError(
-                f'Protocol "{name}" is not defined.' + self.error_location(row, col))
+                f'Protocol "{name}" is not defined.' + error_location(row, col))
 
     def get_method(self, id: LexerToken) -> Method:
         row, col, name = self.decompact(id)
@@ -79,7 +80,7 @@ class Context:
             return self.methods[name]
         except KeyError:
             raise SemanticError(
-                f'Method "{name}" is not defined.' + self.error_location(row, col))
+                f'Method "{name}" is not defined.' + error_location(row, col))
 
     def __str__(self):
         return '{\n\t' + '\n\t'.join(y for x in self.types.values() for y in str(x).split('\n')) + '\n\t' + \
@@ -257,7 +258,7 @@ class Function:
         row, col, name = (id.row, id.col, id.value)
         if len(self.args) != len(parameters):
             raise SemanticError(
-                f'Invalid amount of arguments while calling function "{name}".')
+                f'Invalid amount of arguments while calling function "{name}". {error_location(row,col)}')
         return self
 
 
@@ -300,9 +301,6 @@ class Scope:
     def decompact(self, token: LexerToken):
         return (token.row, token.col, token.value)
 
-    def error_location(self, row, col) -> str:
-        return f' Error at {row}:{col}'
-
     def create_child_scope(self) -> 'Scope':
         return Scope(self)
 
@@ -319,7 +317,7 @@ class Scope:
         if self.parent is not None:
             return self.parent.get_defined_variable(id)
         raise SemanticError(
-            f'Variable {name} is not defined.' + self.error_location(row, col))
+            f'Variable {name} is not defined.' + error_location(row, col))
 
     def define_function(self, name: str, node: SemanticNode, args: List[SemanticNode]) -> SemanticNode:
         self.functions.append(Function(name, node, args))
@@ -336,14 +334,14 @@ class Scope:
         if self.parent is not None:
             return self.parent.get_defined_function(id)
         raise SemanticError(
-            f'Function {name} is not defined.' + self.error_location(row, col))
+            f'Function {name} is not defined.' + error_location(row, col))
 
     def check_valid_params(self, id: LexerToken, parameters) -> Function:
         row, col, name = self.decompact(id)
         function_ = self.get_defined_function(id)
         if len(function_.args) != len(parameters):
             raise SemanticError(
-                f'Invalid amount of arguments while calling function "{name}".' + self.error_location(row, col))
+                f'Invalid amount of arguments while calling function "{name}".' + error_location(row, col))
         return function_
 
     def get_defined_type(self, id: LexerToken) -> TypeSemantic:
@@ -354,7 +352,7 @@ class Scope:
         if self.parent is not None:
             return self.parent.get_defined_type(id)
         raise SemanticError(
-            f'Type {name} is not defined.' + self.error_location(row, col))
+            f'Type {name} is not defined.' + error_location(row, col))
 
     def method_type_inferfence(self, context: Context):
         def is_vector(name: str):

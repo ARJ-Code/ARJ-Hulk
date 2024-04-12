@@ -285,8 +285,8 @@ class SemanticChecker(object):
 
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode, scope: Scope):
-        pi_n = self.graph.add_node(NUMBER)
-        e_n = self.graph.add_node(NUMBER)
+        pi_n = self.graph.add_node(-1,-1,NUMBER)
+        e_n = self.graph.add_node(-1,-1,NUMBER)
 
         scope.define_variable(LexerToken(0, 0, 'PI', ''), pi_n)
         scope.define_variable(LexerToken(0, 0, 'E', ''), e_n)
