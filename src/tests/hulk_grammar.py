@@ -1,4 +1,4 @@
-from hulk.hulk_parser import  hulk_to_grammar, hulk_parse
+from hulk.hulk_parser import hulk_to_grammar, hulk_parse
 from compiler_tools.lexer import Lexer
 from hulk.hulk_grammar import hulk_grammar
 
@@ -8,12 +8,13 @@ def hulk_compile_str(program: str):
     hulk_lexer.load('hulk')
 
     result = hulk_lexer.run(program)
-    tokens=result.tokens
+    tokens = result.tokens
 
     result = hulk_parse([hulk_to_grammar(t) for t in result.tokens])
-    hulk_grammar.evaluate(result.derivation_tree,tokens)
+    hulk_grammar.evaluate(result.derivation_tree, tokens)
 
     return result.ok
+
 
 def test():
     string_test =\
@@ -21,7 +22,7 @@ def test():
             let a = "hello" @@ "world" in {
                 print(a);
                 print("hello" @ "world");
-            };
+            }
         """
 
     assert hulk_compile_str(string_test)
@@ -45,7 +46,7 @@ def test():
                 1 >= 2;
             }
         """
-    
+
     assert hulk_compile_str(boolean_test)
 
     arithmetic_test =\
@@ -58,7 +59,7 @@ def test():
                 3 / 3;
             }
         """
-    
+
     assert hulk_compile_str(arithmetic_test)
 
     declaration_test =\
@@ -69,7 +70,7 @@ def test():
                 print(a);
             }
         """
-    
+
     assert hulk_compile_str(declaration_test)
 
     array_test =\
@@ -81,7 +82,7 @@ def test():
                 print(a);
             }
         """
-    
+
     assert hulk_compile_str(array_test)
 
     explicit_array_test =\
@@ -99,7 +100,7 @@ def test():
                 };
             }
         """
-    
+
     assert hulk_compile_str(while_test)
 
     comment_test =\
@@ -108,7 +109,7 @@ def test():
             lkdnkn;2333@@@334667; */
             hello := 34 + 4;
         """
-    
+
     assert hulk_compile_str(comment_test)
 
     nested_let_test =\
@@ -117,7 +118,7 @@ def test():
                 let s = let w = 9 in w * 2 in 23;
             }
         """
-    
+
     assert hulk_compile_str(nested_let_test)
 
     for_test =\
@@ -126,7 +127,7 @@ def test():
                 print(i);
             }
         """
-    
+
     assert hulk_compile_str(for_test)
 
     if_test =\
@@ -139,7 +140,7 @@ def test():
                 3 + 3;
             }
         """
-    
+
     assert hulk_compile_str(if_test)
 
     type_test =\
@@ -155,7 +156,7 @@ def test():
                 print(a.qwe(2));
             }
         """
-    
+
     assert hulk_compile_str(type_test)
 
     variable_test =\
@@ -176,7 +177,7 @@ def test():
                 };
             }
         """
-    
+
     assert hulk_compile_str(variable_test)
 
     protocol_test =\
@@ -191,7 +192,7 @@ def test():
     assert hulk_compile_str(protocol_test)
 
     type_inference_test =\
-    """
+        """
         type Person {
             name = 'Alex';
 
@@ -199,7 +200,7 @@ def test():
         }
 
         let p = new Person() in {
-            if (p is Person) p.hello()
+            if (p is Person) p.hello();
             else {
                 print('Isnt a person');
                 let z = p as Person in {
@@ -212,7 +213,7 @@ def test():
     assert hulk_compile_str(type_inference_test)
 
     vector_type_test =\
-    """ 
+        """ 
         function count(vector: [String]): Number 
             => let a = 0 in 
                 for (char in vector) 
